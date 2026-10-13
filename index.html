@@ -49,7 +49,7 @@ canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px soli
 <div class="overlay" id="overlay">
 <section class="panel">
 <h1 class="logo" id="panelTitle">KYO DASH</h1>
-<p class="sub" id="panelText">Прыгай через шипы и доберись до финиша!</p>
+<p class="sub" id="panelText">Прыгай через треугольные шипы!</p>
 <div class="levels" id="levels">
 <button class="level active" data-level="0">EASY<small>Спокойно</small></button>
 <button class="level" data-level="1">MEDIUM<small>Сложнее</small></button>
@@ -67,6 +67,7 @@ canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px soli
 <script>
 (()=>{
 'use strict';
+
 const canvas=document.getElementById('game');
 const ctx=canvas.getContext('2d');
 const overlay=document.getElementById('overlay');
@@ -114,40 +115,48 @@ levelLabel.textContent=LEVELS[selected].name+' · '+(selected+1);
 }
 
 function addSpike(x,count=1){
-for(let i=0;i<count;i++)obstacles.push({x:x+i*37,w:37,h:37,type:'spike'});
+for(let i=0;i<count;i++){
+obstacles.push({x:x+i*37,w:37,h:37,type:'spike'});
+}
 }
 
 function makeLevel(){
 obstacles=[];
 const cfg=LEVELS[selected];
 let x=590,idx=0;
+
 while(x<cfg.length-260){
 const pattern=(idx*7+selected*3)%7;
+
 if(selected===0){
-if(pattern===2||pattern===5)addSpike(x);
-else if(pattern===3)addSpike(x,2);
-else if(pattern===0&&idx>1)obstacles.push({x,w:38,h:44,type:'block'});
+if(pattern===3)addSpike(x,2);
+else addSpike(x,1);
 }else if(selected===1){
-if(pattern===0||pattern===4)addSpike(x,2);
-else if(pattern===1)addSpike(x);
-else if(pattern===3)obstacles.push({x,w:40,h:52,type:'block'});
-else if(pattern===6){addSpike(x);obstacles.push({x:x+70,w:38,h:44,type:'block'});}
+if(pattern===0||pattern===4||pattern===6)addSpike(x,2);
+else addSpike(x,1);
 }else{
 if(pattern===0||pattern===3||pattern===6)addSpike(x,2);
-else if(pattern===1)addSpike(x);
-else if(pattern===2)obstacles.push({x,w:42,h:58,type:'block'});
-else{addSpike(x);addSpike(x+76);}
+else if(pattern===2)addSpike(x,3);
+else addSpike(x,1);
 }
+
 x+=cfg.gap+(pattern%3)*24;
 idx++;
 }
+
 obstacles.push({x:cfg.length-130,w:12,h:80,type:'finish'});
 }
 
 function reset(){
-world=0;progress=0;held=false;
-p.y=G-S;p.vy=0;p.angle=0;p.onGround=true;
-makeLevel();updateHud();
+world=0;
+progress=0;
+held=false;
+p.y=G-S;
+p.vy=0;
+p.angle=0;
+p.onGround=true;
+makeLevel();
+updateHud();
 }
 
 function updateHud(){
@@ -162,36 +171,39 @@ save();
 }
 
 function showMenu(kind='menu'){
-mode=kind;held=false;
+mode=kind;
+held=false;
 overlay.classList.remove('hidden');
 levelsBox.classList.toggle('hidden',kind==='dead'||kind==='win');
+
 if(kind==='dead'){
 title.textContent='УПС!';
 panelText.textContent='Прогресс: '+progress+'%. Попробуй ещё раз!';
 startBtn.textContent='ЕЩЁ РАЗ';
 }else if(kind==='win'){
 title.textContent='УРОВЕНЬ ПРОЙДЕН!';
-panelText.textContent='Красиво! Уровень '+LEVELS[selected].name+' пройден.';
+panelText.textContent='Уровень '+LEVELS[selected].name+' пройден!';
 startBtn.textContent='ИГРАТЬ СНОВА';
 }else{
 title.textContent='KYO DASH';
-panelText.textContent='Прыгай через шипы и доберись до финиша!';
+panelText.textContent='Прыгай через треугольные шипы и доберись до финиша!';
 startBtn.textContent='ИГРАТЬ';
 }
-refreshStats();draw();
+refreshStats();
+draw();
 }
 
 function start(){
 cancelAnimationFrame(raf);
-reset();mode='playing';
+reset();
+mode='playing';
 overlay.classList.add('hidden');
 last=performance.now();
 raf=requestAnimationFrame(loop);
 }
 
 function jump(){
-if(mode!=='playing')return;
-if(p.onGround){
+if(mode==='playing'&&p.onGround){
 p.vy=LEVELS[selected].jump;
 p.onGround=false;
 }
@@ -199,32 +211,63 @@ p.onGround=false;
 
 function die(){
 if(mode!=='playing')return;
-mode='dead';held=false;showMenu('dead');
+mode='dead';
+held=false;
+showMenu('dead');
 }
 
 function win(){
-mode='win';held=false;progress=100;
+mode='win';
+held=false;
+progress=100;
 progressText.textContent='100%';
 progressFill.style.width='100%';
-best[selected]=100;wins[selected]=true;save();
-refreshStats();showMenu('win');
+best[selected]=100;
+wins[selected]=true;
+save();
+refreshStats();
+showMenu('win');
+}
+
+/* Проверка столкновения с треугольным шипом.
+   Проверяем высоту наклонных сторон треугольника,
+   а не прямоугольник вокруг шипа. */
+function hitSpike(px,py,size,o){
+const left=Math.max(px+3,o.x);
+const right=Math.min(px+size-3,o.x+o.w);
+if(left>=right)return false;
+
+const playerBottom=py+size-2;
+const center=o.x+o.w/2;
+
+const samples=[left,(left+right)/2,right];
+for(const x of samples){
+const ratio=Math.abs(x-center)/(o.w/2);
+const spikeSurface=G-o.h*(1-ratio);
+if(playerBottom>spikeSurface && py+size*0.25<G){
+return true;
+}
+}
+return false;
 }
 
 function update(dt){
 if(mode!=='playing')return;
+
 const cfg=LEVELS[selected];
 world+=cfg.speed*dt;
 p.vy+=cfg.gravity*dt;
 p.y+=p.vy*dt;
 
 if(p.y>=G-S){
+p.y=G-S;
+p.vy=0;
 if(!p.onGround){
-p.y=G-S;p.vy=0;p.onGround=true;
+p.onGround=true;
 p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
 if(held)jump();
-}else{
-p.y=G-S;p.vy=0;
-if(held)jump();
+}else if(held){
+jump();
 }
 }else{
 p.onGround=false;
@@ -232,82 +275,126 @@ p.angle+=cfg.speed*dt/S*(Math.PI/2);
 }
 
 updateHud();
+
 const px=p.x,py=p.y,s=S;
 
 for(const o of obstacles){
 const ox=o.x-world;
-if(ox>px+90||ox+o.w<px-80)continue;
+if(ox>px+s||ox+o.w<px)continue;
 
 if(o.type==='finish'){
-if(ox<px+s*.6){win();return;}
+if(ox<px+s*.6){
+win();
+return;
+}
 }else if(o.type==='spike'){
-const left=ox+8,right=ox+o.w-8,top=G-o.h+12;
-const bottom=py+s-3;
-if(px+s-5>left&&px+5<right&&bottom>top+6&&py+s*.72<G){die();return;}
-}else if(o.type==='block'){
-if(px+s-4>ox+3&&px+4<ox+o.w-3&&py+s-3>G-o.h+3){die();return;}
+const shifted={x:ox,w:o.w,h:o.h};
+if(hitSpike(px,py,s,shifted)){
+die();
+return;
+}
 }
 }
 }
 
 function draw(){
-ctx.fillStyle='#0a1230';ctx.fillRect(0,0,W,H);
+ctx.fillStyle='#0a1230';
+ctx.fillRect(0,0,W,H);
+
 const grad=ctx.createLinearGradient(0,0,0,G);
-grad.addColorStop(0,'#111e48');grad.addColorStop(1,'#0a1530');
-ctx.fillStyle=grad;ctx.fillRect(0,0,W,G);
-ctx.strokeStyle='#213865';ctx.lineWidth=1;
+grad.addColorStop(0,'#111e48');
+grad.addColorStop(1,'#0a1530');
+ctx.fillStyle=grad;
+ctx.fillRect(0,0,W,G);
+
+ctx.strokeStyle='#213865';
+ctx.lineWidth=1;
 const off=-(world*.3%45);
-for(let x=off;x<W;x+=45){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,G);ctx.stroke();}
-for(let y=22;y<G;y+=45){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+for(let x=off;x<W;x+=45){
+ctx.beginPath();
+ctx.moveTo(x,0);
+ctx.lineTo(x,G);
+ctx.stroke();
+}
+for(let y=22;y<G;y+=45){
+ctx.beginPath();
+ctx.moveTo(0,y);
+ctx.lineTo(W,y);
+ctx.stroke();
+}
 
 for(let i=0;i<26;i++){
-const sx=(i*137-world*.12%900+900)%900,sy=(i*71)%285;
-ctx.fillStyle='#668ac5';ctx.fillRect(sx,sy,2,2);
+const sx=(i*137-world*.12%900+900)%900;
+const sy=(i*71)%285;
+ctx.fillStyle='#668ac5';
+ctx.fillRect(sx,sy,2,2);
 }
-ctx.fillStyle='#14264c';ctx.fillRect(0,G,W,H-G);
-ctx.fillStyle='#36e8ff';ctx.fillRect(0,G,W,4);
+
+ctx.fillStyle='#14264c';
+ctx.fillRect(0,G,W,H-G);
+ctx.fillStyle='#36e8ff';
+ctx.fillRect(0,G,W,4);
 
 for(let x=-(world%50);x<W;x+=50){
-ctx.fillStyle='#2b4779';ctx.fillRect(x,G+16,25,4);
+ctx.fillStyle='#2b4779';
+ctx.fillRect(x,G+16,25,4);
 }
 
 for(const o of obstacles){
 const x=o.x-world;
 if(x<-70||x>W+70)continue;
+
 if(o.type==='spike'){
 ctx.fillStyle=selected===2?'#ff3d8c':'#ff4d83';
-ctx.beginPath();ctx.moveTo(x,G);ctx.lineTo(x+o.w/2,G-o.h);ctx.lineTo(x+o.w,G);ctx.closePath();ctx.fill();
-ctx.strokeStyle='#ffb2cb';ctx.lineWidth=2;ctx.stroke();
-}else if(o.type==='block'){
-ctx.fillStyle='#824dff';ctx.fillRect(x,G-o.h,o.w,o.h);
-ctx.strokeStyle='#d6c2ff';ctx.lineWidth=3;ctx.strokeRect(x+2,G-o.h+2,o.w-4,o.h-4);
+ctx.beginPath();
+ctx.moveTo(x,G);
+ctx.lineTo(x+o.w/2,G-o.h);
+ctx.lineTo(x+o.w,G);
+ctx.closePath();
+ctx.fill();
+ctx.strokeStyle='#ffb2cb';
+ctx.lineWidth=2;
+ctx.stroke();
 }else{
-ctx.fillStyle='#4dffb4';ctx.fillRect(x,G-o.h,8,o.h);
-ctx.fillStyle='#e6fff5';ctx.font='bold 18px Arial';ctx.fillText('FINISH',x-26,G-o.h-12);
+ctx.fillStyle='#4dffb4';
+ctx.fillRect(x,G-o.h,8,o.h);
+ctx.fillStyle='#e6fff5';
+ctx.font='bold 18px Arial';
+ctx.fillText('FINISH',x-26,G-o.h-12);
 }
 }
 
 ctx.save();
 ctx.translate(p.x+S/2,p.y+S/2);
 ctx.rotate(p.angle);
-ctx.shadowColor='#00dfff';ctx.shadowBlur=14;
-ctx.fillStyle='#35e7ff';ctx.fillRect(-S/2,-S/2,S,S);
-ctx.shadowBlur=0;ctx.strokeStyle='#d8fcff';ctx.lineWidth=3;
+ctx.shadowColor='#00dfff';
+ctx.shadowBlur=14;
+ctx.fillStyle='#35e7ff';
+ctx.fillRect(-S/2,-S/2,S,S);
+ctx.shadowBlur=0;
+ctx.strokeStyle='#d8fcff';
+ctx.lineWidth=3;
 ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
-ctx.fillStyle='#0a2750';ctx.fillRect(-9,-7,5,7);ctx.fillRect(4,-7,5,7);
+ctx.fillStyle='#0a2750';
+ctx.fillRect(-9,-7,5,7);
+ctx.fillRect(4,-7,5,7);
 ctx.restore();
 }
 
 function loop(now){
 const dt=Math.min((now-last)/1000,.025);
-last=now;update(dt);draw();
+last=now;
+update(dt);
+draw();
 if(mode==='playing')raf=requestAnimationFrame(loop);
 }
 
 function press(e){
 if(e)e.preventDefault();
 if(mode!=='playing')return;
-held=true;jump();
+held=true;
+jump();
 }
 function release(e){
 if(e)e.preventDefault();
@@ -317,25 +404,38 @@ held=false;
 canvas.addEventListener('pointerdown',press);
 window.addEventListener('pointerup',release);
 window.addEventListener('pointercancel',release);
+
 window.addEventListener('keydown',e=>{
 if(e.code==='Space'||e.code==='ArrowUp'){
 e.preventDefault();
-if(mode==='playing'){if(!held)press(e);}
-else start();
+if(mode==='playing'){
+if(!held)press(e);
+}else if(e.code==='Space'){
+start();
+}
 }
 });
 window.addEventListener('keyup',e=>{
 if(e.code==='Space'||e.code==='ArrowUp')release(e);
 });
+
 startBtn.addEventListener('click',start);
 document.getElementById('menuBtn').addEventListener('click',()=>{
-cancelAnimationFrame(raf);showMenu('menu');
+cancelAnimationFrame(raf);
+showMenu('menu');
 });
-levelsBox.querySelectorAll('.level').forEach(b=>b.addEventListener('click',()=>{
-selected=Number(b.dataset.level);refreshStats();draw();
-}));
 
-refreshStats();makeLevel();draw();
+levelsBox.querySelectorAll('.level').forEach(b=>{
+b.addEventListener('click',()=>{
+selected=Number(b.dataset.level);
+refreshStats();
+draw();
+});
+});
+
+refreshStats();
+makeLevel();
+draw();
 })();
 </script>
 </body>
