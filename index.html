@@ -1,51 +1,342 @@
+
 <!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#080d22">
 <title>KYO DASH</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090d20;color:#fff;font-family:Arial,sans-serif;touch-action:none}#wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;gap:10px}canvas{display:block;width:100%;max-width:900px;height:auto;max-height:72vh;border:2px solid #263b79;border-radius:12px;background:#101b42;box-shadow:0 0 25px #163fc855;touch-action:none}#hud{width:100%;max-width:900px;display:flex;justify-content:space-between;gap:8px;font-size:14px;color:#bfeaff}#tip{font-size:12px;color:#8ea6da;text-align:center}button{background:#28d9ff;color:#081126;border:0;border-radius:12px;font-size:18px;font-weight:800;padding:13px 26px}#overlay{position:fixed;inset:0;background:#06091bdc;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center}#panel{width:min(90vw,430px);padding:28px 20px;border:1px solid #2f71be;border-radius:20px;background:linear-gradient(145deg,#142454,#0b1028);box-shadow:0 0 35px #00c8ff25}h1{font-size:clamp(34px,9vw,58px);margin:0 0 8px;color:#42e6ff;letter-spacing:3px;text-shadow:0 0 20px #00bfff}p{color:#bed0ff;line-height:1.5}#small{font-size:12px;color:#7f97ca;margin-top:12px}.hidden{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d22;color:#f3f7ff;font-family:Arial,sans-serif}
+body{display:flex;align-items:center;justify-content:center}
+.app{width:min(100%,1000px);padding:10px;display:flex;flex-direction:column;gap:9px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:bold;color:#b8d9ff}
+.brand{color:#48eaff;font-size:18px;letter-spacing:2px}
+.meter{height:7px;background:#172344;border-radius:9px;overflow:hidden}
+.fill{height:100%;width:0;background:linear-gradient(90deg,#26dfff,#5cffba)}
+canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px solid #28477a;border-radius:12px;background:#0c1534;touch-action:none}
+.hint{text-align:center;font-size:11px;color:#8da8d7}
+.overlay{position:fixed;inset:0;z-index:5;background:#040817ee;display:flex;align-items:center;justify-content:center;padding:18px}
+.panel{width:min(94vw,470px);padding:24px 20px;border:1px solid #3266a4;border-radius:22px;text-align:center;background:linear-gradient(150deg,#172754,#0a1026)}
+.logo{font-size:clamp(36px,10vw,58px);font-weight:1000;letter-spacing:3px;color:#45eaff;margin:0}
+.sub{color:#b9c9f2;line-height:1.5;font-size:14px}
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0 12px}
+.level{border:1px solid #304873;border-radius:12px;padding:12px 4px;background:#111b38;color:#d8e6ff;font-weight:bold;font-size:12px}
+.level small{display:block;color:#90a7d4;margin-top:5px}
+.level.active{border-color:#35e3ff;background:#12314a}
+.btn{border:0;border-radius:12px;padding:13px 18px;background:linear-gradient(90deg,#2adfff,#65ffca);color:#071126;font-weight:bold;font-size:16px;width:100%}
+.secondary{margin-top:9px;background:#192747;color:#cde2ff;border:1px solid #344d79}
+.hidden{display:none!important}
+.stats{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;color:#9eb8e8;font-size:12px;margin:12px 0}
+.stats b{color:white}
+.menuBtn{border:1px solid #294774;background:#111d3a;color:#bfe8ff;border-radius:9px;padding:6px 10px;font-weight:bold;font-size:11px}
 </style>
 </head>
 <body>
-<div id="wrap">
- <div id="hud"><span id="score">ПРОГРЕСС 0%</span><span id="best">РЕКОРД 0%</span></div>
- <canvas id="game" width="900" height="420" aria-label="KYO DASH"></canvas>
- <div id="tip">ТАП — ПРЫЖОК · УДЕРЖИВАЙ — АВТОПРЫЖКИ</div>
+<main class="app">
+<header class="top">
+<span class="brand">KYO DASH</span>
+<span id="levelLabel">EASY · 1</span>
+<span id="progressText">0%</span>
+<button class="menuBtn" id="menuBtn">МЕНЮ</button>
+</header>
+<div class="meter"><div class="fill" id="progressFill"></div></div>
+<canvas id="game" width="900" height="420"></canvas>
+<div class="hint">ТАП — ПРЫЖОК · УДЕРЖИВАЙ — АВТОПРЫЖКИ</div>
+</main>
+
+<div class="overlay" id="overlay">
+<section class="panel">
+<h1 class="logo" id="panelTitle">KYO DASH</h1>
+<p class="sub" id="panelText">Прыгай через шипы и доберись до финиша!</p>
+<div class="levels" id="levels">
+<button class="level active" data-level="0">EASY<small>Спокойно</small></button>
+<button class="level" data-level="1">MEDIUM<small>Сложнее</small></button>
+<button class="level" data-level="2">HARD<small>Трудно</small></button>
 </div>
-<div id="overlay"><div id="panel"><h1>KYO DASH</h1><p>Прыгай через шипы и доберись до финиша!</p><button id="start">ИГРАТЬ</button><div id="small">Коснись экрана, чтобы прыгнуть</div></div></div>
+<div class="stats">
+<span>РЕКОРД <b id="best">0%</b></span>
+<span>ПРОЙДЕНО <b id="wins">0/3</b></span>
+</div>
+<button class="btn" id="startBtn">ИГРАТЬ</button>
+<div style="font-size:11px;color:#8097c6;margin-top:12px">Рекорды сохраняются на устройстве</div>
+</section>
+</div>
+
 <script>
-(()=>{'use strict';
-const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
-const overlay=document.getElementById('overlay'),startBtn=document.getElementById('start');
-const scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
-let best=0;try{best=Number(localStorage.getItem('kyoDashBest')||0)}catch(e){}bestEl.textContent='РЕКОРД '+best+'%';
-const W=900,H=420,ground=330,player={x:145,y:ground-34,size:34,vy:0,angle:0,onGround:true};
-let running=false,dead=false,finished=false,held=false,started=false,world=0,progress=0,last=0,raf=0;
-const speed=270,gravity=1700,jump=-610,levelLength=6600;
-let obstacles=[];
-function makeLevel(){obstacles=[];let x=580;while(x<levelLength-220){let gap=245+Math.random()*100; x+=gap;obstacles.push({x,w:36,h:36,type:'spike'});if(Math.random()<.2)obstacles.push({x:x+48,w:36,h:36,type:'spike'});if(Math.random()<.12)obstacles.push({x:x+120,w:36,h:36,type:'block'});}obstacles.push({x:levelLength-160,w:45,h:70,type:'finish'});}
-function reset(){world=0;progress=0;dead=false;finished=false;held=false;player.y=ground-player.size;player.vy=0;player.angle=0;player.onGround=true;makeLevel();scoreEl.textContent='ПРОГРЕСС 0%';}
-function start(){reset();running=true;overlay.classList.add('hidden');last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop);}
-function jumpNow(){if(!running)return;if(player.onGround&&!dead&&!finished){player.vy=jump;player.onGround=false;}}
-function die(){if(dead||finished)return;dead=true;running=false;overlay.classList.remove('hidden');document.querySelector('#panel h1').textContent='УПС!';document.querySelector('#panel p').textContent='Прогресс: '+progress+'%. Попробуй ещё раз!';startBtn.textContent='ЕЩЁ РАЗ';}
-function win(){finished=true;running=false;progress=100;scoreEl.textContent='ПРОГРЕСС 100%';overlay.classList.remove('hidden');document.querySelector('#panel h1').textContent='УРОВЕНЬ ПРОЙДЕН!';document.querySelector('#panel p').textContent='Отлично! Ты прошёл KYO DASH.';startBtn.textContent='ИГРАТЬ СНОВА';}
-function update(dt){if(!running)return;world+=speed*dt;player.vy+=gravity*dt;player.y+=player.vy*dt;if(player.y>=ground-player.size){player.y=ground-player.size;player.vy=0;player.onGround=true;player.angle=Math.round(player.angle/(Math.PI/2))*(Math.PI/2);if(held)jumpNow();}else{player.onGround=false;player.angle+=Math.sign(player.vy||1)*dt*5.2;}
-progress=Math.min(99,Math.floor(world/(levelLength-160)*100));scoreEl.textContent='ПРОГРЕСС '+progress+'%';if(progress>best){best=progress;bestEl.textContent='РЕКОРД '+best+'%';try{localStorage.setItem('kyoDashBest',String(best))}catch(e){}}
-const px=player.x,py=player.y,s=player.size;for(const o of obstacles){const ox=o.x-world;if(ox>px+100||ox+o.w<px-100)continue;if(o.type==='finish'&&ox<px+s){win();return;}if(o.type==='spike'){const left=ox+7,right=ox+o.w-7,top=ground-o.h+10;const cx=px+s*.5,cy=py+s*.5;if(cx>left&&cx<right&&cy+s*.28>top&&py+s-3>ground-o.h+4){die();return;}}else if(o.type==='block'){if(px+s>ox+4&&px<ox+o.w-4&&py+s>ground-o.h+3){die();return;}}}
-if(held&&player.onGround)jumpNow();}
-function draw(){ctx.clearRect(0,0,W,H);const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#111b45');bg.addColorStop(1,'#091126');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-ctx.strokeStyle='#263c78';ctx.lineWidth=1;const offset=-(world*.35%45);for(let x=offset;x<W;x+=45){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,ground);ctx.stroke();}for(let y=25;y<ground;y+=45){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-ctx.fillStyle='#172957';ctx.fillRect(0,ground,W,H-ground);ctx.fillStyle='#2fe4ff';ctx.fillRect(0,ground,W,4);for(let x=-(world%50);x<W;x+=50){ctx.fillStyle='#25447e';ctx.fillRect(x,ground+15,25,4);}
-for(const o of obstacles){const x=o.x-world;if(x<-70||x>W+70)continue;if(o.type==='spike'){ctx.fillStyle='#ff3e82';ctx.beginPath();ctx.moveTo(x,ground);ctx.lineTo(x+o.w/2,ground-o.h);ctx.lineTo(x+o.w,ground);ctx.closePath();ctx.fill();ctx.strokeStyle='#ff9bbc';ctx.lineWidth=2;ctx.stroke();}else if(o.type==='block'){ctx.fillStyle='#8a4dff';ctx.fillRect(x,ground-o.h,o.w,o.h);ctx.strokeStyle='#d6b7ff';ctx.lineWidth=3;ctx.strokeRect(x+2,ground-o.h+2,o.w-4,o.h-4);}else{ctx.fillStyle='#37f5ad';ctx.fillRect(x,ground-70,8,70);ctx.fillStyle='#fff';ctx.font='bold 18px Arial';ctx.fillText('FINISH',x-15,ground-86);}}
-ctx.save();ctx.translate(player.x+player.size/2,player.y+player.size/2);ctx.rotate(player.angle);ctx.fillStyle='#31e5ff';ctx.shadowColor='#00cfff';ctx.shadowBlur=14;ctx.fillRect(-player.size/2,-player.size/2,player.size,player.size);ctx.shadowBlur=0;ctx.strokeStyle='#d5fbff';ctx.lineWidth=3;ctx.strokeRect(-player.size/2+3,-player.size/2+3,player.size-6,player.size-6);ctx.fillStyle='#10254c';ctx.fillRect(-8,-7,5,7);ctx.fillRect(4,-7,5,7);ctx.restore();
-if(!running&&!dead&&!finished){ctx.fillStyle='#b5ccff';ctx.font='bold 20px Arial';ctx.textAlign='center';ctx.fillText('READY?',W/2,100);ctx.textAlign='left';}}
-function loop(now){const dt=Math.min((now-last)/1000,.033);last=now;update(dt);draw();if(running)raf=requestAnimationFrame(loop);}
-function press(e){if(e){e.preventDefault();}held=true;if(running)jumpNow();}
-function release(e){if(e)e.preventDefault();held=false;}
-canvas.addEventListener('pointerdown',press);window.addEventListener('pointerup',release);window.addEventListener('pointercancel',release);window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();if(!started){started=true;start()}else press(e)}});window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ArrowUp')release(e)});startBtn.addEventListener('click',()=>{started=true;document.querySelector('#panel h1').textContent='KYO DASH';start()});
-makeLevel();draw();
+(()=>{
+'use strict';
+const canvas=document.getElementById('game');
+const ctx=canvas.getContext('2d');
+const overlay=document.getElementById('overlay');
+const title=document.getElementById('panelTitle');
+const panelText=document.getElementById('panelText');
+const startBtn=document.getElementById('startBtn');
+const levelsBox=document.getElementById('levels');
+const levelLabel=document.getElementById('levelLabel');
+const progressText=document.getElementById('progressText');
+const progressFill=document.getElementById('progressFill');
+const bestEl=document.getElementById('best');
+const winsEl=document.getElementById('wins');
+
+const W=900,H=420,G=330,S=34;
+const LEVELS=[
+{name:'EASY',speed:275,jump:-590,gravity:1650,length:5100,gap:300},
+{name:'MEDIUM',speed:300,jump:-600,gravity:1700,length:5900,gap:250},
+{name:'HARD',speed:320,jump:-610,gravity:1750,length:6500,gap:215}
+];
+
+let selected=0,mode='menu',world=0,progress=0,last=0,raf=0,held=false;
+let obstacles=[],best=[0,0,0],wins=[false,false,false];
+
+try{
+best=JSON.parse(localStorage.getItem('kyoDashBest3')||'[0,0,0]');
+wins=JSON.parse(localStorage.getItem('kyoDashWins3')||'[false,false,false]');
+if(!Array.isArray(best)||best.length!==3)best=[0,0,0];
+if(!Array.isArray(wins)||wins.length!==3)wins=[false,false,false];
+}catch(e){best=[0,0,0];wins=[false,false,false]}
+
+const p={x:150,y:G-S,vy:0,angle:0,onGround:true};
+
+function save(){
+try{
+localStorage.setItem('kyoDashBest3',JSON.stringify(best));
+localStorage.setItem('kyoDashWins3',JSON.stringify(wins));
+}catch(e){}
+}
+
+function refreshStats(){
+bestEl.textContent=(best[selected]||0)+'%';
+winsEl.textContent=wins.filter(Boolean).length+'/3';
+document.querySelectorAll('.level').forEach((b,i)=>b.classList.toggle('active',i===selected));
+levelLabel.textContent=LEVELS[selected].name+' · '+(selected+1);
+}
+
+function addSpike(x,count=1){
+for(let i=0;i<count;i++)obstacles.push({x:x+i*37,w:37,h:37,type:'spike'});
+}
+
+function makeLevel(){
+obstacles=[];
+const cfg=LEVELS[selected];
+let x=590,idx=0;
+while(x<cfg.length-260){
+const pattern=(idx*7+selected*3)%7;
+if(selected===0){
+if(pattern===2||pattern===5)addSpike(x);
+else if(pattern===3)addSpike(x,2);
+else if(pattern===0&&idx>1)obstacles.push({x,w:38,h:44,type:'block'});
+}else if(selected===1){
+if(pattern===0||pattern===4)addSpike(x,2);
+else if(pattern===1)addSpike(x);
+else if(pattern===3)obstacles.push({x,w:40,h:52,type:'block'});
+else if(pattern===6){addSpike(x);obstacles.push({x:x+70,w:38,h:44,type:'block'});}
+}else{
+if(pattern===0||pattern===3||pattern===6)addSpike(x,2);
+else if(pattern===1)addSpike(x);
+else if(pattern===2)obstacles.push({x,w:42,h:58,type:'block'});
+else{addSpike(x);addSpike(x+76);}
+}
+x+=cfg.gap+(pattern%3)*24;
+idx++;
+}
+obstacles.push({x:cfg.length-130,w:12,h:80,type:'finish'});
+}
+
+function reset(){
+world=0;progress=0;held=false;
+p.y=G-S;p.vy=0;p.angle=0;p.onGround=true;
+makeLevel();updateHud();
+}
+
+function updateHud(){
+progress=Math.min(100,Math.floor(world/(LEVELS[selected].length-130)*100));
+progressText.textContent=progress+'%';
+progressFill.style.width=progress+'%';
+if(progress>best[selected]){
+best[selected]=progress;
+bestEl.textContent=progress+'%';
+save();
+}
+}
+
+function showMenu(kind='menu'){
+mode=kind;held=false;
+overlay.classList.remove('hidden');
+levelsBox.classList.toggle('hidden',kind==='dead'||kind==='win');
+if(kind==='dead'){
+title.textContent='УПС!';
+panelText.textContent='Прогресс: '+progress+'%. Попробуй ещё раз!';
+startBtn.textContent='ЕЩЁ РАЗ';
+}else if(kind==='win'){
+title.textContent='УРОВЕНЬ ПРОЙДЕН!';
+panelText.textContent='Красиво! Уровень '+LEVELS[selected].name+' пройден.';
+startBtn.textContent='ИГРАТЬ СНОВА';
+}else{
+title.textContent='KYO DASH';
+panelText.textContent='Прыгай через шипы и доберись до финиша!';
+startBtn.textContent='ИГРАТЬ';
+}
+refreshStats();draw();
+}
+
+function start(){
+cancelAnimationFrame(raf);
+reset();mode='playing';
+overlay.classList.add('hidden');
+last=performance.now();
+raf=requestAnimationFrame(loop);
+}
+
+function jump(){
+if(mode!=='playing')return;
+if(p.onGround){
+p.vy=LEVELS[selected].jump;
+p.onGround=false;
+}
+}
+
+function die(){
+if(mode!=='playing')return;
+mode='dead';held=false;showMenu('dead');
+}
+
+function win(){
+mode='win';held=false;progress=100;
+progressText.textContent='100%';
+progressFill.style.width='100%';
+best[selected]=100;wins[selected]=true;save();
+refreshStats();showMenu('win');
+}
+
+function update(dt){
+if(mode!=='playing')return;
+const cfg=LEVELS[selected];
+world+=cfg.speed*dt;
+p.vy+=cfg.gravity*dt;
+p.y+=p.vy*dt;
+
+if(p.y>=G-S){
+if(!p.onGround){
+p.y=G-S;p.vy=0;p.onGround=true;
+p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
+if(held)jump();
+}else{
+p.y=G-S;p.vy=0;
+if(held)jump();
+}
+}else{
+p.onGround=false;
+p.angle+=cfg.speed*dt/S*(Math.PI/2);
+}
+
+updateHud();
+const px=p.x,py=p.y,s=S;
+
+for(const o of obstacles){
+const ox=o.x-world;
+if(ox>px+90||ox+o.w<px-80)continue;
+
+if(o.type==='finish'){
+if(ox<px+s*.6){win();return;}
+}else if(o.type==='spike'){
+const left=ox+8,right=ox+o.w-8,top=G-o.h+12;
+const bottom=py+s-3;
+if(px+s-5>left&&px+5<right&&bottom>top+6&&py+s*.72<G){die();return;}
+}else if(o.type==='block'){
+if(px+s-4>ox+3&&px+4<ox+o.w-3&&py+s-3>G-o.h+3){die();return;}
+}
+}
+}
+
+function draw(){
+ctx.fillStyle='#0a1230';ctx.fillRect(0,0,W,H);
+const grad=ctx.createLinearGradient(0,0,0,G);
+grad.addColorStop(0,'#111e48');grad.addColorStop(1,'#0a1530');
+ctx.fillStyle=grad;ctx.fillRect(0,0,W,G);
+ctx.strokeStyle='#213865';ctx.lineWidth=1;
+const off=-(world*.3%45);
+for(let x=off;x<W;x+=45){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,G);ctx.stroke();}
+for(let y=22;y<G;y+=45){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+for(let i=0;i<26;i++){
+const sx=(i*137-world*.12%900+900)%900,sy=(i*71)%285;
+ctx.fillStyle='#668ac5';ctx.fillRect(sx,sy,2,2);
+}
+ctx.fillStyle='#14264c';ctx.fillRect(0,G,W,H-G);
+ctx.fillStyle='#36e8ff';ctx.fillRect(0,G,W,4);
+
+for(let x=-(world%50);x<W;x+=50){
+ctx.fillStyle='#2b4779';ctx.fillRect(x,G+16,25,4);
+}
+
+for(const o of obstacles){
+const x=o.x-world;
+if(x<-70||x>W+70)continue;
+if(o.type==='spike'){
+ctx.fillStyle=selected===2?'#ff3d8c':'#ff4d83';
+ctx.beginPath();ctx.moveTo(x,G);ctx.lineTo(x+o.w/2,G-o.h);ctx.lineTo(x+o.w,G);ctx.closePath();ctx.fill();
+ctx.strokeStyle='#ffb2cb';ctx.lineWidth=2;ctx.stroke();
+}else if(o.type==='block'){
+ctx.fillStyle='#824dff';ctx.fillRect(x,G-o.h,o.w,o.h);
+ctx.strokeStyle='#d6c2ff';ctx.lineWidth=3;ctx.strokeRect(x+2,G-o.h+2,o.w-4,o.h-4);
+}else{
+ctx.fillStyle='#4dffb4';ctx.fillRect(x,G-o.h,8,o.h);
+ctx.fillStyle='#e6fff5';ctx.font='bold 18px Arial';ctx.fillText('FINISH',x-26,G-o.h-12);
+}
+}
+
+ctx.save();
+ctx.translate(p.x+S/2,p.y+S/2);
+ctx.rotate(p.angle);
+ctx.shadowColor='#00dfff';ctx.shadowBlur=14;
+ctx.fillStyle='#35e7ff';ctx.fillRect(-S/2,-S/2,S,S);
+ctx.shadowBlur=0;ctx.strokeStyle='#d8fcff';ctx.lineWidth=3;
+ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
+ctx.fillStyle='#0a2750';ctx.fillRect(-9,-7,5,7);ctx.fillRect(4,-7,5,7);
+ctx.restore();
+}
+
+function loop(now){
+const dt=Math.min((now-last)/1000,.025);
+last=now;update(dt);draw();
+if(mode==='playing')raf=requestAnimationFrame(loop);
+}
+
+function press(e){
+if(e)e.preventDefault();
+if(mode!=='playing')return;
+held=true;jump();
+}
+function release(e){
+if(e)e.preventDefault();
+held=false;
+}
+
+canvas.addEventListener('pointerdown',press);
+window.addEventListener('pointerup',release);
+window.addEventListener('pointercancel',release);
+window.addEventListener('keydown',e=>{
+if(e.code==='Space'||e.code==='ArrowUp'){
+e.preventDefault();
+if(mode==='playing'){if(!held)press(e);}
+else start();
+}
+});
+window.addEventListener('keyup',e=>{
+if(e.code==='Space'||e.code==='ArrowUp')release(e);
+});
+startBtn.addEventListener('click',start);
+document.getElementById('menuBtn').addEventListener('click',()=>{
+cancelAnimationFrame(raf);showMenu('menu');
+});
+levelsBox.querySelectorAll('.level').forEach(b=>b.addEventListener('click',()=>{
+selected=Number(b.dataset.level);refreshStats();draw();
+}));
+
+refreshStats();makeLevel();draw();
 })();
 </script>
-</body></html>
+</body>
+</html>
