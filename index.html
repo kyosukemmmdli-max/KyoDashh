@@ -36,7 +36,6 @@ h1{font-size:clamp(34px,9vw,55px);color:#e0d1ef;margin:5px;text-shadow:0 0 20px 
 .hidden{display:none!important}
 .shop-item{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:10px 0;padding:12px;background:#21192f;border:1px solid #51405f;border-radius:12px;text-align:left}
 .shop-item button{flex-shrink:0;background:#c6b0df;color:#21142d}
-.shop-item small{color:#c3b4d4}
 @media(max-width:400px){.panel{padding:15px 9px}.levels{gap:5px}.level{font-size:11px}.logo{font-size:18px}}
 </style>
 </head>
@@ -102,8 +101,6 @@ const c=document.getElementById('game');
 const ctx=c.getContext('2d');
 const $=id=>document.getElementById(id);
 const W=900,H=420,G=330,S=34;
-
-// PIN для локального Owner Mode
 const OWNER_PIN='OwnerKD-ADS5H-D6E9F037F7';
 
 const levels=[
@@ -173,7 +170,7 @@ function saveShop(){
 function updateCoins(){
  $('coins').textContent=ownerMode?'∞ KC':coins+' KC';
  $('shopCoins').textContent=ownerMode?'∞ KC':coins+' KC';
- $('ownerBtn').textContent=ownerMode?'👑 OWNER MODE: ВКЛ':'👑 OWNER MODE';
+ $('ownerBtn').textContent=ownerMode?'👑 OWNER MODE: ВЫКЛ':'👑 OWNER MODE';
 }
 
 function earnCoins(amount){
@@ -523,7 +520,6 @@ function drawWeather(){
    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-7,y+15);ctx.stroke();
   }
 
-  // Короткие вспышки молнии
   if(Math.floor(performance.now()/1800)%7===0){
    ctx.strokeStyle='#dce5ff55';ctx.lineWidth=4;
    ctx.beginPath();
@@ -557,7 +553,6 @@ function draw(){
  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
  drawWeather();
 
- // Небольшие фоновые фигуры вместо гор
  ctx.globalAlpha=.10;
  ctx.strokeStyle='#fff';ctx.lineWidth=2;
  for(let i=0;i<9;i++){
@@ -674,4 +669,12 @@ $('music').addEventListener('click',()=>{
 });
 
 document.querySelectorAll('.level').forEach(b=>{
- 
+ b.addEventListener('click',()=>{
+  selected=Number(b.dataset.n);
+  stats();
+  reset();
+  draw();
+ });
+});
+
+$('shopBtn').addEventListe 
