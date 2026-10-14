@@ -22,8 +22,8 @@ input{min-width:0;background:#080f25;border:1px solid #355786;border-radius:9px;
 canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px solid #28477a;border-radius:12px;background:#0c1534;touch-action:none}
 .hint{text-align:center;font-size:11px;color:#8da8d7}
 .overlay{position:fixed;inset:0;z-index:5;background:#040817ee;display:flex;align-items:center;justify-content:center;padding:12px}
-.panel{width:min(94vw,490px);max-height:94vh;overflow:auto;padding:19px;border:1px solid #3266a4;border-radius:22px;text-align:center;background:linear-gradient(150deg,#172754,#0a1026)}
-.logo{font-size:40px;color:#45eaff;margin:0}
+.panel{width:min(94vw,490px);max-height:94vh;overflow:auto;padding:18px;border:1px solid #3266a4;border-radius:22px;text-align:center;background:linear-gradient(150deg,#172754,#0a1026)}
+.logo{font-size:38px;color:#45eaff;margin:0}
 .sub{color:#b9c9f2;font-size:14px}
 .profileBox,.wallet{margin:12px 0;padding:12px;border:1px solid #2d4c79;border-radius:14px;background:#0b1733}
 .profileLine{font-size:12px;color:#a9c4f2;margin:7px}
@@ -37,16 +37,16 @@ canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px soli
 .level{background:#111b38;color:#d8e6ff;border:1px solid #304873}
 .level.active{border-color:#35e3ff;background:#12314a}
 .level small{display:block;font-size:10px;margin-top:4px}
-.btn{width:100%;padding:13px;margin-top:8px;font-size:14px;background:linear-gradient(90deg,#2adfff,#65ffca)}
+.btn{width:100%;padding:12px;margin-top:8px;font-size:14px;background:linear-gradient(90deg,#2adfff,#65ffca)}
 .secondary{background:#192747;color:#cde2ff;border:1px solid #344d79}
 .stats{display:flex;justify-content:center;gap:18px;color:#9eb8e8;font-size:12px;margin:12px}
 .hidden{display:none!important}
 .small{font-size:11px;color:#8097c6;margin-top:10px}
 .menuBtn{padding:7px;background:#111d3a;color:#bfe8ff;border:1px solid #294774}
-.wallet{display:flex;justify-content:space-around;gap:10px}
+.wallet{display:flex;justify-content:center;gap:10px}
 .currency{font-size:13px;color:#a8c9ff}
-.currency b{display:block;font-size:19px;color:#56ffcb;margin-top:5px;overflow-wrap:anywhere}
-.sectionTitle{color:#50eaff;font-size:14px;margin:18px 0 8px}
+.currency b{display:block;font-size:20px;color:#56ffcb;margin-top:5px}
+.sectionTitle{color:#50eaff;font-size:14px;margin:15px 0 10px}
 .shopGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;text-align:left}
 .item{background:#0c1732;border:1px solid #2c4775;border-radius:12px;padding:12px}
 .item h3{font-size:14px;margin:0 0 7px}
@@ -56,10 +56,11 @@ canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px soli
 .ownerTools input{grid-column:span 2}
 .ownerTools button{font-size:11px;padding:10px}
 .notice{font-size:11px;color:#9db8e8;line-height:1.5;margin-top:12px}
-@media(max-height:650px){.panel{padding:12px;max-height:96vh}.logo{font-size:30px}.profileBox{margin:7px 0;padding:8px}.levels{margin:8px 0}.btn{padding:10px;margin-top:5px}.sub{margin:7px 0}}
+@media(max-height:650px){.panel{padding:10px;max-height:97vh}.logo{font-size:28px}.profileBox{margin:6px 0;padding:8px}.levels{margin:8px 0}.btn{padding:9px;margin-top:5px}.sub{margin:6px 0}}
 </style>
 </head>
 <body>
+
 <main class="app">
 <header class="top">
 <span class="brand">Kyo Dash</span>
@@ -78,11 +79,10 @@ canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px soli
 <p class="sub" id="panelText">Прыгай через шипы и доберись до финиша!</p>
 
 <div class="wallet">
-<div class="currency">KC<b id="kcBalance">0</b></div>
-<div class="currency">KyoCoins<b id="kyoBalance">0</b></div>
+<div class="currency">ТВОИ МОНЕТЫ KC<b id="kcBalance">0</b></div>
 </div>
 
-<div class="profileBox" id="profileBox">
+<div class="profileBox">
 <div class="profileLine">ИГРОК: <strong id="profileNick">Player</strong></div>
 <div class="profileLine">УРОВЕНЬ <strong id="profileLevel">1</strong> · XP <strong id="profileXp">0 / 250</strong></div>
 <div class="xpTrack"><div class="xpFill" id="xpFill"></div></div>
@@ -118,26 +118,26 @@ canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px soli
 <div class="sectionTitle">OWNER CONTROL PANEL</div>
 <p class="sub" id="ownerStatus">Режим владельца не активирован</p>
 <div class="ownerTools">
-<input id="ownerAmount" type="number" min="0" placeholder="Количество валюты">
-<button id="addKC">+ KC</button>
-<button id="addKyo">+ KyoCoins</button>
-<button id="ownerReward">НАЧИСЛИТЬ ОБЕ</button>
+<input id="ownerAmount" type="number" min="1" step="1" placeholder="Количество KC">
+<button id="addKC">НАЧИСЛИТЬ KC</button>
+<button id="ownerReward">+ 100000 KC</button>
 <button id="ownerExit">ВЫЙТИ ИЗ OWNER</button>
+<button id="ownerBack">НАЗАД</button>
 </div>
-<div class="notice">Панель действует только в этом браузере. Баланс можно изменить через инструменты разработчика, поэтому это не защищённая онлайн-экономика.</div>
-<button class="btn secondary" id="ownerBack">НАЗАД</button>
+<div class="notice">Монеты хранятся в браузере этого устройства. Это локальная игровая валюта, а не защищённый онлайн-баланс.</div>
 </div>
 
-<button class="btn secondary hidden" id="menuOnly">ВЫБОР УРОВНЯ</button>
-<div class="notice">Локальное сохранение: очистка данных браузера может сбросить прогресс, валюту и покупки.</div>
+<div class="notice" id="saveNotice">Очистка данных сайта может сбросить прогресс и монеты.</div>
 </section>
 </div>
 
 <script>
 (()=>{
 'use strict';
+
 const $=id=>document.getElementById(id);
-const canvas=$('game'),ctx=canvas.getContext('2d');
+const canvas=$('game');
+const ctx=canvas.getContext('2d');
 const overlay=$('overlay');
 
 const OWNER_PINS=[
@@ -145,373 +145,569 @@ const OWNER_PINS=[
  'KenanDrun-AJ9S3L6KS9-8H67HSK'
 ];
 
-const STORE={
- kc:'kyoDashKC',
- kyo:'kyoDashKyoCoins',
- owned:'kyoDashOwnedItems',
- equipped:'kyoDashEquipped'
-};
+const KC_KEY='kyoDashKC';
+const PROFILE_KEY='kyoDashProfile';
+const OWNED_KEY='kyoDashOwnedItems';
+const EQUIPPED_KEY='kyoDashEquipped';
 
 const ITEMS=[
- {id:'cyan',name:'CYAN CUBE',desc:'Классический голубой куб',price:0,currency:'KC',color:'#35e7ff'},
- {id:'gold',name:'GOLD CUBE',desc:'Золотой стиль',price:500,currency:'KC',color:'#ffd34e'},
- {id:'pink',name:'NEON PINK',desc:'Розовый неон',price:300,currency:'KyoCoins',color:'#ff48d1'},
- {id:'purple',name:'PURPLE NOVA',desc:'Фиолетовый куб',price:750,currency:'KyoCoins',color:'#a66bff'}
+ {id:'cyan',name:'CYAN CUBE',desc:'Классический голубой куб',price:0,color:'#35e7ff'},
+ {id:'gold',name:'GOLD CUBE',desc:'Золотой стиль',price:500,color:'#ffd34e'},
+ {id:'pink',name:'NEON PINK',desc:'Розовый неон',price:300,color:'#ff48d1'},
+ {id:'purple',name:'PURPLE NOVA',desc:'Фиолетовый куб',price:750,color:'#a66bff'}
 ];
 
-let profile={nickname:'Player',xp:0,isDev:false};
-let ownerMode=false;
-let selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
-let held=false,obstacles=[],best=[0,0,0],wins=[false,false,false];
-let kc=0,kyoCoins=0;
-let owned=['cyan'],equipped='cyan';
-
-const W=900,H=420,G=330,S=34;
 const LEVELS=[
  {name:'EASY',speed:275,jump:-590,gravity:1650,length:5100,gap:300},
  {name:'MEDIUM',speed:300,jump:-600,gravity:1700,length:5900,gap:250},
  {name:'HARD',speed:320,jump:-610,gravity:1750,length:6500,gap:215}
 ];
 
-const p={x:150,y:G-S,vy:0,angle:0,onGround:true};
+const W=900,H=420,G=330,S=34;
+const player={x:150,y:G-S,vy:0,angle:0,onGround:true};
 
-function numberFromStorage(key,fallback=0){
- try{
-  const n=Number(localStorage.getItem(key));
-  return Number.isFinite(n)&&n>=0?n:fallback;
- }catch(e){return fallback}
-}
+let profile={nickname:'Player',xp:0,isDev:false};
+let kc=0,owned=['cyan'],equipped='cyan';
+let ownerMode=false;
+let selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
+let held=false,obstacles=[];
+let best=[0,0,0],wins=[false,false,false];
+
 function readJSON(key,fallback){
  try{
   const v=JSON.parse(localStorage.getItem(key));
   return v===null?fallback:v;
  }catch(e){return fallback}
 }
-function saveWallet(){
- try{
-  localStorage.setItem(STORE.kc,String(kc));
-  localStorage.setItem(STORE.kyo,String(kyoCoins));
-  localStorage.setItem(STORE.owned,JSON.stringify(owned));
-  localStorage.setItem(STORE.equipped,equipped);
- }catch(e){}
- updateWallet();
+
+function saveJSON(key,value){
+ try{localStorage.setItem(key,JSON.stringify(value))}
+ catch(e){console.warn('Не удалось сохранить данные:',e)}
 }
-function loadWallet(){
- kc=numberFromStorage(STORE.kc);
- kyoCoins=numberFromStorage(STORE.kyo);
- const o=readJSON(STORE.owned,['cyan']);
- owned=Array.isArray(o)?o.filter(id=>ITEMS.some(i=>i.id===id)):['cyan'];
- if(!owned.includes('cyan'))owned.push('cyan');
- equipped=localStorage.getItem(STORE.equipped)||'cyan';
- if(!owned.includes(equipped))equipped='cyan';
- updateWallet();
-}
-function updateWallet(){
- $('kcBalance').textContent=Math.floor(kc).toLocaleString('en-US');
- $('kyoBalance').textContent=Math.floor(kyoCoins).toLocaleString('en-US');
-}
-function loadProfile(){
- const saved=readJSON('kyoDashProfile',{});
+
+function loadData(){
+ const saved=readJSON(PROFILE_KEY,{});
  profile.xp=Number.isFinite(saved.xp)&&saved.xp>=0?Math.floor(saved.xp):0;
  profile.isDev=saved.isDev===true;
  profile.nickname=profile.isDev?'[DEV] Kyosuke':
-  (typeof saved.nickname==='string'&&saved.nickname.trim()?saved.nickname.trim().slice(0,16):'Player');
+  (typeof saved.nickname==='string'&&saved.nickname.trim()
+   ?saved.nickname.trim().slice(0,16):'Player');
+
+ const storedKC=Number(localStorage.getItem(KC_KEY));
+ kc=Number.isSafeInteger(storedKC)&&storedKC>=0?storedKC:0;
+
+ const storedOwned=readJSON(OWNED_KEY,['cyan']);
+ owned=Array.isArray(storedOwned)
+  ?storedOwned.filter(id=>ITEMS.some(item=>item.id===id))
+  :['cyan'];
+
+ if(!owned.includes('cyan'))owned.push('cyan');
+
+ equipped=localStorage.getItem(EQUIPPED_KEY)||'cyan';
+ if(!owned.includes(equipped))equipped='cyan';
+
+ best=readJSON('kyoDashBest3',[0,0,0]);
+ wins=readJSON('kyoDashWins3',[false,false,false]);
+
+ if(!Array.isArray(best)||best.length!==3)best=[0,0,0];
+ if(!Array.isArray(wins)||wins.length!==3)wins=[false,false,false];
+
+ updateProfile();
+ updateWallet();
 }
+
 function saveProfile(){
- try{localStorage.setItem('kyoDashProfile',JSON.stringify(profile))}catch(e){}
+ saveJSON(PROFILE_KEY,profile);
  updateProfile();
 }
+
+function saveWallet(){
+ try{
+  localStorage.setItem(KC_KEY,String(kc));
+  localStorage.setItem(OWNED_KEY,JSON.stringify(owned));
+  localStorage.setItem(EQUIPPED_KEY,equipped);
+ }catch(e){alert('Браузер не смог сохранить данные.')}
+ updateWallet();
+}
+
+function updateWallet(){
+ $('kcBalance').textContent=kc.toLocaleString('en-US');
+}
+
 function updateProfile(){
  $('profileNick').textContent=profile.nickname;
  $('profileNick').classList.toggle('rainbowNick',profile.isDev);
  $('profileLevel').textContent=Math.floor(profile.xp/250)+1;
  $('profileXp').textContent=(profile.xp%250)+' / 250';
  $('xpFill').style.width=(profile.xp%250)/250*100+'%';
- if(document.activeElement!==$('nickInput'))$('nickInput').value=profile.nickname;
+
+ if(document.activeElement!==$('nickInput')){
+  $('nickInput').value=profile.nickname;
+ }
 }
+
 function activateOwner(pin){
  if(!OWNER_PINS.includes(pin.trim())){
   alert('Неверный PIN!');
-  return;
+  return false;
  }
- let deviceId=localStorage.getItem('kyodash-device-id');
- if(!deviceId){
-  deviceId=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
-  localStorage.setItem('kyodash-device-id',deviceId);
- }
- const key='kyodash-owner-device-'+pin;
- const savedDevice=localStorage.getItem(key);
- if(savedDevice&&savedDevice!==deviceId){
-  alert('Этот PIN уже привязан к другому браузеру!');
-  return;
- }
- localStorage.setItem(key,deviceId);
+
  ownerMode=true;
  profile.isDev=true;
  profile.nickname='[DEV] Kyosuke';
- // Большой стартовый баланс владельца.
+
+ // Начисление стартового баланса владельца.
  kc=999999999;
- kyoCoins=999999999;
  saveWallet();
  saveProfile();
+
  $('ownerStatus').textContent='DEV АКТИВЕН · [DEV] Kyosuke';
  $('ownerBtn').textContent='OWNER PANEL';
- alert('Здравствуйте! Owner Mode активирован. KC и KyoCoins начислены.');
+
+ alert('Owner Mode активирован! Тебе начислено 999999999 KC.');
+ return true;
 }
+
 function saveStats(){
- try{
-  localStorage.setItem('kyoDashBest3',JSON.stringify(best));
-  localStorage.setItem('kyoDashWins3',JSON.stringify(wins));
- }catch(e){}
+ saveJSON('kyoDashBest3',best);
+ saveJSON('kyoDashWins3',wins);
 }
+
 function refreshStats(){
  $('best').textContent=(best[selected]||0)+'%';
  $('wins').textContent=wins.filter(Boolean).length+'/3';
- document.querySelectorAll('.level').forEach((b,i)=>b.classList.toggle('active',i===selected));
+
+ document.querySelectorAll('.level').forEach((button,index)=>{
+  button.classList.toggle('active',index===selected);
+ });
+
  $('levelLabel').textContent=LEVELS[selected].name+' · '+(selected+1);
 }
+
 function makeLevel(){
  obstacles=[];
  const cfg=LEVELS[selected];
  let x=590,i=0;
+
  while(x<cfg.length-260){
   const pattern=(i*7+selected*3)%7;
   let count=1;
+
   if(selected===1&&(pattern===0||pattern===4||pattern===6))count=2;
   if(selected===2&&(pattern===0||pattern===3||pattern===6))count=2;
   if(selected===2&&pattern===2)count=3;
-  for(let j=0;j<count;j++)obstacles.push({x:x+j*37,w:37,h:37,type:'spike'});
+
+  for(let j=0;j<count;j++){
+   obstacles.push({x:x+j*37,w:37,h:37,type:'spike'});
+  }
+
   x+=cfg.gap+(pattern%3)*24;
   i++;
  }
+
  obstacles.push({x:cfg.length-130,w:12,h:80,type:'finish'});
 }
+
 function updateHud(){
  progress=Math.min(100,Math.floor(world/(LEVELS[selected].length-130)*100));
+
  $('progressText').textContent=progress+'%';
  $('progressFill').style.width=progress+'%';
+
  if(progress>best[selected]){
   best[selected]=progress;
   $('best').textContent=progress+'%';
   saveStats();
  }
 }
+
 function reset(){
- world=0;progress=0;held=false;
- p.y=G-S;p.vy=0;p.angle=0;p.onGround=true;
- makeLevel();updateHud();
+ world=0;
+ progress=0;
+ held=false;
+ player.y=G-S;
+ player.vy=0;
+ player.angle=0;
+ player.onGround=true;
+ makeLevel();
+ updateHud();
 }
+
 function showMenu(kind='menu'){
- mode=kind;held=false;
+ cancelAnimationFrame(raf);
+ raf=0;
+ mode=kind;
+ held=false;
+
  overlay.classList.remove('hidden');
  $('mainMenu').classList.remove('hidden');
  $('shopScreen').classList.add('hidden');
  $('ownerScreen').classList.add('hidden');
+ $('saveNotice').classList.remove('hidden');
+
  $('levels').classList.toggle('hidden',kind==='dead'||kind==='win');
- $('menuOnly').classList.toggle('hidden',kind!=='dead'&&kind!=='win');
+
  if(kind==='dead'){
   $('panelTitle').textContent='УПС!';
   $('panelText').textContent='Прогресс: '+progress+'%. Попробуй ещё раз!';
   $('startBtn').textContent='ЕЩЁ РАЗ';
  }else if(kind==='win'){
   $('panelTitle').textContent='УРОВЕНЬ ПРОЙДЕН!';
-  $('panelText').textContent='Отлично! Уровень '+LEVELS[selected].name+' пройден.';
+  $('panelText').textContent='Уровень '+LEVELS[selected].name+' пройден!';
   $('startBtn').textContent='ИГРАТЬ СНОВА';
  }else{
   $('panelTitle').textContent='Kyo Dash';
   $('panelText').textContent='Прыгай через шипы и доберись до финиша!';
   $('startBtn').textContent='ИГРАТЬ';
-  $('menuOnly').classList.add('hidden');
+  $('levels').classList.remove('hidden');
  }
- refreshStats();updateProfile();updateWallet();draw();
+
+ refreshStats();
+ updateProfile();
+ updateWallet();
+ draw();
 }
+
 function start(){
  cancelAnimationFrame(raf);
- reset();mode='playing';overlay.classList.add('hidden');
- last=performance.now();raf=requestAnimationFrame(loop);
+ reset();
+ mode='playing';
+ overlay.classList.add('hidden');
+ last=performance.now();
+ raf=requestAnimationFrame(loop);
 }
+
 function jump(){
- if(mode==='playing'&&p.onGround){
-  p.vy=LEVELS[selected].jump;
-  p.onGround=false;
+ if(mode==='playing'&&player.onGround){
+  player.vy=LEVELS[selected].jump;
+  player.onGround=false;
  }
 }
+
 function die(){
  if(mode!=='playing')return;
- mode='dead';held=false;showMenu('dead');
+ mode='dead';
+ held=false;
+ showMenu('dead');
 }
+
 function win(){
  if(mode!=='playing')return;
- mode='win';held=false;progress=100;
+
+ mode='win';
+ held=false;
+ progress=100;
  $('progressText').textContent='100%';
  $('progressFill').style.width='100%';
+
  best[selected]=100;
+
  if(!wins[selected]){
   profile.xp+=[100,150,200][selected];
-  // Награда за первое прохождение уровня.
   kc+=[100,200,350][selected];
   saveWallet();
   saveProfile();
  }
+
  wins[selected]=true;
- saveStats();refreshStats();showMenu('win');
+ saveStats();
+ refreshStats();
+ showMenu('win');
 }
+
 function update(dt){
  if(mode!=='playing')return;
+
  const cfg=LEVELS[selected];
  world+=cfg.speed*dt;
- p.vy+=cfg.gravity*dt;
- p.y+=p.vy*dt;
- if(p.y>=G-S){
-  p.y=G-S;p.vy=0;p.onGround=true;
-  p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
+ player.vy+=cfg.gravity*dt;
+ player.y+=player.vy*dt;
+
+ if(player.y>=G-S){
+  player.y=G-S;
+  player.vy=0;
+  player.onGround=true;
+  player.angle=Math.round(player.angle/(Math.PI/2))*(Math.PI/2);
   if(held)jump();
  }else{
-  p.onGround=false;
-  p.angle+=cfg.speed*dt/S*(Math.PI/2);
+  player.onGround=false;
+  player.angle+=cfg.speed*dt/S*(Math.PI/2);
  }
+
  updateHud();
+
  for(const o of obstacles){
   const ox=o.x-world;
-  if(ox>p.x+90||ox+o.w<p.x-80)continue;
+
+  if(ox>player.x+90||ox+o.w<player.x-80)continue;
+
   if(o.type==='finish'){
-   if(ox<p.x+S*.6){win();return}
+   if(ox<player.x+S*.6){
+    win();
+    return;
+   }
   }else{
-   const left=Math.max(p.x+4,ox);
-   const right=Math.min(p.x+S-4,ox+o.w);
-   if(left<right&&p.y+S>G-o.h){
+   const left=Math.max(player.x+4,ox);
+   const right=Math.min(player.x+S-4,ox+o.w);
+
+   if(left<right&&player.y+S>G-o.h){
     const center=ox+o.w/2;
-    const nearest=Math.max(ox,Math.min(center,p.x+S));
+    const nearest=Math.max(ox,Math.min(center,player.x+S));
     const surfaceY=G-o.h*(1-Math.abs(nearest-center)/(o.w/2));
-    if(p.y+S-3>surfaceY&&p.y<G){die();return}
+
+    if(player.y+S-3>surfaceY&&player.y<G){
+     die();
+     return;
+    }
    }
   }
  }
 }
+
 function draw(){
- ctx.fillStyle='#0a1230';ctx.fillRect(0,0,W,H);
+ ctx.fillStyle='#0a1230';
+ ctx.fillRect(0,0,W,H);
+
  const grad=ctx.createLinearGradient(0,0,0,G);
- grad.addColorStop(0,'#111e48');grad.addColorStop(1,'#0a1530');
- ctx.fillStyle=grad;ctx.fillRect(0,0,W,G);
- ctx.strokeStyle='#213865';ctx.lineWidth=1;
+ grad.addColorStop(0,'#111e48');
+ grad.addColorStop(1,'#0a1530');
+ ctx.fillStyle=grad;
+ ctx.fillRect(0,0,W,G);
+
+ ctx.strokeStyle='#213865';
+ ctx.lineWidth=1;
  const off=-(world*.3%45);
- for(let x=off;x<W;x+=45){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,G);ctx.stroke()}
- for(let y=22;y<G;y+=45){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+
+ for(let x=off;x<W;x+=45){
+  ctx.beginPath();
+  ctx.moveTo(x,0);
+  ctx.lineTo(x,G);
+  ctx.stroke();
+ }
+
+ for(let y=22;y<G;y+=45){
+  ctx.beginPath();
+  ctx.moveTo(0,y);
+  ctx.lineTo(W,y);
+  ctx.stroke();
+ }
+
  for(let i=0;i<26;i++){
-  const sx=(i*137-world*.12%900+900)%900,sy=(i*71)%285;
-  ctx.fillStyle='#668ac5';ctx.fillRect(sx,sy,2,2);
+  const sx=(i*137-world*.12%900+900)%900;
+  const sy=(i*71)%285;
+  ctx.fillStyle='#668ac5';
+  ctx.fillRect(sx,sy,2,2);
  }
- ctx.fillStyle='#14264c';ctx.fillRect(0,G,W,H-G);
- ctx.fillStyle='#36e8ff';ctx.fillRect(0,G,W,4);
+
+ ctx.fillStyle='#14264c';
+ ctx.fillRect(0,G,W,H-G);
+ ctx.fillStyle='#36e8ff';
+ ctx.fillRect(0,G,W,4);
+
  for(let x=-(world%50);x<W;x+=50){
-  ctx.fillStyle='#2b4779';ctx.fillRect(x,G+16,25,4);
+  ctx.fillStyle='#2b4779';
+  ctx.fillRect(x,G+16,25,4);
  }
+
  for(const o of obstacles){
   const x=o.x-world;
   if(x<-70||x>W+70)continue;
+
   if(o.type==='spike'){
    ctx.fillStyle=selected===2?'#ff3d8c':'#ff4d83';
-   ctx.beginPath();ctx.moveTo(x,G);ctx.lineTo(x+o.w/2,G-o.h);ctx.lineTo(x+o.w,G);ctx.closePath();ctx.fill();
-   ctx.strokeStyle='#ffb2cb';ctx.lineWidth=2;ctx.stroke();
+   ctx.beginPath();
+   ctx.moveTo(x,G);
+   ctx.lineTo(x+o.w/2,G-o.h);
+   ctx.lineTo(x+o.w,G);
+   ctx.closePath();
+   ctx.fill();
+
+   ctx.strokeStyle='#ffb2cb';
+   ctx.lineWidth=2;
+   ctx.stroke();
   }else{
-   ctx.fillStyle='#4dffb4';ctx.fillRect(x,G-o.h,8,o.h);
-   ctx.fillStyle='#e6fff5';ctx.font='bold 18px Arial';ctx.fillText('FINISH',x-26,G-o.h-12);
+   ctx.fillStyle='#4dffb4';
+   ctx.fillRect(x,G-o.h,8,o.h);
+   ctx.fillStyle='#e6fff5';
+   ctx.font='bold 18px Arial';
+   ctx.fillText('FINISH',x-26,G-o.h-12);
   }
  }
- const skin=ITEMS.find(i=>i.id===equipped)||ITEMS[0];
+
+ const skin=ITEMS.find(item=>item.id===equipped)||ITEMS[0];
+
  ctx.save();
- ctx.translate(p.x+S/2,p.y+S/2);ctx.rotate(p.angle);
- ctx.shadowColor=skin.color;ctx.shadowBlur=14;
- ctx.fillStyle=skin.color;ctx.fillRect(-S/2,-S/2,S,S);
- ctx.shadowBlur=0;ctx.strokeStyle='#d8fcff';ctx.lineWidth=3;
+ ctx.translate(player.x+S/2,player.y+S/2);
+ ctx.rotate(player.angle);
+ ctx.shadowColor=skin.color;
+ ctx.shadowBlur=14;
+ ctx.fillStyle=skin.color;
+ ctx.fillRect(-S/2,-S/2,S,S);
+ ctx.shadowBlur=0;
+ ctx.strokeStyle='#d8fcff';
+ ctx.lineWidth=3;
  ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
- ctx.fillStyle='#0a2750';ctx.fillRect(-9,-7,5,7);ctx.fillRect(4,-7,5,7);
+ ctx.fillStyle='#0a2750';
+ ctx.fillRect(-9,-7,5,7);
+ ctx.fillRect(4,-7,5,7);
  ctx.restore();
+
  if(mode==='menu'){
-  ctx.fillStyle='#b6d2ff';ctx.font='bold 20px Arial';
-  ctx.textAlign='center';ctx.fillText('READY?',W/2,105);ctx.textAlign='left';
+  ctx.fillStyle='#b6d2ff';
+  ctx.font='bold 20px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('READY?',W/2,105);
+  ctx.textAlign='left';
  }
 }
+
 function loop(now){
  const dt=Math.min((now-last)/1000,.025);
- last=now;update(dt);draw();
- if(mode==='playing')raf=requestAnimationFrame(loop);
+ last=now;
+ update(dt);
+ draw();
+
+ if(mode==='playing'){
+  raf=requestAnimationFrame(loop);
+ }
 }
+
 function press(e){
  if(e)e.preventDefault();
  if(mode!=='playing')return;
- held=true;jump();
+ held=true;
+ jump();
 }
+
 function release(e){
  if(e)e.preventDefault();
  held=false;
 }
+
 canvas.addEventListener('pointerdown',press);
 window.addEventListener('pointerup',release);
 window.addEventListener('pointercancel',release);
+
 window.addEventListener('keydown',e=>{
  if(e.code==='Space'||e.code==='ArrowUp'){
   e.preventDefault();
-  if(mode==='playing'){if(!held)press(e)}
-  else if(e.code==='Space')start();
- }
-});
-window.addEventListener('keyup',e=>{
- if(e.code==='Space'||e.code==='ArrowUp')release(e);
-});
-$('nickSave').addEventListener('click',()=>{
- if(profile.isDev){alert('DEV-ник закреплён.');updateProfile();return}
- const nick=$('nickInput').value.trim();
- if(nick.length<2){alert('Ник должен содержать минимум 2 символа.');return}
- profile.nickname=nick.slice(0,16);saveProfile();
-});
-$('nickInput').addEventListener('keydown',e=>{
- if(e.key==='Enter')$('nickSave').click();
-});
-$('startBtn').addEventListener('click',start);
-
-$('ownerBtn').addEventListener('click',()=>{
- if(ownerMode){
-  $('mainMenu').classList.add('hidden');
-  $('shopScreen').classList.add('hidden');
-  $('ownerScreen').classList.remove('hidden');
-  $('panelTitle').textContent='OWNER MODE';
-  $('panelText').textContent='Управление локальной игровой валютой';
-  overlay.classList.remove('hidden');
-  updateWallet();
-  return;
- }
- const pin=prompt('Введите PIN владельца:');
- if(pin!==null){
-  activateOwner(pin);
-  if(ownerMode){
-   $('mainMenu').classList.add('hidden');
-   $('ownerScreen').classList.remove('hidden');
-   $('panelTitle').textContent='OWNER MODE';
-   $('panelText').textContent='Управление локальной игровой валютой';
+  if(mode==='playing'){
+   if(!held)press(e);
+  }else if(e.code==='Space'){
+   start();
   }
  }
 });
 
-function openShop(){
- renderShop();
+window.addEventListener('keyup',e=>{
+ if(e.code==='Space'||e.code==='ArrowUp')release(e);
+});
+
+$('nickSave').addEventListener('click',()=>{
+ if(profile.isDev){
+  alert('DEV-ник закреплён.');
+  updateProfile();
+  return;
+ }
+
+ const nick=$('nickInput').value.trim();
+
+ if(nick.length<2){
+  alert('Ник должен содержать минимум 2 символа.');
+  return;
+ }
+
+ profile.nickname=nick.slice(0,16);
+ saveProfile();
+});
+
+$('nickInput').addEventListener('keydown',e=>{
+ if(e.key==='Enter')$('nickSave').click();
+});
+
+$('startBtn').addEventListener('click',start);
+
+$('ownerBtn').addEventListener('click',()=>{
+ if(ownerMode){
+  openOwnerPanel();
+  return;
+ }
+
+ const pin=prompt('Введите PIN владельца:');
+
+ if(pin!==null&&activateOwner(pin)){
+  openOwnerPanel();
+ }
+});
+
+function openOwnerPanel(){
  $('mainMenu').classList.add('hidden');
- $('ownerScreen').classList.add('hidden');
- $('shopScreen').classList.remove('hidden');
- $('panelTitle').textContent='МАГАЗИН';
- $('panelText').textContent='Выбирай кубики и покупай новые стили';
+ $('shopScreen').classList.add('hidden');
+ $('ownerScreen').classList.remove('hidden');
+ $('saveNotice').classList.add('hidden');
+
+ $('panelTitle').textContent='OWNER MODE';
+ $('panelText').textContent='Управление валютой KC';
+ $('ownerStatus').textContent='DEV АКТИВЕН · [DEV] Kyosuke';
+
  overlay.classList.remove('hidden');
  updateWallet();
 }
+
+function openShop(){
+ renderShop();
+
+ $('mainMenu').classList.add('hidden');
+ $('ownerScreen').classList.add('hidden');
+ $('shopScreen').classList.remove('hidden');
+ $('saveNotice').classList.add('hidden');
+
+ $('panelTitle').textContent='МАГАЗИН';
+ $('panelText').textContent='Покупай новые стили кубика за KC';
+
+ overlay.classList.remove('hidden');
+ updateWallet();
+}
+
 function renderShop(){
- const grid=$('shopGrid');grid.innerHTML='';
+ const grid=$('shopGrid');
+ grid.replaceChildren();
+
  for(const item of ITEMS){
-  const div=document.createElement('div');div.className='item';
-  const title=document.createElement('h3');title.textContent=item.name;title.style.color=item.color;
-  const desc=document.createElement('p');desc.textContent=item.desc;
-  const cost=document.createElement('p');cost.textContent=item.price===0?'Бесплатно':item.price+' '+item.currency;
+  const div=document.createElement('div');
+  div.className='item';
+
+  const title=document.createElement('h3');
+  title.textContent=item.name;
+  title.style.color=item.color;
+
+  const desc=document.createElement('p');
+  desc.textContent=item.desc;
+
+  const cost=document.createElement('p');
+  cost.textContent=item.price===0?'Бесплатно':item.price+' KC';
+
   const btn=document.createElement('button');
-  if(equipped===item.id)btn.textContent='НАДЕТО';
-  else if(owned.includes(item.id))btn.textContent='НАДЕТЬ';
-  else btn.textContent='КУПИТЬ';
-  btn.addEv
+
+  if(equipped===item.id){
+   btn.textContent='НАДЕТО';
+   btn.disabled=true;
+  }else if(owned.includes(item.id)){
+   btn.textContent='НАДЕТЬ';
+  }else{
+   btn.textContent='КУПИТЬ';
+  }
+
+  btn.addEventListener('click',()=>{
+   if(owned.includes(item.id)){
+    equipped=item.id;
+    saveWallet();
+    renderShop();
+    draw();
+    return;
+   }
+
+   if(kc<item.price){
+    alert('Недостаточно KC!');
+    return;
+ 
