@@ -8,11 +8,11 @@
 <title>Kyo Dash</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d22;color:white;font-family:Arial,sans-serif}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d22;color:#fff;font-family:Arial,sans-serif}
 body{display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 button,input{font:inherit}
-button{border:0;border-radius:10px;padding:12px;background:#35e5ff;color:#071126;font-weight:900;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
-button:active{transform:scale(.97);filter:brightness(.88)}
+button{border:0;border-radius:10px;padding:12px;background:#35e5ff;color:#071126;font-weight:900;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:active{transform:scale(.97)}
 .app{width:min(100%,1000px);padding:10px;display:flex;flex-direction:column;gap:9px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:800;color:#b8d9ff}
 .brand{color:#48eaff;font-size:17px;letter-spacing:2px}
@@ -21,7 +21,7 @@ button:active{transform:scale(.97);filter:brightness(.88)}
 canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px solid #28477a;border-radius:12px;background:#0c1534;touch-action:none}
 .hint{text-align:center;font-size:11px;color:#8da8d7}
 .overlay{position:fixed;inset:0;z-index:10;background:#040817ee;display:flex;align-items:center;justify-content:center;padding:12px}
-.panel{width:min(94vw,470px);max-height:94dvh;overflow:auto;padding:20px;border:1px solid #3266a4;border-radius:22px;text-align:center;background:linear-gradient(150deg,#172754,#0a1026);overscroll-behavior:contain}
+.panel{width:min(94vw,470px);max-height:94dvh;overflow:auto;padding:20px;border:1px solid #3266a4;border-radius:22px;text-align:center;background:linear-gradient(150deg,#172754,#0a1026)}
 .logo{font-size:42px;color:#45eaff;margin:0}
 .sub{color:#b9c9f2;font-size:14px}
 .profileBox{margin:14px 0;padding:12px;border:1px solid #2d4c79;border-radius:14px;background:#0b1733}
@@ -30,7 +30,6 @@ canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px soli
 @keyframes rainbow{to{background-position:300% 50%}}
 .nickRow{display:flex;gap:7px;margin-top:10px}
 input{min-width:0;width:100%;flex:1;background:#080f25;border:1px solid #355786;border-radius:9px;padding:10px;color:white}
-.nickSave{padding:9px}
 .xpTrack{height:6px;background:#1a2b4d;border-radius:99px;overflow:hidden;margin-top:8px}
 .xpFill{height:100%;width:0;background:linear-gradient(90deg,#35e5ff,#66ffb8)}
 .levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:15px 0}
@@ -70,7 +69,7 @@ input{min-width:0;width:100%;flex:1;background:#080f25;border:1px solid #355786;
 <div class="xpTrack"><div class="xpFill" id="xpFill"></div></div>
 <div class="nickRow">
 <input id="nickInput" maxlength="16" placeholder="Твой ник" autocomplete="off">
-<button type="button" class="nickSave" id="nickSave">СМЕНИТЬ</button>
+<button type="button" id="nickSave">СМЕНИТЬ</button>
 </div>
 <div class="small">Профиль и XP сохраняются на устройстве</div>
 </div>
@@ -120,22 +119,17 @@ const MUSIC=[
 ];
 
 const W=900,H=420,G=330,S=34;
-
 let profile={nickname:'Player',xp:0,isDev:false};
 let ownerMode=false;
 let selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
 let held=false,obstacles=[],best=[0,0,0],wins=[false,false,false];
 let audioCtx=null,musicGain=null,musicTimer=null,musicStep=0,musicToken=0;
-
 const p={x:150,y:G-S,vy:0,angle:0,onGround:true};
 
 function storageGet(key,fallback){
- try{
-  const v=localStorage.getItem(key);
-  return v===null?fallback:v;
- }catch(e){return fallback;}
+ try{const v=localStorage.getItem(key);return v===null?fallback:v;}
+ catch(e){return fallback;}
 }
-
 function storageSet(key,value){
  try{localStorage.setItem(key,value);return true;}
  catch(e){return false;}
@@ -148,16 +142,12 @@ function loadProfile(){
   profile.isDev=saved.isDev===true;
   profile.nickname=profile.isDev?'[DEV] Kyosuke':
    (typeof saved.nickname==='string'&&saved.nickname.trim()?saved.nickname.trim().slice(0,16):'Player');
- }catch(e){
-  profile={nickname:'Player',xp:0,isDev:false};
- }
+ }catch(e){profile={nickname:'Player',xp:0,isDev:false};}
 }
-
 function saveProfile(){
  storageSet('kyoDashProfile',JSON.stringify(profile));
  updateProfile();
 }
-
 function updateProfile(){
  $('profileNick').textContent=profile.nickname;
  $('profileNick').classList.toggle('rainbowNick',profile.isDev);
@@ -169,46 +159,30 @@ function updateProfile(){
 
 function activateOwner(pin){
  pin=pin.trim();
-
- if(!OWNER_PINS.includes(pin)){
-  alert('Неверный PIN!');
-  return;
- }
-
+ if(!OWNER_PINS.includes(pin)){alert('Неверный PIN!');return;}
  let deviceId=storageGet('kyodash-device-id','');
  if(!deviceId){
   deviceId=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
   storageSet('kyodash-device-id',deviceId);
  }
-
  const key='kyodash-owner-device-'+pin;
  const savedDevice=storageGet(key,'');
-
  if(savedDevice&&savedDevice!==deviceId){
-  alert('Этот PIN уже привязан к другому браузеру!');
-  return;
+  alert('Этот PIN уже привязан к другому браузеру!');return;
  }
-
  storageSet(key,deviceId);
  ownerMode=true;
-
- if(pin==='OwnerKD-ADS5H-D6E9F037F7'){
-  profile.isDev=true;
-  profile.nickname='[DEV] Kyosuke';
-  saveProfile();
-  alert('DEV активирован! Радужный ник сохранён.');
- }else if(pin==='TESTER-AAA111'){
-  profile.isDev=false;
-  profile.nickname='[TEST] TesterKD';
-  saveProfile();
-  alert('TESTER активирован! Ник: [TEST] TesterKD');
+ if(pin===OWNER_PINS[0]){
+  profile.isDev=true;profile.nickname='[DEV] Kyosuke';saveProfile();
+  alert('DEV активирован!');
+ }else if(pin===OWNER_PINS[2]){
+  profile.isDev=false;profile.nickname='[TEST] TesterKD';saveProfile();
+  alert('TESTER активирован!');
  }else{
   profile.isDev=false;
   if(profile.nickname==='[DEV] Kyosuke')profile.nickname='Player';
-  saveProfile();
-  alert('Owner Mode активирован!');
+  saveProfile();alert('Owner Mode активирован!');
  }
-
  refreshStats();
 }
 
@@ -217,42 +191,25 @@ function setupAudio(){
  const AudioClass=window.AudioContext||window.webkitAudioContext;
  if(!AudioClass)return false;
  try{
-  audioCtx=new AudioClass();
-  musicGain=audioCtx.createGain();
-  musicGain.gain.value=0;
-  musicGain.connect(audioCtx.destination);
-  return true;
- }catch(e){
-  audioCtx=null;
-  musicGain=null;
-  return false;
- }
+  audioCtx=new AudioClass();musicGain=audioCtx.createGain();
+  musicGain.gain.value=0;musicGain.connect(audioCtx.destination);return true;
+ }catch(e){audioCtx=null;musicGain=null;return false;}
 }
-
 function playNote(freq,duration,type,volume){
  if(!audioCtx||!musicGain||!freq)return;
  try{
-  const now=audioCtx.currentTime;
-  const osc=audioCtx.createOscillator();
-  const gain=audioCtx.createGain();
-  osc.type=type;
-  osc.frequency.setValueAtTime(freq,now);
+  const now=audioCtx.currentTime,osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+  osc.type=type;osc.frequency.setValueAtTime(freq,now);
   gain.gain.setValueAtTime(.001,now);
   gain.gain.linearRampToValueAtTime(volume,now+.018);
   gain.gain.exponentialRampToValueAtTime(.001,now+duration);
-  osc.connect(gain);
-  gain.connect(musicGain);
-  osc.start(now);
-  osc.stop(now+duration+.02);
+  osc.connect(gain);gain.connect(musicGain);
+  osc.start(now);osc.stop(now+duration+.02);
  }catch(e){}
 }
-
 function stopMusic(){
  musicToken++;
- if(musicTimer!==null){
-  clearInterval(musicTimer);
-  musicTimer=null;
- }
+ if(musicTimer!==null){clearInterval(musicTimer);musicTimer=null;}
  if(musicGain&&audioCtx){
   try{
    const now=audioCtx.currentTime;
@@ -261,14 +218,10 @@ function stopMusic(){
   }catch(e){}
  }
 }
-
 function startMusic(){
  stopMusic();
  if(!setupAudio())return;
- const token=musicToken;
- const track=MUSIC[selected];
- musicStep=0;
-
+ const token=musicToken,track=MUSIC[selected];musicStep=0;
  try{
   if(audioCtx.state==='suspended')audioCtx.resume();
   const now=audioCtx.currentTime;
@@ -276,18 +229,14 @@ function startMusic(){
   musicGain.gain.setValueAtTime(0,now);
   musicGain.gain.linearRampToValueAtTime(.22,now+.15);
  }catch(e){}
-
  function tick(){
   if(token!==musicToken||mode!=='playing')return;
-  const i=musicStep%track.melody.length;
-  const duration=track.tempo/1000;
+  const i=musicStep%track.melody.length,duration=track.tempo/1000;
   playNote(track.melody[i],duration*.82,'triangle',.23);
   if(i%4===0)playNote(track.bass[i],duration*3.4,'sine',.35);
   musicStep++;
  }
-
- tick();
- musicTimer=setInterval(tick,track.tempo);
+ tick();musicTimer=setInterval(tick,track.tempo);
 }
 
 function loadStats(){
@@ -296,90 +245,53 @@ function loadStats(){
   const w=JSON.parse(storageGet('kyoDashWins3','[false,false,false]'));
   best=Array.isArray(b)&&b.length===3?b:[0,0,0];
   wins=Array.isArray(w)&&w.length===3?w:[false,false,false];
- }catch(e){
-  best=[0,0,0];
-  wins=[false,false,false];
- }
+ }catch(e){best=[0,0,0];wins=[false,false,false];}
  best=best.map(n=>Number.isFinite(n)?Math.max(0,Math.min(100,n)):0);
  wins=wins.map(Boolean);
 }
-
 function saveStats(){
  storageSet('kyoDashBest3',JSON.stringify(best));
  storageSet('kyoDashWins3',JSON.stringify(wins));
 }
-
 function refreshStats(){
  $('best').textContent=(best[selected]||0)+'%';
  $('wins').textContent=wins.filter(Boolean).length+'/3';
- document.querySelectorAll('.level').forEach((b,i)=>{
-  b.classList.toggle('active',i===selected);
- });
+ document.querySelectorAll('.level').forEach((b,i)=>b.classList.toggle('active',i===selected));
  $('levelLabel').textContent=LEVELS[selected].name+' · '+(selected+1);
 }
 
 function makeLevel(){
  obstacles=[];
- const cfg=LEVELS[selected];
- let x=590,i=0;
-
+ const cfg=LEVELS[selected];let x=590,i=0;
  while(x<cfg.length-260){
-  const pattern=(i*7+selected*3)%7;
-  let count=1;
+  const pattern=(i*7+selected*3)%7;let count=1;
   if(selected===1&&(pattern===0||pattern===4||pattern===6))count=2;
   if(selected===2&&(pattern===0||pattern===3||pattern===6))count=2;
   if(selected===2&&pattern===2)count=3;
-
-  for(let j=0;j<count;j++){
-   obstacles.push({x:x+j*37,w:37,h:37,type:'spike'});
-  }
-
-  // Потолочные блоки на сложных уровнях не дают
-  // постоянно удерживать прыжок без расчёта времени.
-  if(selected>=1&&i%5===2){
-   obstacles.push({x:x+105,w:48,h:35,type:'ceiling'});
-  }
-
-  x+=cfg.gap+(pattern%3)*24;
-  i++;
+  for(let j=0;j<count;j++)obstacles.push({x:x+j*37,w:37,h:37,type:'spike'});
+  if(selected>=1&&i%5===2)obstacles.push({x:x+105,w:48,h:35,type:'ceiling'});
+  x+=cfg.gap+(pattern%3)*24;i++;
  }
-
  obstacles.push({x:cfg.length-130,w:12,h:80,type:'finish'});
 }
-
 function updateHud(){
  progress=Math.min(100,Math.floor(world/(LEVELS[selected].length-130)*100));
  $('progressText').textContent=progress+'%';
  $('progressFill').style.width=progress+'%';
-
  if(progress>best[selected]){
-  best[selected]=progress;
-  $('best').textContent=progress+'%';
-  saveStats();
+  best[selected]=progress;$('best').textContent=progress+'%';saveStats();
  }
 }
-
 function reset(){
- world=0;
- progress=0;
- held=false;
- p.y=G-S;
- p.vy=0;
- p.angle=0;
- p.onGround=true;
- makeLevel();
- updateHud();
+ world=0;progress=0;held=false;
+ p.y=G-S;p.vy=0;p.angle=0;p.onGround=true;
+ makeLevel();updateHud();
 }
-
 function showMenu(kind='menu'){
- stopMusic();
- mode=kind;
- held=false;
+ stopMusic();mode=kind;held=false;
  overlay.classList.remove('hidden');
-
  $('levels').classList.toggle('hidden',kind==='dead'||kind==='win');
  $('menuOnly').classList.toggle('hidden',kind==='menu');
-
  if(kind==='dead'){
   $('panelTitle').textContent='УПС!';
   $('panelText').textContent='Прогресс: '+progress+'%. Попробуй ещё раз!';
@@ -393,344 +305,160 @@ function showMenu(kind='menu'){
   $('panelText').textContent='Прыгай через шипы и доберись до финиша!';
   $('startBtn').textContent='ИГРАТЬ';
  }
-
- refreshStats();
- updateProfile();
- draw();
+ refreshStats();updateProfile();draw();
 }
-
 function start(){
- cancelAnimationFrame(raf);
- raf=0;
- stopMusic();
- reset();
- mode='playing';
- overlay.classList.add('hidden');
- startMusic();
- last=performance.now();
- raf=requestAnimationFrame(loop);
+ cancelAnimationFrame(raf);raf=0;stopMusic();reset();
+ mode='playing';overlay.classList.add('hidden');
+ startMusic();last=performance.now();raf=requestAnimationFrame(loop);
 }
-
 function jump(){
- if(mode==='playing'&&p.onGround){
-  p.vy=LEVELS[selected].jump;
-  p.onGround=false;
- }
+ if(mode==='playing'&&p.onGround){p.vy=LEVELS[selected].jump;p.onGround=false;}
 }
-
-function die(){
- if(mode!=='playing')return;
- held=false;
- showMenu('dead');
-}
-
+function die(){if(mode!=='playing')return;held=false;showMenu('dead');}
 function win(){
  if(mode!=='playing')return;
- held=false;
- progress=100;
- $('progressText').textContent='100%';
- $('progressFill').style.width='100%';
+ held=false;progress=100;
+ $('progressText').textContent='100%';$('progressFill').style.width='100%';
  best[selected]=100;
-
- if(!wins[selected]){
-  profile.xp+=[100,150,200][selected];
-  saveProfile();
- }
-
- wins[selected]=true;
- saveStats();
- refreshStats();
- showMenu('win');
+ if(!wins[selected]){profile.xp+=[100,150,200][selected];saveProfile();}
+ wins[selected]=true;saveStats();refreshStats();showMenu('win');
 }
 
 function update(dt){
  if(mode!=='playing')return;
- const cfg=LEVELS[selected];
- world+=cfg.speed*dt;
-
- p.vy+=cfg.gravity*dt;
- p.y+=p.vy*dt;
-
+ const cfg=LEVELS[selected];world+=cfg.speed*dt;
+ p.vy+=cfg.gravity*dt;p.y+=p.vy*dt;
  if(p.y>=G-S){
-  p.y=G-S;
-  p.vy=0;
-  p.onGround=true;
+  p.y=G-S;p.vy=0;p.onGround=true;
   p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
   if(held)jump();
- }else{
-  p.onGround=false;
-  p.angle+=cfg.speed*dt/S*(Math.PI/2);
- }
-
+ }else{p.onGround=false;p.angle+=cfg.speed*dt/S*(Math.PI/2);}
  updateHud();
-
  for(const o of obstacles){
   const ox=o.x-world;
   if(ox>p.x+90||ox+o.w<p.x-80)continue;
-
-  if(o.type==='finish'){
-   if(ox<p.x+S*.6){
-    win();
-    return;
-   }
-   continue;
-  }
-
-  const playerLeft=p.x+4;
-  const playerRight=p.x+S-4;
-  const left=Math.max(playerLeft,ox);
-  const right=Math.min(playerRight,ox+o.w);
+  if(o.type==='finish'){if(ox<p.x+S*.6){win();return;}continue;}
+  const left=Math.max(p.x+4,ox),right=Math.min(p.x+S-4,ox+o.w);
   if(left>=right)continue;
-
   if(o.type==='ceiling'){
    const bottom=G-o.h;
-   if(p.y<bottom&&p.y+S>bottom-8){
-    die();
-    return;
-   }
+   if(p.y<bottom&&p.y+S>bottom-8){die();return;}
    continue;
   }
-
-  // Приближённая проверка треугольного шипа.
-  const center=ox+o.w/2;
-  const samples=[left,(left+right)/2,right];
-  let hit=false;
-
+  const center=ox+o.w/2,samples=[left,(left+right)/2,right];
   for(const sx of samples){
    const height=o.h*(1-Math.abs(sx-center)/(o.w/2));
-   const spikeSurface=G-height;
-   if(p.y+S-3>spikeSurface&&p.y+S>G-o.h+5){
-    hit=true;
-    break;
-   }
-  }
-
-  if(hit){
-   die();
-   return;
+   if(p.y+S-3>G-height&&p.y+S>G-o.h+5){die();return;}
   }
  }
 }
 
 function draw(){
  ctx.clearRect(0,0,W,H);
- ctx.fillStyle='#0a1230';
- ctx.fillRect(0,0,W,H);
-
+ ctx.fillStyle='#0a1230';ctx.fillRect(0,0,W,H);
  const grad=ctx.createLinearGradient(0,0,0,G);
- grad.addColorStop(0,'#111e48');
- grad.addColorStop(1,'#0a1530');
- ctx.fillStyle=grad;
- ctx.fillRect(0,0,W,G);
-
- ctx.strokeStyle='#213865';
- ctx.lineWidth=1;
+ grad.addColorStop(0,'#111e48');grad.addColorStop(1,'#0a1530');
+ ctx.fillStyle=grad;ctx.fillRect(0,0,W,G);
+ ctx.strokeStyle='#213865';ctx.lineWidth=1;
  const off=-(world*.3%45);
-
- for(let x=off;x<W;x+=45){
-  ctx.beginPath();
-  ctx.moveTo(x,0);
-  ctx.lineTo(x,G);
-  ctx.stroke();
- }
-
- for(let y=22;y<G;y+=45){
-  ctx.beginPath();
-  ctx.moveTo(0,y);
-  ctx.lineTo(W,y);
-  ctx.stroke();
- }
-
+ for(let x=off;x<W;x+=45){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,G);ctx.stroke();}
+ for(let y=22;y<G;y+=45){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
  for(let i=0;i<26;i++){
-  const sx=(i*137-world*.12%900+900)%900;
-  const sy=(i*71)%285;
-  ctx.fillStyle='#668ac5';
-  ctx.fillRect(sx,sy,2,2);
+  const sx=(i*137-world*.12%900+900)%900,sy=(i*71)%285;
+  ctx.fillStyle='#668ac5';ctx.fillRect(sx,sy,2,2);
  }
-
- ctx.fillStyle='#14264c';
- ctx.fillRect(0,G,W,H-G);
- ctx.fillStyle='#36e8ff';
- ctx.fillRect(0,G,W,4);
-
- for(let x=-(world%50);x<W;x+=50){
-  ctx.fillStyle='#2b4779';
-  ctx.fillRect(x,G+16,25,4);
- }
-
+ ctx.fillStyle='#14264c';ctx.fillRect(0,G,W,H-G);
+ ctx.fillStyle='#36e8ff';ctx.fillRect(0,G,W,4);
+ for(let x=-(world%50);x<W;x+=50){ctx.fillStyle='#2b4779';ctx.fillRect(x,G+16,25,4);}
  for(const o of obstacles){
-  const x=o.x-world;
-  if(x<-70||x>W+70)continue;
-
+  const x=o.x-world;if(x<-70||x>W+70)continue;
   if(o.type==='spike'){
    ctx.fillStyle=selected===2?'#ff3d8c':'#ff4d83';
-   ctx.beginPath();
-   ctx.moveTo(x,G);
-   ctx.lineTo(x+o.w/2,G-o.h);
-   ctx.lineTo(x+o.w,G);
-   ctx.closePath();
-   ctx.fill();
-   ctx.strokeStyle='#ffb2cb';
-   ctx.lineWidth=2;
-   ctx.stroke();
+   ctx.beginPath();ctx.moveTo(x,G);ctx.lineTo(x+o.w/2,G-o.h);ctx.lineTo(x+o.w,G);ctx.closePath();ctx.fill();
+   ctx.strokeStyle='#ffb2cb';ctx.lineWidth=2;ctx.stroke();
   }else if(o.type==='ceiling'){
-   ctx.fillStyle='#ffad35';
-   ctx.fillRect(x,G-o.h-75,o.w,o.h);
-   ctx.fillStyle='#fff0c7';
-   ctx.fillRect(x+5,G-o.h-70,o.w-10,4);
+   ctx.fillStyle='#ffad35';ctx.fillRect(x,G-o.h-75,o.w,o.h);
+   ctx.fillStyle='#fff0c7';ctx.fillRect(x+5,G-o.h-70,o.w-10,4);
   }else{
-   ctx.fillStyle='#4dffb4';
-   ctx.fillRect(x,G-o.h,8,o.h);
-   ctx.fillStyle='#e6fff5';
-   ctx.font='bold 18px Arial';
-   ctx.fillText('FINISH',x-26,G-o.h-12);
+   ctx.fillStyle='#4dffb4';ctx.fillRect(x,G-o.h,8,o.h);
+   ctx.fillStyle='#e6fff5';ctx.font='bold 18px Arial';ctx.fillText('FINISH',x-26,G-o.h-12);
   }
  }
-
- ctx.save();
- ctx.translate(p.x+S/2,p.y+S/2);
- ctx.rotate(p.angle);
- ctx.shadowColor='#00dfff';
- ctx.shadowBlur=14;
- ctx.fillStyle='#35e7ff';
- ctx.fillRect(-S/2,-S/2,S,S);
- ctx.shadowBlur=0;
- ctx.strokeStyle='#d8fcff';
- ctx.lineWidth=3;
- ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
- ctx.fillStyle='#0a2750';
- ctx.fillRect(-9,-7,5,7);
- ctx.fillRect(4,-7,5,7);
- ctx.restore();
-
- if(mode==='menu'){
-  ctx.fillStyle='#b6d2ff';
-  ctx.font='bold 20px Arial';
-  ctx.textAlign='center';
-  ctx.fillText('READY?',W/2,105);
-  ctx.textAlign='left';
- }
+ ctx.save();ctx.translate(p.x+S/2,p.y+S/2);ctx.rotate(p.angle);
+ ctx.shadowColor='#00dfff';ctx.shadowBlur=14;ctx.fillStyle='#35e7ff';ctx.fillRect(-S/2,-S/2,S,S);
+ ctx.shadowBlur=0;ctx.strokeStyle='#d8fcff';ctx.lineWidth=3;ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
+ ctx.fillStyle='#0a2750';ctx.fillRect(-9,-7,5,7);ctx.fillRect(4,-7,5,7);ctx.restore();
+ if(mode==='menu'){ctx.fillStyle='#b6d2ff';ctx.font='bold 20px Arial';ctx.textAlign='center';ctx.fillText('READY?',W/2,105);ctx.textAlign='left';}
 }
-
 function loop(now){
- if(mode!=='playing'){
-  raf=0;
-  return;
- }
-
- const dt=Math.min(Math.max((now-last)/1000,0),.025);
- last=now;
- update(dt);
- draw();
-
- if(mode==='playing'){
-  raf=requestAnimationFrame(loop);
- }else{
-  raf=0;
- }
+ if(mode!=='playing'){raf=0;return;}
+ const dt=Math.min(Math.max((now-last)/1000,0),.025);last=now;
+ update(dt);draw();
+ if(mode==='playing')raf=requestAnimationFrame(loop);else raf=0;
 }
-
 function press(e){
  if(e)e.preventDefault();
  if(mode!=='playing')return;
- held=true;
- jump();
+ held=true;jump();
 }
+function release(e){if(e)e.preventDefault();held=false;}
 
-function release(e){
- if(e)e.preventDefault();
- held=false;
-}
-
-// Прыжок работает только при нажатии на игровое поле.
 canvas.addEventListener('pointerdown',press);
 window.addEventListener('pointerup',release);
 window.addEventListener('pointercancel',release);
 window.addEventListener('blur',()=>{held=false;});
-
 window.addEventListener('keydown',e=>{
  if(e.code!=='Space'&&e.code!=='ArrowUp')return;
  e.preventDefault();
-
- if(mode==='playing'){
-  if(!held)press(e);
- }else if(e.code==='Space'){
-  start();
- }
+ if(mode==='playing'){if(!held)press(e);}
+ else if(e.code==='Space')start();
 });
-
 window.addEventListener('keyup',e=>{
  if(e.code==='Space'||e.code==='ArrowUp')release(e);
 });
 
-// Единый обработчик кнопок: работает и для вложенного текста
-// внутри кнопок, и не зависит от отдельных обработчиков.
 document.addEventListener('click',e=>{
  const button=e.target.closest('button');
- if(!button)return;
- if(button.disabled)return;
-
- const id=button.id;
-
+ if(!button||button.disabled)return;
  if(button.dataset.level!==undefined){
   const n=Number(button.dataset.level);
-  if(Number.isInteger(n)&&n>=0&&n<LEVELS.length){
-   selected=n;
-   refreshStats();
-   draw();
-  }
+  if(Number.isInteger(n)&&n>=0&&n<LEVELS.length){selected=n;refreshStats();draw();}
   return;
  }
-
- switch(id){
-  case 'startBtn':
-   start();
-   break;
-
+ switch(button.id){
+  case 'startBtn':start();break;
   case 'menuBtn':
-   cancelAnimationFrame(raf);
-   raf=0;
-   showMenu('menu');
-   break;
-
-  case 'menuOnly':
-   showMenu('menu');
-   break;
-
+   cancelAnimationFrame(raf);raf=0;showMenu('menu');break;
+  case 'menuOnly':showMenu('menu');break;
   case 'nickSave':{
-   if(profile.isDev){
-    alert('DEV-ник закреплён и не меняется через обычное меню.');
-    updateProfile();
-    break;
-   }
+   if(profile.isDev){alert('DEV-ник закреплён.');updateProfile();break;}
    const nick=$('nickInput').value.trim();
-   if(nick.length<2){
-    alert('Ник должен содержать минимум 2 символа.');
-    break;
-   }
-   profile.nickname=nick.slice(0,16);
-   saveProfile();
+   if(nick.length<2){alert('Ник должен содержать минимум 2 символа.');break;}
+   profile.nickname=nick.slice(0,16);saveProfile();break;
+  }
+  case 'ownerBtn':{
+   if(ownerMode){ownerMode=false;alert('Owner Mode выключен');}
+   else{const pin=prompt('Введите PIN владельца:');if(pin!==null)activateOwner(pin);}
    break;
   }
-
-  case 'ownerBtn':
-   if(ownerMode){
-    ownerMode=false;
-    alert('Owner Mode выключен');
-    break;
-   }
-   {
-    const pin=prompt('Введите PIN владельца:');
-    if(pin!==null)activateOwner(pin);
-   }
-   break;
  }
 });
 
 $('nickInput').addEventListener('keydown',e=>{
- if(e.key==='Enter'){
-  e.preventDefault();
-  $('nickSave').click();
- }
+ if(e.key==='Enter'){e.preventDefault();$('nickSave').click();}
 });
 
+window.addEventListener('error',e=>console.error('Kyo Dash:',e.message));
+
+loadProfile();
+loadStats();
+reset();
+showMenu('menu');
+draw();
+
+})();
+</script>
+</body>
+ </html>
+ 
