@@ -8,11 +8,8 @@
 <title>Kyo Dash</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d22;color:#fff;font-family:Arial,sans-serif}
-body{display:flex;align-items:center;justify-content:center;touch-action:manipulation}
-button,input{font:inherit}
-button{border:0;border-radius:10px;padding:12px;background:#35e5ff;color:#071126;font-weight:900;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-button:active{transform:scale(.97)}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d22;color:#fff;font-family:Arial,sans-serif;touch-action:pan-y}
+body{display:flex;align-items:center;justify-content:center}
 .app{width:min(100%,1000px);padding:10px;display:flex;flex-direction:column;gap:9px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:800;color:#b8d9ff}
 .brand{color:#48eaff;font-size:17px;letter-spacing:2px}
@@ -20,39 +17,50 @@ button:active{transform:scale(.97)}
 .fill{height:100%;width:0;background:linear-gradient(90deg,#26dfff,#5cffba)}
 canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px solid #28477a;border-radius:12px;background:#0c1534;touch-action:none}
 .hint{text-align:center;font-size:11px;color:#8da8d7}
-.overlay{position:fixed;inset:0;z-index:10;background:#040817ee;display:flex;align-items:center;justify-content:center;padding:12px}
-.panel{width:min(94vw,470px);max-height:94dvh;overflow:auto;padding:20px;border:1px solid #3266a4;border-radius:22px;text-align:center;background:linear-gradient(150deg,#172754,#0a1026)}
+.overlay{position:fixed;inset:0;z-index:5;background:#040817ee;display:flex;align-items:center;justify-content:center;padding:12px}
+.panel{width:min(94vw,470px);max-height:94vh;overflow:auto;padding:20px;border:1px solid #3266a4;border-radius:22px;text-align:center;background:linear-gradient(150deg,#172754,#0a1026)}
 .logo{font-size:42px;color:#45eaff;margin:0}
 .sub{color:#b9c9f2;font-size:14px}
 .profileBox{margin:14px 0;padding:12px;border:1px solid #2d4c79;border-radius:14px;background:#0b1733}
 .profileLine{font-size:12px;color:#a9c4f2;margin:7px}
-.rainbowNick{font-weight:1000;background:linear-gradient(90deg,#ff3158,#ffad35,#ffff55,#42ff9b,#35eaff,#a66bff,#ff48d1,#ff3158);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:rainbow 2.5s linear infinite}
+.rainbowNick{
+ font-weight:1000;
+ background:linear-gradient(90deg,#ff3158,#ffad35,#ffff55,#42ff9b,#35eaff,#a66bff,#ff48d1,#ff3158);
+ background-size:300% 100%;
+ -webkit-background-clip:text;
+ background-clip:text;
+ color:transparent!important;
+ animation:rainbow 2.5s linear infinite
+}
 @keyframes rainbow{to{background-position:300% 50%}}
 .nickRow{display:flex;gap:7px;margin-top:10px}
-input{min-width:0;width:100%;flex:1;background:#080f25;border:1px solid #355786;border-radius:9px;padding:10px;color:white}
+input{min-width:0;flex:1;background:#080f25;border:1px solid #355786;border-radius:9px;padding:10px;color:white}
+button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126;font-weight:900;cursor:pointer}
+.nickSave{padding:9px}
 .xpTrack{height:6px;background:#1a2b4d;border-radius:99px;overflow:hidden;margin-top:8px}
 .xpFill{height:100%;width:0;background:linear-gradient(90deg,#35e5ff,#66ffb8)}
-.levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:15px 0}
-.level{background:#111b38;color:#d8e6ff;border:1px solid #304873;padding:11px 5px}
-.level.active{border-color:#35e3ff;background:#12314a;box-shadow:0 0 12px #35e3ff33}
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:15px 0}
+.level{background:#111b38;color:#d8e6ff;border:1px solid #304873}
+.level.active{border-color:#35e3ff;background:#12314a}
 .level small{display:block;font-size:10px;margin-top:4px}
 .btn{width:100%;padding:13px;margin-top:8px;font-size:15px;background:linear-gradient(90deg,#2adfff,#65ffca)}
 .secondary{background:#192747;color:#cde2ff;border:1px solid #344d79}
 .stats{display:flex;justify-content:center;gap:18px;color:#9eb8e8;font-size:12px;margin:12px}
 .hidden{display:none!important}
 .small{font-size:11px;color:#8097c6;margin-top:10px}
-.menuBtn{padding:8px;background:#111d3a;color:#bfe8ff;border:1px solid #294774;white-space:nowrap}
-@media(max-height:620px){.panel{padding:12px;max-height:96dvh}.logo{font-size:30px}.profileBox{margin:8px 0;padding:8px}.levels{margin:8px 0}.sub{margin:6px 0}}
+.menuBtn{padding:7px;background:#111d3a;color:#bfe8ff;border:1px solid #294774}
 </style>
 </head>
 <body>
+
 <main class="app">
 <header class="top">
 <span class="brand">Kyo Dash</span>
 <span id="levelLabel">EASY · 1</span>
 <span id="progressText">0%</span>
-<button type="button" class="menuBtn" id="menuBtn">МЕНЮ</button>
+<button class="menuBtn" id="menuBtn">МЕНЮ</button>
 </header>
+
 <div class="meter"><div class="fill" id="progressFill"></div></div>
 <canvas id="game" width="900" height="420"></canvas>
 <div class="hint">ТАП — ПРЫЖОК · УДЕРЖИВАЙ — АВТОПРЫЖКИ</div>
@@ -68,16 +76,16 @@ input{min-width:0;width:100%;flex:1;background:#080f25;border:1px solid #355786;
 <div class="profileLine">УРОВЕНЬ <strong id="profileLevel">1</strong> · XP <strong id="profileXp">0 / 250</strong></div>
 <div class="xpTrack"><div class="xpFill" id="xpFill"></div></div>
 <div class="nickRow">
-<input id="nickInput" maxlength="16" placeholder="Твой ник" autocomplete="off">
-<button type="button" id="nickSave">СМЕНИТЬ</button>
+<input id="nickInput" maxlength="16" placeholder="Твой ник">
+<button class="nickSave" id="nickSave">СМЕНИТЬ</button>
 </div>
 <div class="small">Профиль и XP сохраняются на устройстве</div>
 </div>
 
 <div class="levels" id="levels">
-<button type="button" class="level active" data-level="0">EASY<small>Легко</small></button>
-<button type="button" class="level" data-level="1">MEDIUM<small>Средне</small></button>
-<button type="button" class="level" data-level="2">HARD<small>Сложно</small></button>
+<button class="level active" data-level="0">EASY<small>Легко</small></button>
+<button class="level" data-level="1">MEDIUM<small>Средне</small></button>
+<button class="level" data-level="2">HARD<small>Сложно</small></button>
 </div>
 
 <div class="stats">
@@ -85,9 +93,9 @@ input{min-width:0;width:100%;flex:1;background:#080f25;border:1px solid #355786;
 <span>ПОБЕДЫ <b id="wins">0/3</b></span>
 </div>
 
-<button type="button" class="btn" id="startBtn">ИГРАТЬ</button>
-<button type="button" class="btn secondary" id="ownerBtn">OWNER MODE</button>
-<button type="button" class="btn secondary hidden" id="menuOnly">ВЫБОР УРОВНЯ</button>
+<button class="btn" id="startBtn">ИГРАТЬ</button>
+<button class="btn secondary" id="ownerBtn">OWNER MODE</button>
+<button class="btn secondary hidden" id="menuOnly">ВЫБОР УРОВНЯ</button>
 </section>
 </div>
 
@@ -96,369 +104,724 @@ input{min-width:0;width:100%;flex:1;background:#080f25;border:1px solid #355786;
 'use strict';
 
 const $=id=>document.getElementById(id);
-const canvas=$('game');
-const ctx=canvas.getContext('2d');
+const canvas=$('game'),ctx=canvas.getContext('2d');
 const overlay=$('overlay');
 
-const OWNER_PINS=[
-'OwnerKD-ADS5H-D6E9F037F7',
-'KenanDrun-AJ9S3L6KS9-8H67HSK',
-'TESTER-AAA111'
-];
+const DEV_PIN='OwnerKD-ADS5H-D6E9F037F7';
+const OWNER_PIN='KenanDrun-AJ9S3L6KS9-8H67HSK';
+const TEST_PIN='TESTER-AAA111';
 
-const LEVELS=[
-{name:'EASY',speed:275,jump:-590,gravity:1650,length:5100,gap:300},
-{name:'MEDIUM',speed:300,jump:-600,gravity:1700,length:5900,gap:250},
-{name:'HARD',speed:320,jump:-610,gravity:1750,length:6500,gap:215}
-];
+const OWNER_PINS=[DEV_PIN,OWNER_PIN,TEST_PIN];
 
-const MUSIC=[
-{tempo:190,melody:[523,659,784,659,587,659,880,784,659,523,587,659,392,523,659,523],bass:[131,0,0,0,196,0,0,0,147,0,0,0,196,0,0,0]},
-{tempo:170,melody:[392,523,587,784,659,587,523,440,523,659,784,880,784,659,587,523],bass:[98,0,0,0,130,0,0,0,110,0,0,0,147,0,0,0]},
-{tempo:145,melody:[440,554,659,880,784,659,554,740,659,880,988,880,740,659,554,440],bass:[110,0,0,0,147,0,0,0,165,0,0,0,147,0,0,0]}
-];
-
-const W=900,H=420,G=330,S=34;
 let profile={nickname:'Player',xp:0,isDev:false};
 let ownerMode=false;
-let selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
-let held=false,obstacles=[],best=[0,0,0],wins=[false,false,false];
-let audioCtx=null,musicGain=null,musicTimer=null,musicStep=0,musicToken=0;
-const p={x:150,y:G-S,vy:0,angle:0,onGround:true};
 
-function storageGet(key,fallback){
- try{const v=localStorage.getItem(key);return v===null?fallback:v;}
- catch(e){return fallback;}
-}
-function storageSet(key,value){
- try{localStorage.setItem(key,value);return true;}
- catch(e){return false;}
-}
-
+/* ПРОФИЛЬ И ИСПРАВЛЕНИЕ DEV-НИКА */
 function loadProfile(){
  try{
-  const saved=JSON.parse(storageGet('kyoDashProfile','{}'));
-  profile.xp=Number.isFinite(saved.xp)&&saved.xp>=0?Math.floor(saved.xp):0;
-  profile.isDev=saved.isDev===true;
-  profile.nickname=profile.isDev?'[DEV] Kyosuke':
-   (typeof saved.nickname==='string'&&saved.nickname.trim()?saved.nickname.trim().slice(0,16):'Player');
- }catch(e){profile={nickname:'Player',xp:0,isDev:false};}
+  const saved=JSON.parse(localStorage.getItem('kyoDashProfile')||'{}');
+  const normalNick=localStorage.getItem('kyoDashNormalNick');
+  const devKeyActive=localStorage.getItem('kyoDashDevKeyActive')==='1';
+
+  profile.xp=Number.isFinite(saved.xp)&&saved.xp>=0
+   ?Math.floor(saved.xp):0;
+
+  if(saved.isDev===true&&devKeyActive){
+   profile.isDev=true;
+   profile.nickname='[DEV] Kyosuke';
+  }else{
+   profile.isDev=false;
+
+   let nick=normalNick||
+    (typeof saved.nickname==='string'?saved.nickname:'Player');
+
+   /* Убираем старый ошибочно сохранённый DEV-ник. */
+   if(nick==='[DEV] Kyosuke')nick='Player';
+
+   profile.nickname=nick.trim().slice(0,16)||'Player';
+  }
+ }catch(e){
+  profile={nickname:'Player',xp:0,isDev:false};
+ }
 }
+
 function saveProfile(){
- storageSet('kyoDashProfile',JSON.stringify(profile));
+ try{
+  localStorage.setItem('kyoDashProfile',JSON.stringify(profile));
+
+  if(!profile.isDev){
+   localStorage.setItem('kyoDashNormalNick',profile.nickname);
+  }
+ }catch(e){}
+
  updateProfile();
 }
+
 function updateProfile(){
- $('profileNick').textContent=profile.nickname;
- $('profileNick').classList.toggle('rainbowNick',profile.isDev);
+ const nick=$('profileNick');
+ nick.textContent=profile.nickname;
+ nick.classList.toggle('rainbowNick',profile.isDev);
+
  $('profileLevel').textContent=Math.floor(profile.xp/250)+1;
  $('profileXp').textContent=(profile.xp%250)+' / 250';
  $('xpFill').style.width=((profile.xp%250)/250*100)+'%';
- if(document.activeElement!==$('nickInput'))$('nickInput').value=profile.nickname;
+
+ if(document.activeElement!==$('nickInput')){
+  $('nickInput').value=profile.nickname;
+ }
 }
 
 function activateOwner(pin){
  pin=pin.trim();
- if(!OWNER_PINS.includes(pin)){alert('Неверный PIN!');return;}
- let deviceId=storageGet('kyodash-device-id','');
+
+ if(!OWNER_PINS.includes(pin)){
+  alert('Неверный PIN!');
+  return;
+ }
+
+ let deviceId=localStorage.getItem('kyodash-device-id');
+
  if(!deviceId){
   deviceId=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
-  storageSet('kyodash-device-id',deviceId);
+  localStorage.setItem('kyodash-device-id',deviceId);
  }
+
  const key='kyodash-owner-device-'+pin;
- const savedDevice=storageGet(key,'');
+ const savedDevice=localStorage.getItem(key);
+
  if(savedDevice&&savedDevice!==deviceId){
-  alert('Этот PIN уже привязан к другому браузеру!');return;
+  alert('Этот PIN уже привязан к другому браузеру!');
+  return;
  }
- storageSet(key,deviceId);
+
+ localStorage.setItem(key,deviceId);
  ownerMode=true;
- if(pin===OWNER_PINS[0]){
-  profile.isDev=true;profile.nickname='[DEV] Kyosuke';saveProfile();
-  alert('DEV активирован!');
- }else if(pin===OWNER_PINS[2]){
-  profile.isDev=false;profile.nickname='[TEST] TesterKD';saveProfile();
-  alert('TESTER активирован!');
- }else{
+
+ if(pin===DEV_PIN){
+  if(!profile.isDev){
+   localStorage.setItem('kyoDashNormalNick',profile.nickname);
+  }
+
+  profile.isDev=true;
+  profile.nickname='[DEV] Kyosuke';
+
+  localStorage.setItem('kyoDashDevKeyActive','1');
+  saveProfile();
+
+  alert('DEV активирован! Радужный ник сохранён.');
+
+ }else if(pin===TEST_PIN){
   profile.isDev=false;
-  if(profile.nickname==='[DEV] Kyosuke')profile.nickname='Player';
-  saveProfile();alert('Owner Mode активирован!');
+  profile.nickname='[TEST] TesterKD';
+
+  localStorage.removeItem('kyoDashDevKeyActive');
+  saveProfile();
+
+  alert('TESTER активирован! Ник: [TEST] TesterKD');
+
+ }else if(pin===OWNER_PIN){
+  /*
+   * Этот ключ включает только Owner Mode.
+   * Он не выдаёт DEV-ник и не включает радугу.
+   * Если остался старый ошибочный DEV-профиль,
+   * восстанавливаем сохранённый обычный ник.
+   */
+  if(profile.isDev){
+   profile.isDev=false;
+   profile.nickname=
+    localStorage.getItem('kyoDashNormalNick')||'Player';
+
+   localStorage.removeItem('kyoDashDevKeyActive');
+   saveProfile();
+  }
+
+  alert('Owner Mode активирован! Ник не изменён.');
  }
+
  refreshStats();
+ updateProfile();
 }
+
+/* ФИЗИКА И УРОВНИ */
+const W=900,H=420,G=330,S=34;
+
+const LEVELS=[
+ {name:'EASY',speed:285,jump:-560,gravity:1550,length:5100,gap:315},
+ {name:'MEDIUM',speed:285,jump:-560,gravity:1550,length:5900,gap:240},
+ {name:'HARD',speed:285,jump:-560,gravity:1550,length:6500,gap:195}
+];
+
+let selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
+let held=false,obstacles=[],best=[0,0,0],wins=[false,false,false];
+
+/* УНИКАЛЬНАЯ СИНТЕЗИРОВАННАЯ МУЗЫКА */
+const MUSIC=[
+ {
+  tempo:190,
+  melody:[523,659,784,659,587,659,880,784,659,523,587,659,392,523,659,523],
+  bass:[131,0,0,0,196,0,0,0,147,0,0,0,196,0,0,0]
+ },
+ {
+  tempo:170,
+  melody:[392,523,587,784,659,587,523,440,523,659,784,880,784,659,587,523],
+  bass:[98,0,0,0,130,0,0,0,110,0,0,0,147,0,0,0]
+ },
+ {
+  tempo:145,
+  melody:[440,554,659,880,784,659,554,740,659,880,988,880,740,659,554,440],
+  bass:[110,0,0,0,147,0,0,0,165,0,0,0,147,0,0,0]
+ }
+];
+
+let audioCtx=null,musicGain=null,musicTimer=null,musicStep=0,musicToken=0;
 
 function setupAudio(){
  if(audioCtx)return true;
+
  const AudioClass=window.AudioContext||window.webkitAudioContext;
  if(!AudioClass)return false;
+
  try{
-  audioCtx=new AudioClass();musicGain=audioCtx.createGain();
-  musicGain.gain.value=0;musicGain.connect(audioCtx.destination);return true;
- }catch(e){audioCtx=null;musicGain=null;return false;}
+  audioCtx=new AudioClass();
+  musicGain=audioCtx.createGain();
+  musicGain.gain.value=0;
+  musicGain.connect(audioCtx.destination);
+  return true;
+ }catch(e){
+  audioCtx=null;
+  musicGain=null;
+  return false;
+ }
 }
+
 function playNote(freq,duration,type,volume){
  if(!audioCtx||!musicGain||!freq)return;
+
  try{
-  const now=audioCtx.currentTime,osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
-  osc.type=type;osc.frequency.setValueAtTime(freq,now);
-  gain.gain.setValueAtTime(.001,now);
-  gain.gain.linearRampToValueAtTime(volume,now+.018);
-  gain.gain.exponentialRampToValueAtTime(.001,now+duration);
-  osc.connect(gain);gain.connect(musicGain);
-  osc.start(now);osc.stop(now+duration+.02);
+  const now=audioCtx.currentTime;
+  const osc=audioCtx.createOscillator();
+  const gain=audioCtx.createGain();
+
+  osc.type=type;
+  osc.frequency.setValueAtTime(freq,now);
+  gain.gain.setValueAtTime(0.001,now);
+  gain.gain.linearRampToValueAtTime(volume,now+0.018);
+  gain.gain.exponentialRampToValueAtTime(0.001,now+duration);
+
+  osc.connect(gain);
+  gain.connect(musicGain);
+  osc.start(now);
+  osc.stop(now+duration+0.02);
  }catch(e){}
 }
+
 function stopMusic(){
  musicToken++;
- if(musicTimer!==null){clearInterval(musicTimer);musicTimer=null;}
+
+ if(musicTimer!==null){
+  clearInterval(musicTimer);
+  musicTimer=null;
+ }
+
  if(musicGain&&audioCtx){
   try{
    const now=audioCtx.currentTime;
    musicGain.gain.cancelScheduledValues(now);
-   musicGain.gain.setTargetAtTime(0,now,.035);
+   musicGain.gain.setTargetAtTime(0,now,0.035);
   }catch(e){}
  }
 }
+
 function startMusic(){
  stopMusic();
  if(!setupAudio())return;
- const token=musicToken,track=MUSIC[selected];musicStep=0;
+
+ const token=musicToken;
+ const track=MUSIC[selected];
+ musicStep=0;
+
  try{
   if(audioCtx.state==='suspended')audioCtx.resume();
+
   const now=audioCtx.currentTime;
   musicGain.gain.cancelScheduledValues(now);
   musicGain.gain.setValueAtTime(0,now);
-  musicGain.gain.linearRampToValueAtTime(.22,now+.15);
+  musicGain.gain.linearRampToValueAtTime(0.22,now+0.15);
  }catch(e){}
+
  function tick(){
   if(token!==musicToken||mode!=='playing')return;
-  const i=musicStep%track.melody.length,duration=track.tempo/1000;
-  playNote(track.melody[i],duration*.82,'triangle',.23);
-  if(i%4===0)playNote(track.bass[i],duration*3.4,'sine',.35);
+
+  const i=musicStep%track.melody.length;
+  const duration=track.tempo/1000;
+
+  playNote(track.melody[i],duration*0.82,'triangle',0.23);
+
+  if(i%4===0){
+   playNote(track.bass[i],duration*3.4,'sine',0.35);
+  }
+
   musicStep++;
  }
- tick();musicTimer=setInterval(tick,track.tempo);
+
+ tick();
+ musicTimer=setInterval(tick,track.tempo);
 }
 
-function loadStats(){
- try{
-  const b=JSON.parse(storageGet('kyoDashBest3','[0,0,0]'));
-  const w=JSON.parse(storageGet('kyoDashWins3','[false,false,false]'));
-  best=Array.isArray(b)&&b.length===3?b:[0,0,0];
-  wins=Array.isArray(w)&&w.length===3?w:[false,false,false];
- }catch(e){best=[0,0,0];wins=[false,false,false];}
- best=best.map(n=>Number.isFinite(n)?Math.max(0,Math.min(100,n)):0);
- wins=wins.map(Boolean);
-}
+/* СОХРАНЁННЫЕ РЕКОРДЫ */
+try{
+ best=JSON.parse(localStorage.getItem('kyoDashBest3')||'[0,0,0]');
+ wins=JSON.parse(localStorage.getItem('kyoDashWins3')||'[false,false,false]');
+
+ if(!Array.isArray(best)||best.length!==3)best=[0,0,0];
+ if(!Array.isArray(wins)||wins.length!==3)wins=[false,false,false];
+}catch(e){}
+
+const p={x:150,y:G-S,vy:0,angle:0,onGround:true};
+
 function saveStats(){
- storageSet('kyoDashBest3',JSON.stringify(best));
- storageSet('kyoDashWins3',JSON.stringify(wins));
+ try{
+  localStorage.setItem('kyoDashBest3',JSON.stringify(best));
+  localStorage.setItem('kyoDashWins3',JSON.stringify(wins));
+ }catch(e){}
 }
+
 function refreshStats(){
  $('best').textContent=(best[selected]||0)+'%';
  $('wins').textContent=wins.filter(Boolean).length+'/3';
- document.querySelectorAll('.level').forEach((b,i)=>b.classList.toggle('active',i===selected));
+
+ document.querySelectorAll('.level').forEach((b,i)=>{
+  b.classList.toggle('active',i===selected);
+ });
+
  $('levelLabel').textContent=LEVELS[selected].name+' · '+(selected+1);
 }
 
+/*
+ * Генератор уровней:
+ * EASY — одиночные и двойные шипы.
+ * MEDIUM — комбинации и низкие потолки.
+ * HARD — тройные шипы, частые комбинации и потолки.
+ *
+ * Потолки заставляют вовремя отпускать экран:
+ * если кубик прыгает под ними, он сталкивается с препятствием.
+ */
 function makeLevel(){
  obstacles=[];
- const cfg=LEVELS[selected];let x=590,i=0;
- while(x<cfg.length-260){
-  const pattern=(i*7+selected*3)%7;let count=1;
-  if(selected===1&&(pattern===0||pattern===4||pattern===6))count=2;
-  if(selected===2&&(pattern===0||pattern===3||pattern===6))count=2;
-  if(selected===2&&pattern===2)count=3;
-  for(let j=0;j<count;j++)obstacles.push({x:x+j*37,w:37,h:37,type:'spike'});
-  if(selected>=1&&i%5===2)obstacles.push({x:x+105,w:48,h:35,type:'ceiling'});
-  x+=cfg.gap+(pattern%3)*24;i++;
+
+ const cfg=LEVELS[selected];
+ let x=570,i=0;
+
+ while(x<cfg.length-300){
+  const pattern=(i*7+selected*3)%9;
+
+  if(selected===0){
+   /* EASY: учимся прыгать и иногда отпускаем экран. */
+   let count=1;
+
+   if(pattern===3||pattern===7)count=2;
+
+   for(let j=0;j<count;j++){
+    obstacles.push({
+     x:x+j*36,w:36,h:36,type:'spike'
+    });
+   }
+
+  }else if(selected===1){
+   /* MEDIUM: двойные шипы и потолки для точного тайминга. */
+   if(pattern===2||pattern===6){
+    obstacles.push({
+     x:x+15,w:125,h:54,type:'ceiling',
+     y:G-90
+    });
+   }else{
+    const count=(pattern===0||pattern===4)?2:1;
+
+    for(let j=0;j<count;j++){
+     obstacles.push({
+      x:x+j*36,w:36,h:36,type:'spike'
+     });
+    }
+   }
+
+  }else{
+   /* HARD: тройные шипы и более частые потолки. */
+   if(pattern===2||pattern===5){
+    obstacles.push({
+     x:x+10,w:145,h:54,type:'ceiling',
+     y:G-90
+    });
+   }else{
+    let count=1;
+
+    if(pattern===0||pattern===3||pattern===7)count=2;
+    if(pattern===4||pattern===8)count=3;
+
+    for(let j=0;j<count;j++){
+     obstacles.push({
+      x:x+j*36,w:36,h:36,type:'spike'
+     });
+    }
+   }
+  }
+
+  const variation=(pattern%3)*13;
+  x+=cfg.gap+variation;
+  i++;
  }
- obstacles.push({x:cfg.length-130,w:12,h:80,type:'finish'});
+
+ obstacles.push({
+  x:cfg.length-130,w:12,h:80,type:'finish'
+ });
 }
+
 function updateHud(){
- progress=Math.min(100,Math.floor(world/(LEVELS[selected].length-130)*100));
+ progress=Math.min(
+  100,
+  Math.floor(world/(LEVELS[selected].length-130)*100)
+ );
+
  $('progressText').textContent=progress+'%';
  $('progressFill').style.width=progress+'%';
+
  if(progress>best[selected]){
-  best[selected]=progress;$('best').textContent=progress+'%';saveStats();
+  best[selected]=progress;
+  $('best').textContent=progress+'%';
+  saveStats();
  }
 }
+
 function reset(){
- world=0;progress=0;held=false;
- p.y=G-S;p.vy=0;p.angle=0;p.onGround=true;
- makeLevel();updateHud();
+ world=0;
+ progress=0;
+ held=false;
+
+ p.y=G-S;
+ p.vy=0;
+ p.angle=0;
+ p.onGround=true;
+
+ makeLevel();
+ updateHud();
 }
+
 function showMenu(kind='menu'){
- stopMusic();mode=kind;held=false;
+ stopMusic();
+ mode=kind;
+ held=false;
+
  overlay.classList.remove('hidden');
  $('levels').classList.toggle('hidden',kind==='dead'||kind==='win');
  $('menuOnly').classList.toggle('hidden',kind==='menu');
+
  if(kind==='dead'){
   $('panelTitle').textContent='УПС!';
   $('panelText').textContent='Прогресс: '+progress+'%. Попробуй ещё раз!';
   $('startBtn').textContent='ЕЩЁ РАЗ';
+
  }else if(kind==='win'){
   $('panelTitle').textContent='УРОВЕНЬ ПРОЙДЕН!';
   $('panelText').textContent='Отлично! Уровень '+LEVELS[selected].name+' пройден.';
   $('startBtn').textContent='ИГРАТЬ СНОВА';
+
  }else{
   $('panelTitle').textContent='Kyo Dash';
   $('panelText').textContent='Прыгай через шипы и доберись до финиша!';
   $('startBtn').textContent='ИГРАТЬ';
+  $('menuOnly').classList.add('hidden');
  }
- refreshStats();updateProfile();draw();
+
+ refreshStats();
+ updateProfile();
+ draw();
 }
+
 function start(){
- cancelAnimationFrame(raf);raf=0;stopMusic();reset();
- mode='playing';overlay.classList.add('hidden');
- startMusic();last=performance.now();raf=requestAnimationFrame(loop);
+ cancelAnimationFrame(raf);
+ stopMusic();
+ reset();
+
+ mode='playing';
+ overlay.classList.add('hidden');
+
+ startMusic();
+ last=performance.now();
+ raf=requestAnimationFrame(loop);
 }
+
 function jump(){
- if(mode==='playing'&&p.onGround){p.vy=LEVELS[selected].jump;p.onGround=false;}
+ if(mode==='playing'&&p.onGround){
+  p.vy=LEVELS[selected].jump;
+  p.onGround=false;
+ }
 }
-function die(){if(mode!=='playing')return;held=false;showMenu('dead');}
+
+function die(){
+ if(mode!=='playing')return;
+
+ mode='dead';
+ held=false;
+ showMenu('dead');
+}
+
 function win(){
  if(mode!=='playing')return;
- held=false;progress=100;
- $('progressText').textContent='100%';$('progressFill').style.width='100%';
+
+ mode='win';
+ held=false;
+ progress=100;
+
+ $('progressText').textContent='100%';
+ $('progressFill').style.width='100%';
+
  best[selected]=100;
- if(!wins[selected]){profile.xp+=[100,150,200][selected];saveProfile();}
- wins[selected]=true;saveStats();refreshStats();showMenu('win');
+
+ if(!wins[selected]){
+  profile.xp+=[100,150,200][selected];
+  saveProfile();
+ }
+
+ wins[selected]=true;
+ saveStats();
+ refreshStats();
+ showMenu('win');
 }
 
 function update(dt){
  if(mode!=='playing')return;
- const cfg=LEVELS[selected];world+=cfg.speed*dt;
- p.vy+=cfg.gravity*dt;p.y+=p.vy*dt;
+
+ const cfg=LEVELS[selected];
+
+ world+=cfg.speed*dt;
+
+ p.vy+=cfg.gravity*dt;
+ p.y+=p.vy*dt;
+
  if(p.y>=G-S){
-  p.y=G-S;p.vy=0;p.onGround=true;
+  p.y=G-S;
+  p.vy=0;
+  p.onGround=true;
   p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
+
+  /* Удерживание работает, но потолки требуют отпустить экран. */
   if(held)jump();
- }else{p.onGround=false;p.angle+=cfg.speed*dt/S*(Math.PI/2);}
+
+ }else{
+  p.onGround=false;
+  p.angle+=cfg.speed*dt/S*(Math.PI/2);
+ }
+
  updateHud();
+
  for(const o of obstacles){
   const ox=o.x-world;
+
   if(ox>p.x+90||ox+o.w<p.x-80)continue;
-  if(o.type==='finish'){if(ox<p.x+S*.6){win();return;}continue;}
-  const left=Math.max(p.x+4,ox),right=Math.min(p.x+S-4,ox+o.w);
-  if(left>=right)continue;
-  if(o.type==='ceiling'){
-   const bottom=G-o.h;
-   if(p.y<bottom&&p.y+S>bottom-8){die();return;}
-   continue;
-  }
-  const center=ox+o.w/2,samples=[left,(left+right)/2,right];
-  for(const sx of samples){
-   const height=o.h*(1-Math.abs(sx-center)/(o.w/2));
-   if(p.y+S-3>G-height&&p.y+S>G-o.h+5){die();return;}
+
+  if(o.type==='finish'){
+   if(ox<p.x+S*.6){
+    win();
+    return;
+   }
+
+  }else if(o.type==='ceiling'){
+   /*
+    * Столкновение с потолком.
+    * На земле кубик проходит под ним,
+    * но во время прыжка касается нижней части.
+    */
+   const top=o.y;
+   const bottom=o.y+o.h;
+
+   const horizontal=p.x+S-3>ox&&p.x+3<ox+o.w;
+   const vertical=p.y+S>top&&p.y<bottom;
+
+   if(horizontal&&vertical){
+    die();
+    return;
+   }
+
+  }else{
+   /* Приближённая треугольная хитбокс-зона шипа. */
+   const left=Math.max(p.x+4,ox);
+   const right=Math.min(p.x+S-4,ox+o.w);
+
+   if(left<right&&p.y+S>G-o.h){
+    const center=ox+o.w/2;
+    const nearest=center<left?left:(center>right?right:center);
+    const surfaceY=G-o.h*(1-Math.abs(nearest-center)/(o.w/2));
+
+    if(p.y+S-3>surfaceY&&p.y<G){
+     die();
+     return;
+    }
+   }
   }
  }
 }
 
 function draw(){
- ctx.clearRect(0,0,W,H);
- ctx.fillStyle='#0a1230';ctx.fillRect(0,0,W,H);
+ ctx.fillStyle='#0a1230';
+ ctx.fillRect(0,0,W,H);
+
  const grad=ctx.createLinearGradient(0,0,0,G);
- grad.addColorStop(0,'#111e48');grad.addColorStop(1,'#0a1530');
- ctx.fillStyle=grad;ctx.fillRect(0,0,W,G);
- ctx.strokeStyle='#213865';ctx.lineWidth=1;
+ grad.addColorStop(0,'#111e48');
+ grad.addColorStop(1,'#0a1530');
+ ctx.fillStyle=grad;
+ ctx.fillRect(0,0,W,G);
+
+ ctx.strokeStyle='#213865';
+ ctx.lineWidth=1;
+
  const off=-(world*.3%45);
- for(let x=off;x<W;x+=45){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,G);ctx.stroke();}
- for(let y=22;y<G;y+=45){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
- for(let i=0;i<26;i++){
-  const sx=(i*137-world*.12%900+900)%900,sy=(i*71)%285;
-  ctx.fillStyle='#668ac5';ctx.fillRect(sx,sy,2,2);
+
+ for(let x=off;x<W;x+=45){
+  ctx.beginPath();
+  ctx.moveTo(x,0);
+  ctx.lineTo(x,G);
+  ctx.stroke();
  }
- ctx.fillStyle='#14264c';ctx.fillRect(0,G,W,H-G);
- ctx.fillStyle='#36e8ff';ctx.fillRect(0,G,W,4);
- for(let x=-(world%50);x<W;x+=50){ctx.fillStyle='#2b4779';ctx.fillRect(x,G+16,25,4);}
+
+ for(let y=22;y<G;y+=45){
+  ctx.beginPath();
+  ctx.moveTo(0,y);
+  ctx.lineTo(W,y);
+  ctx.stroke();
+ }
+
+ for(let i=0;i<26;i++){
+  const sx=(i*137-world*.12%900+900)%900;
+  const sy=(i*71)%285;
+  ctx.fillStyle='#668ac5';
+  ctx.fillRect(sx,sy,2,2);
+ }
+
+ ctx.fillStyle='#14264c';
+ ctx.fillRect(0,G,W,H-G);
+
+ ctx.fillStyle='#36e8ff';
+ ctx.fillRect(0,G,W,4);
+
+ for(let x=-(world%50);x<W;x+=50){
+  ctx.fillStyle='#2b4779';
+  ctx.fillRect(x,G+16,25,4);
+ }
+
  for(const o of obstacles){
-  const x=o.x-world;if(x<-70||x>W+70)continue;
+  const x=o.x-world;
+
+  if(x<-170||x>W+170)continue;
+
   if(o.type==='spike'){
    ctx.fillStyle=selected===2?'#ff3d8c':'#ff4d83';
-   ctx.beginPath();ctx.moveTo(x,G);ctx.lineTo(x+o.w/2,G-o.h);ctx.lineTo(x+o.w,G);ctx.closePath();ctx.fill();
-   ctx.strokeStyle='#ffb2cb';ctx.lineWidth=2;ctx.stroke();
+
+   ctx.beginPath();
+   ctx.moveTo(x,G);
+   ctx.lineTo(x+o.w/2,G-o.h);
+   ctx.lineTo(x+o.w,G);
+   ctx.closePath();
+   ctx.fill();
+
+   ctx.strokeStyle='#ffb2cb';
+   ctx.lineWidth=2;
+   ctx.stroke();
+
   }else if(o.type==='ceiling'){
-   ctx.fillStyle='#ffad35';ctx.fillRect(x,G-o.h-75,o.w,o.h);
-   ctx.fillStyle='#fff0c7';ctx.fillRect(x+5,G-o.h-70,o.w-10,4);
+   ctx.fillStyle=selected===2?'#ff3d8c':'#ffb348';
+   ctx.fillRect(x,o.y,o.w,o.h);
+
+   ctx.fillStyle='#ffe4a8';
+
+   for(let k=0;k<o.w;k+=22){
+    ctx.beginPath();
+    ctx.moveTo(x+k,o.y+o.h);
+    ctx.lineTo(x+k+11,o.y+o.h+10);
+    ctx.lineTo(x+k+22,o.y+o.h);
+    ctx.closePath();
+    ctx.fill();
+   }
+
   }else{
-   ctx.fillStyle='#4dffb4';ctx.fillRect(x,G-o.h,8,o.h);
-   ctx.fillStyle='#e6fff5';ctx.font='bold 18px Arial';ctx.fillText('FINISH',x-26,G-o.h-12);
+   ctx.fillStyle='#4dffb4';
+   ctx.fillRect(x,G-o.h,8,o.h);
+
+   ctx.fillStyle='#e6fff5';
+   ctx.font='bold 18px Arial';
+   ctx.fillText('FINISH',x-26,G-o.h-12);
   }
  }
- ctx.save();ctx.translate(p.x+S/2,p.y+S/2);ctx.rotate(p.angle);
- ctx.shadowColor='#00dfff';ctx.shadowBlur=14;ctx.fillStyle='#35e7ff';ctx.fillRect(-S/2,-S/2,S,S);
- ctx.shadowBlur=0;ctx.strokeStyle='#d8fcff';ctx.lineWidth=3;ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
- ctx.fillStyle='#0a2750';ctx.fillRect(-9,-7,5,7);ctx.fillRect(4,-7,5,7);ctx.restore();
- if(mode==='menu'){ctx.fillStyle='#b6d2ff';ctx.font='bold 20px Arial';ctx.textAlign='center';ctx.fillText('READY?',W/2,105);ctx.textAlign='left';}
+
+ /* КУБИК */
+ ctx.save();
+ ctx.translate(p.x+S/2,p.y+S/2);
+ ctx.rotate(p.angle);
+
+ ctx.shadowColor='#00dfff';
+ ctx.shadowBlur=14;
+
+ ctx.fillStyle='#35e7ff';
+ ctx.fillRect(-S/2,-S/2,S,S);
+
+ ctx.shadowBlur=0;
+ ctx.strokeStyle='#d8fcff';
+ ctx.lineWidth=3;
+ ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
+
+ ctx.fillStyle='#0a2750';
+ ctx.fillRect(-9,-7,5,7);
+ ctx.fillRect(4,-7,5,7);
+
+ ctx.restore();
+
+ if(mode==='menu'){
+  ctx.fillStyle='#b6d2ff';
+  ctx.font='bold 20px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('READY?',W/2,105);
+  ctx.textAlign='left';
+ }
 }
+
 function loop(now){
- if(mode!=='playing'){raf=0;return;}
- const dt=Math.min(Math.max((now-last)/1000,0),.025);last=now;
- update(dt);draw();
- if(mode==='playing')raf=requestAnimationFrame(loop);else raf=0;
+ const dt=Math.min((now-last)/1000,.025);
+ last=now;
+
+ update(dt);
+ draw();
+
+ if(mode==='playing'){
+  raf=requestAnimationFrame(loop);
+ }
 }
+
+/* УПРАВЛЕНИЕ */
 function press(e){
  if(e)e.preventDefault();
  if(mode!=='playing')return;
- held=true;jump();
+
+ held=true;
+ jump();
 }
-function release(e){if(e)e.preventDefault();held=false;}
+
+function release(e){
+ if(e)e.preventDefault();
+ held=false;
+}
 
 canvas.addEventListener('pointerdown',press);
 window.addEventListener('pointerup',release);
 window.addEventListener('pointercancel',release);
-window.addEventListener('blur',()=>{held=false;});
+
 window.addEventListener('keydown',e=>{
- if(e.code!=='Space'&&e.code!=='ArrowUp')return;
- e.preventDefault();
- if(mode==='playing'){if(!held)press(e);}
- else if(e.code==='Space')start();
-});
-window.addEventListener('keyup',e=>{
- if(e.code==='Space'||e.code==='ArrowUp')release(e);
-});
+ if(e.code==='Space'||e.code==='ArrowUp'){
+  e.preventDefault();
 
-document.addEventListener('click',e=>{
- const button=e.target.closest('button');
- if(!button||button.disabled)return;
- if(button.dataset.level!==undefined){
-  const n=Number(button.dataset.level);
-  if(Number.isInteger(n)&&n>=0&&n<LEVELS.length){selected=n;refreshStats();draw();}
-  return;
- }
- switch(button.id){
-  case 'startBtn':start();break;
-  case 'menuBtn':
-   cancelAnimationFrame(raf);raf=0;showMenu('menu');break;
-  case 'menuOnly':showMenu('menu');break;
-  case 'nickSave':{
-   if(profile.isDev){alert('DEV-ник закреплён.');updateProfile();break;}
-   const nick=$('nickInput').value.trim();
-   if(nick.length<2){alert('Ник должен содержать минимум 2 символа.');break;}
-   profile.nickname=nick.slice(0,16);saveProfile();break;
-  }
-  case 'ownerBtn':{
-   if(ownerMode){ownerMode=false;alert('Owner Mode выключен');}
-   else{const pin=prompt('Введите PIN владельца:');if(pin!==null)activateOwner(pin);}
-   break;
+  if(mode==='playing'){
+   if(!held)press(e);
+  }else if(e.code==='Space'){
+   start();
   }
  }
 });
 
-$('nickInput').addEventListener('keydown',e=>{
- if(e.key==='Enter'){e.preventDefault();$('nickSave').click();}
-});
-
-window.addEventListener('error',e=>console.error('Kyo Dash:',e.message));
-
-loadProfile();
-loadStats();
-reset();
-showMenu('menu');
-draw();
-
-})();
-</script>
-</body>
- </html>
- 
+window.addEventListener('ke
