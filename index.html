@@ -86,7 +86,24 @@ h1{font-size:clamp(34px,9vw,55px);color:#e0caff;margin:8px}
 const $=id=>document.getElementById(id);
 const c=$('game'),ctx=c.getContext('2d');
 const W=900,H=420,G=330,S=34;
-const OWNER_PIN='OwnerKD-ADS5H-D6E9F037F7';
+
+/* ДВА PIN-КОДА OWNER MODE */
+const OWNER_PINS=[
+ 'OwnerKD-ADS5H-D6E9F037F7',
+ 'KenanDrun-AJ9S3L6KS9-8H67HSK'
+];
+
+/* Идентификатор браузера */
+function getDeviceId(){
+ let id=localStorage.getItem('kyodash-device-id');
+ if(!id){
+  id=Date.now().toString(36)+'-'+
+     Math.random().toString(36).slice(2)+'-'+
+     Math.random().toString(36).slice(2);
+  localStorage.setItem('kyodash-device-id',id);
+ }
+ return id;
+}
 
 const levels=[
 {name:'EASY',weather:0,speed:275,jump:590,gravity:1650,length:5100,gap:340,notes:[392,494,587,494,392,330,392,494]},
@@ -516,12 +533,11 @@ $('shopBack').addEventListener('click',()=>{
  showMenu('menu');
 });
 
-/* Исправленный обработчик Owner Mode */
+/* OWNER MODE: ДВА PIN И ПРИВЯЗКА К БРАУЗЕРУ */
 $('ownerBtn').addEventListener('click',()=>{
  try{
   if(ownerMode){
    ownerMode=false;
-   save();
    stats();
    renderShop();
    alert('Owner Mode выключен');
@@ -531,15 +547,27 @@ $('ownerBtn').addEventListener('click',()=>{
   const pin=window.prompt('Введите PIN владельца:');
   if(pin===null)return;
 
-  if(pin.trim()===OWNER_PIN){
-   ownerMode=true;
-   save();
-   stats();
-   renderShop();
-   alert('Owner Mode включён!');
-  }else{
+  const normalizedPin=pin.trim();
+
+  if(!OWNER_PINS.includes(normalizedPin)){
    alert('Неверный PIN!');
+   return;
   }
+
+  const deviceId=getDeviceId();
+  const key='kyodash-owner-device-'+normalizedPin;
+  const savedDevice=localStorage.getItem(key);
+
+  if(savedDevice&&savedDevice!==deviceId){
+   alert('Этот PIN уже привязан к другому браузеру!');
+   return;
+  }
+
+  localStorage.setItem(key,deviceId);
+  ownerMode=true;
+  stats();
+  renderShop();
+  alert('Owner Mode включён!');
  }catch(error){
   alert('Ошибка Owner Mode: '+error.message);
  }
@@ -554,5 +582,4 @@ draw();
 })();
 </script>
 </body>
- </html>
- 
+</html>
