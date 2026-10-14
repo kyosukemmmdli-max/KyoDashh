@@ -112,7 +112,6 @@ input,select{width:100%;padding:10px;background:#080f25;border:1px solid #355786
 <button class="ownerTab" data-page="player">ИГРОК</button>
 <button class="ownerTab" data-page="visual">ВИД</button>
 </div>
-
 <div class="ownerPage" id="page-game">
 <div class="setting">
 <label><input type="checkbox" id="flyToggle"> ✈️ FLY — полёт</label>
@@ -135,7 +134,6 @@ input,select{width:100%;padding:10px;background:#080f25;border:1px solid #355786
 <button id="restartLevel">🔄 Перезапуск</button>
 </div>
 </div>
-
 <div class="ownerPage hidden" id="page-player">
 <div class="setting">
 <label>Добавить XP</label>
@@ -146,23 +144,20 @@ input,select{width:100%;padding:10px;background:#080f25;border:1px solid #355786
 <div class="row"><input id="setXpAmount" type="number" min="0" max="1000000" value="0"><button class="menuBtn" id="setXp">УСТАНОВИТЬ</button></div>
 </div>
 <div class="setting">
-<label>Цвет кубика</label>
-<input id="cubeColor" type="color" value="#35e7ff">
+<label>Цвет кубика</label><input id="cubeColor" type="color" value="#35e7ff">
 </div>
 <div class="ownerActions">
 <button id="unlockAll">🔓 Открыть уровни</button>
 <button id="resetProgress" class="danger">🗑️ Сбросить прогресс</button>
 </div>
 </div>
-
 <div class="ownerPage hidden" id="page-visual">
 <div class="setting">
 <label><input type="checkbox" id="neonToggle" checked> ✨ Неоновое свечение</label>
 <label><input type="checkbox" id="particlesToggle" checked> 🎆 Частицы при финише</label>
 </div>
 <div class="setting">
-<label>Цвет следа</label>
-<input id="trailColor" type="color" value="#35e7ff">
+<label>Цвет следа</label><input id="trailColor" type="color" value="#35e7ff">
 </div>
 <div class="setting">
 <label>Тема фона</label>
@@ -174,7 +169,6 @@ input,select{width:100%;padding:10px;background:#080f25;border:1px solid #355786
 </div>
 <button class="secondary" id="saveSettings">💾 СОХРАНИТЬ НАСТРОЙКИ</button>
 </div>
-
 <button class="btn" id="closeOwner">ГОТОВО</button>
 <div class="small">Настройки Owner Mode хранятся локально в браузере.</div>
 </section>
@@ -213,7 +207,6 @@ fly:false,god:false,noSpikes:false,autoWin:false,
 speed:275,jump:590,cubeColor:'#35e7ff',
 trailColor:'#35e7ff',neon:true,particles:true,theme:'blue'
 };
-
 const p={x:150,y:G-S,vy:0,angle:0,onGround:true,spin:0};
 
 function readJSON(key,fallback){
@@ -226,16 +219,13 @@ function load(){
  if(typeof profile.nickname!=='string')profile.nickname='Player';
  profile.nickname=profile.nickname.slice(0,16);
  profile.xp=Math.max(0,Math.floor(Number(profile.xp)||0));
-
  settings={...settings,...readJSON('kyoDashOwnerSettings',{})};
  devProfile=localStorage.getItem('kyoDashDevProfile')==='1';
  if(devProfile)profile.nickname='[DEV] Kyosuke';
-
  best=readJSON('kyoDashBest3',[0,0,0]);
  wins=readJSON('kyoDashWins3',[false,false,false]);
  if(!Array.isArray(best)||best.length!==3)best=[0,0,0];
  if(!Array.isArray(wins)||wins.length!==3)wins=[false,false,false];
-
  $('flyToggle').checked=!!settings.fly;
  $('godToggle').checked=!!settings.god;
  $('noSpikesToggle').checked=!!settings.noSpikes;
@@ -244,8 +234,8 @@ function load(){
  $('jumpRange').value=settings.jump;
  $('cubeColor').value=settings.cubeColor;
  $('trailColor').value=settings.trailColor;
- $('neonToggle').checked=settings.neon;
- $('particlesToggle').checked=settings.particles;
+ $('neonToggle').checked=!!settings.neon;
+ $('particlesToggle').checked=!!settings.particles;
  $('themeSelect').value=settings.theme;
  updateRangeLabels();
 }
@@ -259,8 +249,8 @@ function saveSettings(){
 }
 function saveRecords(){
  try{
- localStorage.setItem('kyoDashBest3',JSON.stringify(best));
- localStorage.setItem('kyoDashWins3',JSON.stringify(wins));
+  localStorage.setItem('kyoDashBest3',JSON.stringify(best));
+  localStorage.setItem('kyoDashWins3',JSON.stringify(wins));
  }catch(e){}
 }
 function updateProfile(){
@@ -280,6 +270,10 @@ function refreshStats(){
  document.querySelectorAll('.level').forEach((b,i)=>b.classList.toggle('active',i===selected));
  $('levelLabel').textContent=LEVELS[selected].name+' · '+(selected+1);
 }
+function updateRangeLabels(){
+ $('speedValue').textContent=settings.speed;
+ $('jumpValue').textContent=settings.jump;
+}
 function addSpike(x,count=1){
  for(let i=0;i<count;i++)obstacles.push({x:x+i*37,w:37,h:37,type:'spike'});
 }
@@ -289,16 +283,10 @@ function makeLevel(){
  let x=590,idx=0;
  while(x<cfg.length-260){
   const pattern=(idx*7+selected*3)%7;
-  if(selected===0){
-   if(pattern===3)addSpike(x,2);else addSpike(x,1);
-  }else if(selected===1){
-   if(pattern===0||pattern===4||pattern===6)addSpike(x,2);
-   else addSpike(x,1);
-  }else{
-   if(pattern===2)addSpike(x,3);
-   else if(pattern===0||pattern===3||pattern===6)addSpike(x,2);
-   else addSpike(x,1);
-  }
+  if(selected===0)addSpike(x,pattern===3?2:1);
+  else if(selected===1)addSpike(x,[0,4,6].includes(pattern)?2:1);
+  else if(pattern===2)addSpike(x,3);
+  else addSpike(x,[0,3,6].includes(pattern)?2:1);
   x+=cfg.gap+(pattern%3)*24;
   idx++;
  }
@@ -323,15 +311,15 @@ function showMenu(kind='menu'){
  mode=kind;held=false;
  mainOverlay.classList.remove('hidden');
  $('levels').classList.toggle('hidden',kind==='dead'||kind==='win');
- $('backLevels').classList.toggle('hidden',kind==='menu');
+ $('backLevels').classList.toggle('hidden',kind!=='menu');
  if(kind==='dead'){
-  $('panelText').textContent='Столкновение! Прогресс: '+progress+'%. Попробуй ещё раз.';
+  panelText.textContent='Столкновение! Прогресс: '+progress+'%. Попробуй ещё раз.';
   startBtn.textContent='ЕЩЁ РАЗ';
  }else if(kind==='win'){
-  $('panelText').textContent='Уровень '+LEVELS[selected].name+' пройден!';
+  panelText.textContent='Уровень '+LEVELS[selected].name+' пройден!';
   startBtn.textContent='ИГРАТЬ СНОВА';
  }else{
-  $('panelText').textContent='Прыгай через шипы и доберись до финиша!';
+  panelText.textContent='Прыгай через шипы и доберись до финиша!';
   startBtn.textContent='ИГРАТЬ';
  }
  refreshStats();updateProfile();draw();
@@ -383,7 +371,6 @@ function update(dt){
  const cfg=LEVELS[selected];
  const speed=Math.max(0,Math.min(500,Number(settings.speed)||0));
  world+=speed*dt;
-
  if(settings.fly){
   if(held)p.y-=Math.max(200,settings.jump*.65)*dt;
   p.y=Math.max(15,Math.min(G-S,p.y));
@@ -402,9 +389,7 @@ function update(dt){
   }
  }
  updateHud();
-
  if(settings.autoWin&&world>=cfg.length-160){win();return}
-
  for(const o of obstacles){
   const ox=o.x-world;
   if(ox>p.x+90||ox+o.w<p.x-80)continue;
@@ -430,7 +415,6 @@ function draw(){
  grad.addColorStop(0,settings.theme==='purple'?'#382052':settings.theme==='green'?'#123a35':'#111e48');
  grad.addColorStop(1,'#0a1530');
  ctx.fillStyle=grad;ctx.fillRect(0,0,W,G);
-
  ctx.strokeStyle=settings.theme==='purple'?'#503268':settings.theme==='green'?'#24584d':'#213865';
  ctx.lineWidth=1;
  const off=-(world*.3%45);
@@ -443,7 +427,6 @@ function draw(){
  ctx.fillStyle='#14264c';ctx.fillRect(0,G,W,H-G);
  ctx.fillStyle=settings.trailColor;ctx.fillRect(0,G,W,4);
  for(let x=-(world%50);x<W;x+=50){ctx.fillStyle='#2b4779';ctx.fillRect(x,G+16,25,4)}
-
  for(const o of obstacles){
   const x=o.x-world;if(x<-70||x>W+70)continue;
   if(o.type==='spike'){
@@ -456,7 +439,6 @@ function draw(){
    ctx.fillStyle='#e6fff5';ctx.font='bold 18px Arial';ctx.fillText('FINISH',x-26,G-o.h-12);
   }
  }
-
  ctx.save();
  ctx.translate(p.x+S/2,p.y+S/2);ctx.rotate(p.angle);
  if(settings.neon){ctx.shadowColor=settings.cubeColor;ctx.shadowBlur=18}
@@ -465,7 +447,6 @@ function draw(){
  ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
  ctx.fillStyle='#0a2750';ctx.fillRect(-9,-7,5,7);ctx.fillRect(4,-7,5,7);
  ctx.restore();
-
  if(settings.fly){
   ctx.fillStyle='#fff';ctx.font='bold 14px Arial';ctx.fillText('FLY',p.x-2,p.y-12);
  }
@@ -492,8 +473,7 @@ window.addEventListener('keydown',e=>{
  if(e.code==='Space'||e.code==='ArrowUp'){
   e.preventDefault();
   if(mode==='playing'){if(!held)press(e)}
-  else if(e.code==='Space'&&!ownerOverlay.classList.contains('hidden')){}
-  else if(e.code==='Space')start();
+  else if(e.code==='Space'&&ownerOverlay.classList.contains('hidden'))start();
  }
  if(e.code==='ArrowDown'&&settings.fly&&mode==='playing')p.y=Math.min(G-S,p.y+30);
 });
@@ -504,8 +484,16 @@ window.addEventListener('keyup',e=>{
 $('startBtn').addEventListener('click',start);
 $('menuBtn').addEventListener('click',()=>{
  cancelAnimationFrame(raf);
- if(mode==='playing')showMenu('menu');else showMenu(mode==='dead'?'dead':'menu');
+ showMenu('menu');
 });
 $('backLevels').addEventListener('click',()=>showMenu('menu'));
+
 document.querySelectorAll('.level').forEach(b=>b.addEventListener('click',()=>{
- selected=Number(b.dataset.level);refre
+ selected=Number(b.dataset.level);
+ refreshStats();
+ showMenu('menu');
+}));
+
+$('nickSave').addEventListener('click',()=>{
+ if(devProfile)return;
+ const
