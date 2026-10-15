@@ -138,37 +138,29 @@ var best=[0,0,0],wins=[false,false,false];
 var p={x:150,y:G-S,vy:0,angle:0,onGround:true};
 var ownerMode=false;
 
-/* ===== МУЗЫКА KYO DASH ===== */
+/* Три оригинальные синтезированные мелодии */
 var musicEnabled=true;
 var audioCtx=null;
 var musicTimer=null;
 var musicStep=0;
 var musicGeneration=0;
 
-/* У каждой сложности отдельная мелодия.
-   0 в последовательности означает паузу. */
 var melodies=[
  {
-  name:'EASY',
   tempo:190,
-  notes:[523,659,784,659,523,392,440,523,659,523,440,392,440,523,659,784,
-         659,523,392,440,523,659,784,880,784,659,523,440,392,440,523,392],
+  notes:[523,659,784,659,523,392,440,523,659,523,440,392,440,523,659,784,659,523,392,440,523,659,784,880,784,659,523,440,392,440,523,392],
   bass:[131,0,165,0,196,0,165,0],
   wave:'square'
  },
  {
-  name:'MEDIUM',
   tempo:145,
-  notes:[392,523,659,784,659,523,392,523,440,587,698,880,698,587,440,587,
-         392,523,659,784,880,784,659,523,440,587,698,880,784,698,587,440],
+  notes:[392,523,659,784,659,523,392,523,440,587,698,880,698,587,440,587,392,523,659,784,880,784,659,523,440,587,698,880,784,698,587,440],
   bass:[98,98,131,131,110,110,147,147],
   wave:'sawtooth'
  },
  {
-  name:'HARD',
   tempo:105,
-  notes:[330,440,659,523,330,440,784,659,349,466,698,587,349,466,880,698,
-         330,523,659,880,784,659,523,440,349,523,698,932,880,698,523,392],
+  notes:[330,440,659,523,330,440,784,659,349,466,698,587,349,466,880,698,330,523,659,880,784,659,523,440,349,523,698,932,880,698,523,392],
   bass:[82,82,110,110,73,73,98,98],
   wave:'square'
  }
@@ -215,12 +207,10 @@ function musicTick(){
 
  if(note)playTone(note,beat*0.9,song.wave,selected===2?0.035:0.04);
 
- /* Басовая партия */
  if(musicStep%4===0){
   var bass=song.bass[Math.floor(musicStep/4)%song.bass.length];
   if(bass)playTone(bass,beat*2,'triangle',0.055);
  }
-
  musicStep++;
 }
 
@@ -233,11 +223,10 @@ function startMusic(){
  var myGeneration=musicGeneration;
  musicStep=0;
 
- var resumeResult;
- try{resumeResult=audioCtx.resume()}catch(e){}
- if(resumeResult&&typeof resumeResult.catch==='function'){
-  resumeResult.catch(function(){});
- }
+ try{
+  var result=audioCtx.resume();
+  if(result&&result.catch)result.catch(function(){});
+ }catch(e){}
 
  musicTick();
  musicTimer=setInterval(function(){
@@ -260,8 +249,10 @@ function updateMusicButton(){
 }
 
 function safeGet(key,fallback){
- try{var v=localStorage.getItem(key);return v===null?fallback:v}
- catch(e){return fallback}
+ try{
+  var v=localStorage.getItem(key);
+  return v===null?fallback:v;
+ }catch(e){return fallback}
 }
 function safeSet(key,value){
  try{localStorage.setItem(key,value)}catch(e){}
@@ -274,10 +265,12 @@ function loadData(){
   profile.nickname=profile.isDev?'[DEV] Kyosuke':
    (typeof d.nickname==='string'&&d.nickname.trim()?d.nickname.trim().slice(0,16):'Player');
  }catch(e){}
+
  try{
   var b=JSON.parse(safeGet('kyoDashBest3','[0,0,0]'));
   if(Array.isArray(b)&&b.length===3)best=b.map(function(n){return Number(n)||0});
  }catch(e){}
+
  try{
   var w=JSON.parse(safeGet('kyoDashWins3','[false,false,false]'));
   if(Array.isArray(w)&&w.length===3)wins=w;
@@ -313,7 +306,7 @@ function addSpikes(x,count){
  }
 }
 
-/* У препятствий есть минимальная дистанция */
+/* Генерация уровня с безопасным расстоянием между группами */
 function makeLevel(){
  obstacles=[];
  var cfg=levels[selected];
@@ -335,23 +328,18 @@ function makeLevel(){
   if(symbol==='1'||symbol==='2'||symbol==='3'){
    addSpikes(x,Number(symbol));
   }
-
   x+=spacing;
   i++;
  }
 
- obstacles.push({
-  x:cfg.length-120,
-  w:12,
-  h:80,
-  type:'finish'
- });
+ obstacles.push({x:cfg.length-120,w:12,h:80,type:'finish'});
 }
 
 function updateHud(){
  progress=Math.min(100,Math.floor(world/(levels[selected].length-120)*100));
  $('progressText').textContent=progress+'%';
  $('progressFill').style.width=progress+'%';
+
  if(progress>best[selected]){
   best[selected]=progress;
   $('best').textContent=progress+'%';
@@ -359,14 +347,21 @@ function updateHud(){
  }
 }
 function reset(){
- world=0;progress=0;held=false;
- p.y=G-S;p.vy=0;p.angle=0;p.onGround=true;
- makeLevel();updateHud();
+ world=0;
+ progress=0;
+ held=false;
+ p.y=G-S;
+ p.vy=0;
+ p.angle=0;
+ p.onGround=true;
+ makeLevel();
+ updateHud();
 }
 function showMenu(kind){
  kind=kind||'menu';
  stopMusic();
- mode=kind;held=false;
+ mode=kind;
+ held=false;
  overlay.classList.remove('hidden');
  $('levels').classList.toggle('hidden',kind==='dead'||kind==='win');
 
@@ -384,7 +379,9 @@ function showMenu(kind){
   $('startBtn').textContent='ИГРАТЬ';
  }
 
- updateProfile();refreshStats();draw();
+ updateProfile();
+ refreshStats();
+ draw();
 }
 function start(){
  if(raf)cancelAnimationFrame(raf);
@@ -403,18 +400,23 @@ function jump(){
 }
 function die(){
  if(mode!=='playing')return;
- mode='dead';held=false;
+ mode='dead';
+ held=false;
  stopMusic();
  if(raf)cancelAnimationFrame(raf);
- raf=0;showMenu('dead');
+ raf=0;
+ showMenu('dead');
 }
 function win(){
  if(mode!=='playing')return;
- mode='win';held=false;progress=100;
+ mode='win';
+ held=false;
+ progress=100;
  stopMusic();
  $('progressText').textContent='100%';
  $('progressFill').style.width='100%';
  best[selected]=100;
+
  if(!wins[selected]){
   profile.xp+=[100,150,200][selected];
   saveProfile();
@@ -425,19 +427,23 @@ function win(){
 }
 function update(dt){
  if(mode!=='playing')return;
+
  var cfg=levels[selected];
  world+=cfg.speed*dt;
  p.vy+=cfg.gravity*dt;
  p.y+=p.vy*dt;
 
  if(p.y>=G-S){
-  p.y=G-S;p.vy=0;p.onGround=true;
+  p.y=G-S;
+  p.vy=0;
+  p.onGround=true;
   p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
   if(held)jump();
  }else{
   p.onGround=false;
   p.angle+=cfg.speed*dt/S*(Math.PI/2);
  }
+
  updateHud();
 
  for(var i=0;i<obstacles.length;i++){
@@ -472,13 +478,20 @@ function draw(){
  ctx.fillStyle=grad;
  ctx.fillRect(0,0,W,G);
 
- ctx.strokeStyle='#213865';ctx.lineWidth=1;
+ ctx.strokeStyle='#213865';
+ ctx.lineWidth=1;
  var off=-(world*.3%45);
  for(var x=off;x<W;x+=45){
-  ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,G);ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x,0);
+  ctx.lineTo(x,G);
+  ctx.stroke();
  }
  for(var y=22;y<G;y+=45){
-  ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0,y);
+  ctx.lineTo(W,y);
+  ctx.stroke();
  }
  for(var i=0;i<26;i++){
   var sx=(i*137-world*.12%900+900)%900;
@@ -487,8 +500,10 @@ function draw(){
   ctx.fillRect(sx,sy,2,2);
  }
 
- ctx.fillStyle='#14264c';ctx.fillRect(0,G,W,H-G);
- ctx.fillStyle='#36e8ff';ctx.fillRect(0,G,W,4);
+ ctx.fillStyle='#14264c';
+ ctx.fillRect(0,G,W,H-G);
+ ctx.fillStyle='#36e8ff';
+ ctx.fillRect(0,G,W,4);
  for(x=-(world%50);x<W;x+=50){
   ctx.fillStyle='#2b4779';
   ctx.fillRect(x,G+16,25,4);
@@ -506,7 +521,9 @@ function draw(){
    ctx.lineTo(ox+o.w,G);
    ctx.closePath();
    ctx.fill();
-   ctx.strokeStyle='#ffb2cb';ctx.lineWidth=2;ctx.stroke();
+   ctx.strokeStyle='#ffb2cb';
+   ctx.lineWidth=2;
+   ctx.stroke();
   }else if(o.type==='finish'){
    ctx.fillStyle='#4dffb4';
    ctx.fillRect(ox,G-o.h,8,o.h);
@@ -519,11 +536,13 @@ function draw(){
  ctx.save();
  ctx.translate(p.x+S/2,p.y+S/2);
  ctx.rotate(p.angle);
- ctx.shadowColor='#00dfff';ctx.shadowBlur=14;
+ ctx.shadowColor='#00dfff';
+ ctx.shadowBlur=14;
  ctx.fillStyle='#35e7ff';
  ctx.fillRect(-S/2,-S/2,S,S);
  ctx.shadowBlur=0;
- ctx.strokeStyle='#d8fcff';ctx.lineWidth=3;
+ ctx.strokeStyle='#d8fcff';
+ ctx.lineWidth=3;
  ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
  ctx.fillStyle='#0a2750';
  ctx.fillRect(-9,-7,5,7);
@@ -541,22 +560,23 @@ function draw(){
 function loop(now){
  var dt=Math.min((now-last)/1000,.025);
  last=now;
- update(dt);draw();
+ update(dt);
+ draw();
  if(mode==='playing')raf=requestAnimationFrame(loop);
  else raf=0;
 }
 
 function handleAction(action,button){
- if(action==='start'){start();return}
+ if(action==='start'){
+  start();
+  return;
+ }
 
  if(action==='music'){
   musicEnabled=!musicEnabled;
   updateMusicButton();
-  if(musicEnabled&&mode==='playing'){
-   startMusic();
-  }else{
-   stopMusic();
-  }
+  if(musicEnabled&&mode==='playing')startMusic();
+  else stopMusic();
   return;
  }
 
@@ -568,9 +588,17 @@ function handleAction(action,button){
  }
 
  if(action==='level'){
-  selected=Number(button.getAttribute('data-level'));
-  if(!Number.isFinite(selected)||selected<0||selected>2)selected=0;
-  reset();refreshStats();draw();
+  var next=Number(button.getAttribute('data-level'));
+  if(!Number.isFinite(next)||next<0||next>2)return;
+
+  selected=next;
+  reset();
+  refreshStats();
+  draw();
+
+  /* Если уровень меняют во время игры,
+     музыка сразу переключается на его мелодию. */
+  if(mode==='playing')startMusic();
   return;
  }
 
@@ -627,29 +655,40 @@ function handleAction(action,button){
  }
 }
 
-/* Единый обработчик кнопок */
-document.addEventListener('click',function(e){
- var button=e.target.closest('button[data-action]');
+/* Обработчик кнопок: работает и на сенсорном экране */
+function buttonHandler(e){
+ var target=e.target;
+ if(!target||!target.closest)return;
+
+ var button=target.closest('button[data-action]');
  if(!button)return;
+
  e.preventDefault();
  e.stopPropagation();
+
  try{
   handleAction(button.getAttribute('data-action'),button);
  }catch(err){
   showError(err);
  }
-},true);
+}
 
-/* Сенсорное управление */
+document.addEventListener('click',buttonHandler,true);
+
+/* Сенсорное управление кубиком */
 function press(e){
  if(mode!=='playing')return;
  if(e.cancelable)e.preventDefault();
- if(!held){held=true;jump()}
+ if(!held){
+  held=true;
+  jump();
+ }
 }
 function release(e){
  held=false;
  if(e&&e.cancelable)e.preventDefault();
 }
+
 canvas.addEventListener('pointerdown',press,{passive:false});
 window.addEventListener('pointerup',release);
 window.addEventListener('pointercancel',release);
@@ -659,17 +698,14 @@ window.addEventListener('keydown',function(e){
  if(e.code==='Space'||e.code==='ArrowUp'){
   e.preventDefault();
   if(mode==='playing'){
-   if(!held){held=true;jump()}
+   if(!held){
+    held=true;
+    jump();
+   }
   }else if(e.code==='Space'){
    start();
   }
  }
 });
 window.addEventListener('keyup',function(e){
- if(e.code==='Space'||e.code==='ArrowUp')held=false;
-});
-
-function showError(err){
- var box=$('errorBox');
- box.style.display='block';
- box.t
+ if(e.code=
