@@ -727,106 +727,42 @@ $('ownerDevBtn').addEventListener('click',()=>{
  ownerMode=true;
  saveProfile();
 
- $('ownerStatus').textContent='DEV-ник активирован!';:    return true;
-  }
-
-  function openOwnerPanel(){
-    if(!ownerDeviceAuthorized()){
-      return;
-    }
-    $('ownerPanel').classList.remove('hidden');
-    $('ownerStatus').textContent='Доступ подтверждён';
-  }
-
-  function closeOwnerPanel(){
-    $('ownerPanel').classList.add('hidden');
-  }
-
-  $('ownerClose').addEventListener('click',closeOwnerPanel);
-
-  $('ownerDevNick').addEventListener('click',()=>{
-    if(!ownerDeviceAuthorized()){
-      $('ownerStatus').textContent='Нет доступа';
-      return;
-    }
-
-    playerName='[DEV] Kyosuke';
-    localStorage.setItem('kyodash-name',playerName);
-    $('nickname').value=playerName;
-    $('ownerStatus').textContent='DEV-ник активирован!';
-  });
-
-  let logoClicks=0;
-  let logoClickTimer=null;
-
-  $('panelTitle').addEventListener('click',()=>{
-    logoClicks++;
-
-    clearTimeout(logoClickTimer);
-    logoClickTimer=setTimeout(()=>{
-      logoClicks=0;
-    },2000);
-
-    if(logoClicks>=7){
-      logoClicks=0;
-
-      if(!ownerDeviceAuthorized()){
-        return;
-      }
-
-      openOwnerPanel();
-    }
-  });
-
-  function checkOwnerSetup(){
-    if(location.hash==='#owner-setup'){
-      const pin=prompt('Введите PIN владельца:');
-
-      if(pin){
-        if(activateOwner(pin)){
-          alert('Доступ владельца активирован на этом браузере.');
-        }else{
-          alert('Неверный PIN.');
-        }
-      }
-
-      history.replaceState(null,'',location.pathname+location.search);
-    }
-  }
-
-  checkOwnerSetup();
-
-  /* Запуск игры */
-  $('playButton').addEventListener('click',()=>{
-    $('mainMenu').classList.add('hidden');
-    $('gameScreen').classList.remove('hidden');
-    startGame();
-  });
-
-  $('backButton').addEventListener('click',()=>{
-    stopGame();
-    $('gameScreen').classList.add('hidden');
-    $('mainMenu').classList.remove('hidden');
-  });
-
-  $('restartButton').addEventListener('click',()=>{
-    startGame();
-  });
-
-  $('levelSelect').addEventListener('change',()=>{
-    selectedLevel=$('levelSelect').value;
-    updateLevelInfo();
-  });
-
-  $('nickname').addEventListener('change',()=>{
-    playerName=$('nickname').value.trim()||'Player';
-    localStorage.setItem('kyodash-name',playerName);
-    $('nickname').value=playerName;
-  });
-
-  updateLevelInfo();
-  updateBestScore();
+ $('ownerStatus').textContent='DEV-ник активирован и сохранён на этом устройстве.';
+ $('ownerDevBtn').textContent='DEV-НИК АКТИВЕН';
 });
+
+// Первичная настройка: добавь #owner-setup в конец адреса игры.
+if(location.hash==='#owner-setup'&&!ownerDeviceAuthorized()){
+ const pin=prompt('Первичная настройка Owner Panel. Введите PIN владельца:');
+
+ if(pin!==null)activateOwner(pin);
+
+ history.replaceState(null,'',location.pathname+location.search);
+}
+
+$('menuOnly').addEventListener('click',()=>showMenu('menu'));
+
+$('menuBtn').addEventListener('click',()=>{
+ cancelAnimationFrame(raf);
+ showMenu('menu');
+});
+
+document.querySelectorAll('.level').forEach(b=>{
+ b.addEventListener('click',()=>{
+  selected=Number(b.dataset.level);
+  refreshStats();
+  makeLevel();
+  draw();
+ });
+});
+
+loadProfile();
+refreshStats();
+updateProfile();
+makeLevel();
+draw();
+
+})();
 </script>
 </body>
 </html>
