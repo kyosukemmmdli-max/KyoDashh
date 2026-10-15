@@ -185,7 +185,7 @@ function addSpikes(x,count){
  }
 }
 
-/* Генерация уровней: только шипы и финиш. Потолков больше нет. */
+/* Уровни без красных блоков-потолков */
 function makeLevel(){
  obstacles=[];
  var cfg=levels[selected],pattern=patterns[selected],x=540,i=0;
@@ -418,15 +418,28 @@ function handleAction(action,button){
  }
 
  if(action==='owner'){
+  /* Не разрешаем повторную активацию */
+  if(ownerMode){
+   alert('Owner Mode уже активирован!');
+   return;
+  }
+
   var pin=prompt('Введите PIN владельца:');
   if(pin===null)return;
 
-  var pins=['OwnerKD-ADS5H-D6E9F037F7','KenanDrun-AJ9S3L6KS9-8H67HSK','TESTER-AAA111'];
+  var pins=[
+   'OwnerKD-ADS5H-D6E9F037F7',
+   'KenanDrun-AJ9S3L6KS9-8H67HSK',
+   'TESTER-AAA111'
+  ];
+
   if(pins.indexOf(pin.trim())===-1){
-   alert('Неверный PIN!');return;
+   alert('Неверный PIN!');
+   return;
   }
 
-  ownerMode=!ownerMode;
+  ownerMode=true;
+
   if(pin.trim()===pins[0]){
    profile.isDev=true;
    profile.nickname='[DEV] Kyosuke';
@@ -437,11 +450,12 @@ function handleAction(action,button){
    saveProfile();
   }
 
-  alert(ownerMode?'Owner Mode активирован!':'Owner Mode выключен!');
+  alert('Owner Mode активирован!');
+  return;
  }
 }
 
-/* Единый обработчик кнопок — оставлен рабочим */
+/* Единый обработчик кнопок */
 document.addEventListener('click',function(e){
  var button=e.target.closest('button[data-action]');
  if(!button)return;
@@ -501,4 +515,5 @@ showMenu('menu');
 })();
 </script>
 </body>
-</html>
+ </html>
+ 
