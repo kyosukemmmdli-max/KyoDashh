@@ -41,6 +41,14 @@ button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126
 .hidden{display:none!important}
 .small{font-size:11px;color:#8097c6;margin-top:10px}
 .menuBtn{padding:7px;background:#111d3a;color:#bfe8ff;border:1px solid #294774}
+@media(max-height:600px){
+ .app{gap:5px;padding:5px}
+ .panel{padding:12px;max-height:96vh}
+ .logo{font-size:32px}
+ .profileBox{margin:8px 0;padding:8px}
+ .levels{margin:8px 0}
+ .stats{margin:7px}
+}
 </style>
 </head>
 <body>
@@ -59,7 +67,7 @@ button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126
 <div class="overlay" id="overlay">
 <section class="panel">
 <h1 class="logo" id="panelTitle">Kyo Dash</h1>
-<p class="sub" id="panelText">Прыгай через шипы и доберись до финиша!</p>
+<p class="sub" id="panelText">Прыгай через шипы и блоки и доберись до финиша!</p>
 <div class="profileBox">
 <div class="profileLine">ИГРОК: <strong id="profileNick">Player</strong></div>
 <div class="profileLine">УРОВЕНЬ <strong id="profileLevel">1</strong> · XP <strong id="profileXp">0 / 250</strong></div>
@@ -176,9 +184,9 @@ function activateOwner(pin){
 const W=900,H=420,G=330,S=34;
 
 const LEVELS=[
- {name:'EASY',speed:275,jump:-590,gravity:1650,length:5600,gap:245},
- {name:'MEDIUM',speed:300,jump:-600,gravity:1700,length:6500,gap:215},
- {name:'HARD',speed:320,jump:-610,gravity:1750,length:7400,gap:195}
+ {name:'EASY',speed:275,jump:-590,gravity:1650,length:5600,gap:225},
+ {name:'MEDIUM',speed:290,jump:-600,gravity:1680,length:6500,gap:205},
+ {name:'HARD',speed:305,jump:-610,gravity:1720,length:7400,gap:185}
 ];
 
 let selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
@@ -232,7 +240,6 @@ function playNote(freq,duration,type,volume){
 
   osc.type=type;
   osc.frequency.setValueAtTime(freq,now);
-
   gain.gain.setValueAtTime(.001,now);
   gain.gain.linearRampToValueAtTime(volume,now+.018);
   gain.gain.exponentialRampToValueAtTime(.001,now+duration);
@@ -282,13 +289,9 @@ function startMusic(){
 
   const i=musicStep%track.melody.length;
   const duration=track.tempo/1000;
-
   playNote(track.melody[i],duration*.82,'triangle',.23);
 
-  if(i%4===0){
-   playNote(track.bass[i],duration*3.4,'sine',.35);
-  }
-
+  if(i%4===0)playNote(track.bass[i],duration*3.4,'sine',.35);
   musicStep++;
  }
 
@@ -326,59 +329,83 @@ function refreshStats(){
  $('levelLabel').textContent=LEVELS[selected].name+' · '+(selected+1);
 }
 
+/* Новые препятствия: одиночные и двойные шипы,
+   широкие блоки и платформы. */
 function makeLevel(){
  obstacles=[];
  const cfg=LEVELS[selected];
 
  const easy=[
-  [1],[1],[2],[1],[1,1],[1],[2],[1],
-  [1,1],[1],[2],[1],[1,2],[1]
+  {type:'spikes',count:1},
+  {type:'platform',w:72,h:44},
+  {type:'spikes',count:2},
+  {type:'platform',w:88,h:55},
+  {type:'spikes',count:1},
+  {type:'spikes',count:2},
+  {type:'platform',w:66,h:40},
+  {type:'spikes',count:1},
+  {type:'spikes',count:2}
  ];
 
  const medium=[
-  [1],[2],[1,1],[2],[3],[1],[2,1],
-  [1,1],[3],[2],[1,2],[3],[2,1],[2]
+  {type:'spikes',count:1},
+  {type:'platform',w:78,h:48},
+  {type:'spikes',count:2},
+  {type:'platform',w:90,h:62},
+  {type:'spikes',count:2},
+  {type:'spikes',count:1},
+  {type:'platform',w:70,h:44},
+  {type:'spikes',count:2},
+  {type:'platform',w:85,h:52}
  ];
 
  const hard=[
-  [2],[3],[1,2],[3],[2,2],[1],[3],
-  [2,1],[3],[2,2],[3],[1,3],[2],[3]
+  {type:'spikes',count:2},
+  {type:'platform',w:80,h:58},
+  {type:'spikes',count:2},
+  {type:'platform',w:96,h:70},
+  {type:'spikes',count:3},
+  {type:'platform',w:74,h:50},
+  {type:'spikes',count:2},
+  {type:'platform',w:92,h:64},
+  {type:'spikes',count:3}
  ];
 
  const patterns=[easy,medium,hard][selected];
  let x=560,i=0;
 
- while(x<cfg.length-300){
-  const pattern=patterns[i%patterns.length];
-  const first=pattern[0];
-  const spikeW=selected===2?35:34;
-  const spikeH=selected===2?42:37;
+ while(x<cfg.length-340){
+  const item=patterns[i%patterns.length];
 
-  for(let j=0;j<first;j++){
-   obstacles.push({
-    x:x+j*spikeW,
-    w:spikeW,
-    h:spikeH,
-    type:'spike'
-   });
-  }
+  if(item.type==='spikes'){
+   const spikeW=34;
+   const spikeH=selected===2?40:36;
 
-  if(pattern.length>1){
-   const secondX=x+first*spikeW+
-    (selected===0?115:selected===1?95:80);
-
-   for(let j=0;j<pattern[1];j++){
+   for(let j=0;j<item.count;j++){
     obstacles.push({
-     x:secondX+j*spikeW,
+     x:x+j*spikeW,
      w:spikeW,
      h:spikeH,
      type:'spike'
     });
    }
+
+   x+=item.count*spikeW;
+  }else{
+   obstacles.push({
+    x,
+    w:item.w,
+    h:item.h,
+    type:'platform'
+   });
+
+   x+=item.w;
   }
 
-  const extra=selected===0?(i%3)*24:
-   selected===1?(i%3)*13:(i%3)*9;
+  // Небольшая случайность расстояния, но без слишком
+  // плотных и практически непроходимых комбинаций.
+  const extra=selected===0?(i%3)*17:
+   selected===1?(i%3)*10:(i%3)*5;
 
   x+=cfg.gap+extra;
   i++;
@@ -438,7 +465,7 @@ function showMenu(kind='menu'){
   $('startBtn').textContent='ИГРАТЬ СНОВА';
  }else{
   $('panelTitle').textContent='Kyo Dash';
-  $('panelText').textContent='Прыгай через шипы и доберись до финиша!';
+  $('panelText').textContent='Прыгай через шипы и блоки и доберись до финиша!';
   $('startBtn').textContent='ИГРАТЬ';
   $('menuOnly').classList.add('hidden');
  }
@@ -498,29 +525,61 @@ function win(){
  showMenu('win');
 }
 
+/* Физика: можно приземляться на верх блоков.
+   При удержании куб автоматически прыгает после приземления. */
 function update(dt){
  if(mode!=='playing')return;
 
  const cfg=LEVELS[selected];
+ const oldY=p.y;
+ const oldBottom=oldY+S;
 
  world+=cfg.speed*dt;
  p.vy+=cfg.gravity*dt;
  p.y+=p.vy*dt;
+ p.onGround=false;
 
- if(p.y>=G-S){
+ // Обычный пол.
+ if(p.y+S>=G){
   p.y=G-S;
   p.vy=0;
   p.onGround=true;
+ }
+
+ // Проверяем блоки и платформы.
+ for(const o of obstacles){
+  if(o.type!=='platform')continue;
+
+  const ox=o.x-world;
+  const top=G-o.h;
+  const overlaps=p.x+S>ox+3&&p.x<ox+o.w-3;
+
+  if(!overlaps)continue;
+
+  const crossedTop=
+   oldBottom<=top+9&&
+   p.y+S>=top&&
+   p.vy>=0;
+
+  if(crossedTop){
+   p.y=top-S;
+   p.vy=0;
+   p.onGround=true;
+  }else if(p.y+S>top+5&&p.y< G){
+   // Столкновение с боковой стороной блока.
+   die();
+   return;
+  }
+ }
+
+ if(p.onGround){
   p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
 
-  // ВОЗВРАЩЁН АВТОПРЫЖОК:
-  // пока палец удерживается, кубик прыгает при приземлении.
   if(held){
    p.vy=cfg.jump;
    p.onGround=false;
   }
  }else{
-  p.onGround=false;
   p.angle+=cfg.speed*dt/S*(Math.PI/2);
  }
 
@@ -536,12 +595,15 @@ function update(dt){
     win();
     return;
    }
-  }else{
-   const left=Math.max(p.x+5,ox+o.w*.16);
-   const right=Math.min(p.x+S-5,ox+o.w*.84);
+  }else if(o.type==='spike'){
+   // Более точная проверка столкновения с треугольным шипом.
+   const center=ox+o.w/2;
+   const playerLeft=p.x+5;
+   const playerRight=p.x+S-5;
+   const left=Math.max(playerLeft,ox+o.w*.16);
+   const right=Math.min(playerRight,ox+o.w*.84);
 
    if(left<right&&p.y+S>G-o.h){
-    const center=ox+o.w/2;
     const nearest=Math.max(ox,Math.min(center,p.x+S));
     const surfaceY=G-o.h*
      (1-Math.abs(nearest-center)/(o.w/2));
@@ -556,6 +618,7 @@ function update(dt){
 }
 
 function draw(){
+ ctx.clearRect(0,0,W,H);
  ctx.fillStyle='#0a1230';
  ctx.fillRect(0,0,W,H);
 
@@ -565,9 +628,9 @@ function draw(){
  ctx.fillStyle=grad;
  ctx.fillRect(0,0,W,G);
 
+ // Сетка фона.
  ctx.strokeStyle='#213865';
  ctx.lineWidth=1;
-
  const off=-(world*.3%45);
 
  for(let x=off;x<W;x+=45){
@@ -584,6 +647,7 @@ function draw(){
   ctx.stroke();
  }
 
+ // Звёзды.
  for(let i=0;i<26;i++){
   const sx=(i*137-world*.12%900+900)%900;
   const sy=(i*71)%285;
@@ -591,6 +655,7 @@ function draw(){
   ctx.fillRect(sx,sy,2,2);
  }
 
+ // Пол.
  ctx.fillStyle='#14264c';
  ctx.fillRect(0,G,W,H-G);
  ctx.fillStyle='#36e8ff';
@@ -601,9 +666,10 @@ function draw(){
   ctx.fillRect(x,G+16,25,4);
  }
 
+ // Препятствия.
  for(const o of obstacles){
   const x=o.x-world;
-  if(x<-70||x>W+70)continue;
+  if(x<-100||x>W+100)continue;
 
   if(o.type==='spike'){
    ctx.fillStyle=selected===2?'#ff3d8c':
@@ -619,7 +685,39 @@ function draw(){
    ctx.strokeStyle='#ffb2cb';
    ctx.lineWidth=2;
    ctx.stroke();
-  }else{
+  }else if(o.type==='platform'){
+   const top=G-o.h;
+
+   // Основной блок.
+   const blockGrad=ctx.createLinearGradient(x,top,x+o.w,G);
+   blockGrad.addColorStop(0,'#37dcff');
+   blockGrad.addColorStop(1,'#2466ce');
+   ctx.fillStyle=blockGrad;
+   ctx.fillRect(x,top,o.w,G-top);
+
+   // Верхняя светящаяся грань.
+   ctx.fillStyle='#b4f7ff';
+   ctx.fillRect(x,top,o.w,5);
+
+   // Обводка и узор.
+   ctx.strokeStyle='#75efff';
+   ctx.lineWidth=2;
+   ctx.strokeRect(x+1,top+1,o.w-2,G-top-2);
+
+   ctx.strokeStyle='#2b8fe4';
+   ctx.lineWidth=2;
+   for(let yy=top+17;yy<G-5;yy+=18){
+    ctx.beginPath();
+    ctx.moveTo(x+7,yy);
+    ctx.lineTo(x+o.w-7,yy);
+    ctx.stroke();
+   }
+
+   // Маленькие светящиеся детали.
+   ctx.fillStyle='#e4ffff';
+   ctx.fillRect(x+8,top+10,5,5);
+   ctx.fillRect(x+o.w-13,top+10,5,5);
+  }else if(o.type==='finish'){
    ctx.fillStyle='#4dffb4';
    ctx.fillRect(x,G-o.h,8,o.h);
 
@@ -629,6 +727,7 @@ function draw(){
   }
  }
 
+ // Кубик.
  ctx.save();
  ctx.translate(p.x+S/2,p.y+S/2);
  ctx.rotate(p.angle);
@@ -661,17 +760,13 @@ function loop(now){
  update(dt);
  draw();
 
- if(mode==='playing'){
-  raf=requestAnimationFrame(loop);
- }
+ if(mode==='playing')raf=requestAnimationFrame(loop);
 }
 
 function press(e){
  if(e)e.preventDefault();
  if(mode!=='playing')return;
 
- // Первое нажатие сразу запускает прыжок.
- // Дальше удерживание включает автопрыжок.
  if(!held){
   held=true;
   jump();
@@ -688,83 +783,4 @@ window.addEventListener('pointerup',release);
 window.addEventListener('pointercancel',release);
 
 window.addEventListener('keydown',e=>{
- if(e.code==='Space'||e.code==='ArrowUp'){
-  e.preventDefault();
-
-  if(mode==='playing'){
-   if(!held){
-    held=true;
-    jump();
-   }
-  }else if(e.code==='Space'){
-   start();
-  }
- }
-});
-
-window.addEventListener('keyup',e=>{
- if(e.code==='Space'||e.code==='ArrowUp')held=false;
-});
-
-$('nickSave').addEventListener('click',()=>{
- if(profile.isDev){
-  alert('DEV-ник закреплён и не меняется через обычное меню.');
-  updateProfile();
-  return;
- }
-
- const nick=$('nickInput').value.trim();
-
- if(nick.length<2){
-  alert('Ник должен содержать минимум 2 символа.');
-  return;
- }
-
- profile.nickname=nick.slice(0,16);
- saveProfile();
-});
-
-$('nickInput').addEventListener('keydown',e=>{
- if(e.key==='Enter')$('nickSave').click();
-});
-
-$('startBtn').addEventListener('click',start);
-
-$('ownerBtn').addEventListener('click',()=>{
- if(ownerMode){
-  ownerMode=false;
-  alert('Owner Mode выключен');
-  return;
- }
-
- const pin=prompt('Введите PIN владельца:');
- if(pin!==null)activateOwner(pin);
-});
-
-$('menuOnly').addEventListener('click',()=>showMenu('menu'));
-
-$('menuBtn').addEventListener('click',()=>{
- cancelAnimationFrame(raf);
- showMenu('menu');
-});
-
-document.querySelectorAll('.level').forEach(b=>{
- b.addEventListener('click',()=>{
-  selected=Number(b.dataset.level);
-  refreshStats();
-  makeLevel();
-  draw();
- });
-});
-
-loadProfile();
-refreshStats();
-updateProfile();
-makeLevel();
-draw();
-
-})();
-</script>
-</body>
- </html>
- 
+ if(e.code==='Space'||e.code==='ArrowU
