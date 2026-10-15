@@ -185,10 +185,13 @@ function addSpikes(x,count){
  }
 }
 
-/* Уровни без красных блоков-потолков */
+/* Исправленная генерация: без дополнительных двойных групп */
 function makeLevel(){
  obstacles=[];
- var cfg=levels[selected],pattern=patterns[selected],x=540,i=0;
+ var cfg=levels[selected];
+ var pattern=patterns[selected];
+ var x=540;
+ var i=0;
 
  while(x<cfg.length-320){
   var symbol=pattern[i%pattern.length];
@@ -198,20 +201,29 @@ function makeLevel(){
   else if(selected===1)spacing+=[25,45,15,55,30][i%5];
   else spacing+=[8,25,12,32,5][i%5];
 
+  /* Не даём препятствиям стоять слишком близко */
+  var minimumGap=selected===0?350:selected===1?335:330;
+  spacing=Math.max(spacing,minimumGap);
+
   if(symbol==='1'||symbol==='2'||symbol==='3'){
    addSpikes(x,Number(symbol));
   }
 
-  if(selected===2&&i%8===5){
-   addSpikes(x+spacing*.55,2);
-  }
+  /* Удалён старый дополнительный спавн двух шипов на HARD.
+     Именно он создавал почти непроходимые комбинации. */
 
   x+=spacing;
   i++;
  }
 
- obstacles.push({x:cfg.length-120,w:12,h:80,type:'finish'});
+ obstacles.push({
+  x:cfg.length-120,
+  w:12,
+  h:80,
+  type:'finish'
+ });
 }
+
 function updateHud(){
  progress=Math.min(100,Math.floor(world/(levels[selected].length-120)*100));
  $('progressText').textContent=progress+'%';
@@ -279,7 +291,9 @@ function win(){
   profile.xp+=[100,150,200][selected];
   saveProfile();
  }
- wins[selected]=true;saveStats();showMenu('win');
+ wins[selected]=true;
+ saveStats();
+ showMenu('win');
 }
 function update(dt){
  if(mode!=='playing')return;
@@ -307,7 +321,8 @@ function update(dt){
    continue;
   }
 
-  var px1=p.x+5,px2=p.x+S-5,py1=p.y+5,py2=p.y+S-3;
+  var px1=p.x+5,px2=p.x+S-5;
+  var py1=p.y+5,py2=p.y+S-3;
   var left=Math.max(px1,ox),right=Math.min(px2,ox+o.w);
   if(left>=right)continue;
 
@@ -320,11 +335,14 @@ function update(dt){
 }
 function draw(){
  ctx.clearRect(0,0,W,H);
- ctx.fillStyle='#0a1230';ctx.fillRect(0,0,W,H);
+ ctx.fillStyle='#0a1230';
+ ctx.fillRect(0,0,W,H);
 
  var grad=ctx.createLinearGradient(0,0,0,G);
- grad.addColorStop(0,'#111e48');grad.addColorStop(1,'#0a1530');
- ctx.fillStyle=grad;ctx.fillRect(0,0,W,G);
+ grad.addColorStop(0,'#111e48');
+ grad.addColorStop(1,'#0a1530');
+ ctx.fillStyle=grad;
+ ctx.fillRect(0,0,W,G);
 
  ctx.strokeStyle='#213865';ctx.lineWidth=1;
  var off=-(world*.3%45);
@@ -335,14 +353,17 @@ function draw(){
   ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
  }
  for(var i=0;i<26;i++){
-  var sx=(i*137-world*.12%900+900)%900,sy=(i*71)%285;
-  ctx.fillStyle='#668ac5';ctx.fillRect(sx,sy,2,2);
+  var sx=(i*137-world*.12%900+900)%900;
+  var sy=(i*71)%285;
+  ctx.fillStyle='#668ac5';
+  ctx.fillRect(sx,sy,2,2);
  }
 
  ctx.fillStyle='#14264c';ctx.fillRect(0,G,W,H-G);
  ctx.fillStyle='#36e8ff';ctx.fillRect(0,G,W,4);
  for(x=-(world%50);x<W;x+=50){
-  ctx.fillStyle='#2b4779';ctx.fillRect(x,G+16,25,4);
+  ctx.fillStyle='#2b4779';
+  ctx.fillRect(x,G+16,25,4);
  }
 
  for(i=0;i<obstacles.length;i++){
@@ -359,8 +380,10 @@ function draw(){
    ctx.fill();
    ctx.strokeStyle='#ffb2cb';ctx.lineWidth=2;ctx.stroke();
   }else if(o.type==='finish'){
-   ctx.fillStyle='#4dffb4';ctx.fillRect(ox,G-o.h,8,o.h);
-   ctx.fillStyle='#e6fff5';ctx.font='bold 18px Arial';
+   ctx.fillStyle='#4dffb4';
+   ctx.fillRect(ox,G-o.h,8,o.h);
+   ctx.fillStyle='#e6fff5';
+   ctx.font='bold 18px Arial';
    ctx.fillText('FINISH',ox-26,G-o.h-12);
   }
  }
@@ -369,17 +392,22 @@ function draw(){
  ctx.translate(p.x+S/2,p.y+S/2);
  ctx.rotate(p.angle);
  ctx.shadowColor='#00dfff';ctx.shadowBlur=14;
- ctx.fillStyle='#35e7ff';ctx.fillRect(-S/2,-S/2,S,S);
+ ctx.fillStyle='#35e7ff';
+ ctx.fillRect(-S/2,-S/2,S,S);
  ctx.shadowBlur=0;
  ctx.strokeStyle='#d8fcff';ctx.lineWidth=3;
  ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
  ctx.fillStyle='#0a2750';
- ctx.fillRect(-9,-7,5,7);ctx.fillRect(4,-7,5,7);
+ ctx.fillRect(-9,-7,5,7);
+ ctx.fillRect(4,-7,5,7);
  ctx.restore();
 
  if(mode!=='playing'){
-  ctx.fillStyle='#b6d2ff';ctx.font='bold 20px Arial';ctx.textAlign='center';
-  ctx.fillText('READY?',W/2,105);ctx.textAlign='left';
+  ctx.fillStyle='#b6d2ff';
+  ctx.font='bold 20px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('READY?',W/2,105);
+  ctx.textAlign='left';
  }
 }
 function loop(now){
@@ -395,30 +423,35 @@ function handleAction(action,button){
 
  if(action==='menu'){
   if(raf)cancelAnimationFrame(raf);
-  raf=0;showMenu('menu');return;
+  raf=0;
+  showMenu('menu');
+  return;
  }
 
  if(action==='level'){
   selected=Number(button.getAttribute('data-level'));
   if(!Number.isFinite(selected)||selected<0||selected>2)selected=0;
-  reset();refreshStats();draw();return;
+  reset();refreshStats();draw();
+  return;
  }
 
  if(action==='nick'){
   if(profile.isDev){
    alert('DEV-ник закреплён.');
-   updateProfile();return;
+   updateProfile();
+   return;
   }
   var nick=$('nickInput').value.trim();
   if(nick.length<2){
-   alert('Ник должен содержать минимум 2 символа.');return;
+   alert('Ник должен содержать минимум 2 символа.');
+   return;
   }
   profile.nickname=nick.slice(0,16);
-  saveProfile();return;
+  saveProfile();
+  return;
  }
 
  if(action==='owner'){
-  /* Не разрешаем повторную активацию */
   if(ownerMode){
    alert('Owner Mode уже активирован!');
    return;
@@ -515,5 +548,4 @@ showMenu('menu');
 })();
 </script>
 </body>
- </html>
- 
+</html>
