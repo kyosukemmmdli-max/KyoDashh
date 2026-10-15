@@ -27,7 +27,7 @@ canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px soli
 @keyframes rainbow{to{background-position:300% 50%}}
 .nickRow{display:flex;gap:7px;margin-top:10px}
 input{min-width:0;flex:1;background:#080f25;border:1px solid #355786;border-radius:9px;padding:10px;color:white}
-button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126;font-weight:900;cursor:pointer}
+button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126;font-weight:900;cursor:pointer;touch-action:manipulation}
 button:active{transform:scale(.97)}
 .nickSave{padding:9px}
 .xpTrack{height:6px;background:#1a2b4d;border-radius:99px;overflow:hidden;margin-top:8px}
@@ -63,7 +63,7 @@ button:active{transform:scale(.97)}
 </header>
 <div class="meter"><div class="fill" id="progressFill"></div></div>
 <canvas id="game" width="900" height="420"></canvas>
-<div class="hint">ТАП — ПРЫЖОК · УДЕРЖИВАЙ — АВТОПРЫЖОК · КРАСНЫЕ БЛОКИ — НЕ ПРЫГАТЬ</div>
+<div class="hint">ТАП — ПРЫЖОК · УДЕРЖИВАЙ — АВТОПРЫЖОК</div>
 </main>
 
 <div class="overlay" id="overlay">
@@ -95,7 +95,6 @@ button:active{transform:scale(.97)}
 
 <button class="btn" id="startBtn">ИГРАТЬ</button>
 <button class="btn secondary" id="ownerBtn">OWNER MODE</button>
-<button class="btn secondary hidden" id="menuOnly">ВЫБОР УРОВНЯ</button>
 <div class="small">У каждого уровня собственная расстановка препятствий.</div>
 </section>
 </div>
@@ -139,9 +138,8 @@ function saveProfile(){
 }
 
 function updateProfile(){
- const nick=$('profileNick');
- nick.textContent=profile.nickname;
- nick.classList.toggle('rainbowNick',profile.isDev);
+ $('profileNick').textContent=profile.nickname;
+ $('profileNick').classList.toggle('rainbowNick',profile.isDev);
  $('profileLevel').textContent=Math.floor(profile.xp/250)+1;
  $('profileXp').textContent=(profile.xp%250)+' / 250';
  $('xpFill').style.width=((profile.xp%250)/250*100)+'%';
@@ -150,14 +148,12 @@ function updateProfile(){
 
 function activateOwner(pin){
  pin=pin.trim();
-
  if(!OWNER_PINS.includes(pin)){
   alert('Неверный PIN!');
   return;
  }
 
  let deviceId=localStorage.getItem('kyodash-device-id');
-
  if(!deviceId){
   deviceId=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
   localStorage.setItem('kyodash-device-id',deviceId);
@@ -187,11 +183,8 @@ function activateOwner(pin){
  }else{
   alert('Owner Mode активирован!');
  }
-
- refreshStats();
 }
 
-/* Новая физика и более мягкая сложность */
 const LEVELS=[
  {name:'EASY',speed:285,jump:-555,gravity:1550,length:5700,gap:365},
  {name:'MEDIUM',speed:295,jump:-565,gravity:1600,length:6500,gap:305},
@@ -323,19 +316,10 @@ function refreshStats(){
  $('levelLabel').textContent=LEVELS[selected].name+' · '+(selected+1);
 }
 
-/*
-  1 = одиночный шип
-  2 = два шипа рядом
-  3 = три шипа рядом
-  C = низкий потолок
-*/
 const PATTERNS=[
- ['1','.','.','1','.','2','.','.','1','.','.','1','.','2','.','.',
-  '1','.','1','.','.','2','.','.','1','.','.','2','.','.','1','.'],
- ['1','.','2','.','1','.','C','.','2','.','1','.','.','2','.','C',
-  '1','.','2','.','1','.','C','.','2','.','1','.','2','.','.','1'],
- ['2','.','1','.','C','.','2','.','1','.','3','.','C','.','2','.',
-  '1','.','C','.','2','.','1','.','3','.','2','.','C','.','1','.']
+ ['1','.','.','1','.','2','.','.','1','.','.','1','.','2','.','.','1','.','1','.','.','2','.','.','1','.','.','2','.','.','1','.'],
+ ['1','.','2','.','1','.','C','.','2','.','1','.','.','2','.','C','1','.','2','.','1','.','C','.','2','.','1','.','2','.','.','1'],
+ ['2','.','1','.','C','.','2','.','1','.','3','.','C','.','2','.','1','.','C','.','2','.','1','.','3','.','2','.','C','.','1','.']
 ];
 
 function addSpikes(x,count){
@@ -364,19 +348,10 @@ function makeLevel(){
   if(symbol==='1'||symbol==='2'||symbol==='3'){
    addSpikes(x,Number(symbol));
   }else if(symbol==='C'&&selected>0){
-   obstacles.push({
-    x:x,
-    w:68,
-    y:G-105,
-    h:30,
-    type:'ceiling'
-   });
+   obstacles.push({x:x,w:68,y:G-105,h:30,type:'ceiling'});
   }
 
-  // Дополнительные препятствия появляются только на HARD.
-  if(selected===2&&i%8===5){
-   addSpikes(x+spacing*.55,2);
-  }
+  if(selected===2&&i%8===5)addSpikes(x+spacing*.55,2);
 
   x+=spacing;
   i++;
@@ -415,7 +390,6 @@ function showMenu(kind='menu'){
  held=false;
  overlay.classList.remove('hidden');
  $('levels').classList.toggle('hidden',kind==='dead'||kind==='win');
- $('menuOnly').classList.add('hidden');
 
  if(kind==='dead'){
   $('panelTitle').textContent='УПС!';
@@ -495,9 +469,11 @@ function update(dt){
   p.vy=0;
   p.onGround=true;
   p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
+
+  // Автопрыжок, пока палец удерживается на экране.
+  if(held)jump();
  }else{
   p.onGround=false;
-  // Куб вращается в прыжке, но не крутится бесконечно на земле.
   p.angle+=cfg.speed*dt/S*(Math.PI/2);
  }
 
@@ -521,15 +497,13 @@ function update(dt){
   const py2=p.y+S-3;
 
   if(o.type==='ceiling'){
-   if(px2>ox+4&&px1<ox+o.w-4&&
-      py2>o.y+4&&py1<o.y+o.h){
+   if(px2>ox+4&&px1<ox+o.w-4&&py2>o.y+4&&py1<o.y+o.h){
     die();
     return;
    }
    continue;
   }
 
-  // Приближённая проверка треугольной формы шипа.
   const left=Math.max(px1,ox);
   const right=Math.min(px2,ox+o.w);
   if(left>=right)continue;
@@ -625,7 +599,6 @@ function draw(){
   }
  }
 
- // Кубик игрока
  ctx.save();
  ctx.translate(p.x+S/2,p.y+S/2);
  ctx.rotate(p.angle);
@@ -642,7 +615,7 @@ function draw(){
  ctx.fillRect(4,-7,5,7);
  ctx.restore();
 
- if(mode==='menu'){
+ if(mode!=='playing'){
   ctx.fillStyle='#b6d2ff';
   ctx.font='bold 20px Arial';
   ctx.textAlign='center';
@@ -657,12 +630,10 @@ function loop(now){
  update(dt);
  draw();
 
- if(mode==='playing'){
-  raf=requestAnimationFrame(loop);
- }
+ if(mode==='playing')raf=requestAnimationFrame(loop);
 }
 
-/* Тап — один прыжок. Удерживание не запускает бесконечные прыжки. */
+/* Управление мышью и сенсорным экраном */
 function press(e){
  if(e)e.preventDefault();
  if(mode!=='playing')return;
@@ -709,7 +680,6 @@ $('nickSave').addEventListener('click',()=>{
  }
 
  const nick=$('nickInput').value.trim();
-
  if(nick.length<2){
   alert('Ник должен содержать минимум 2 символа.');
   return;
@@ -736,8 +706,6 @@ $('ownerBtn').addEventListener('click',()=>{
  if(pin!==null)activateOwner(pin);
 });
 
-$('menuOnly').addEventListener('click',()=>showMenu('menu'));
-
 $('menuBtn').addEventListener('click',()=>{
  cancelAnimationFrame(raf);
  showMenu('menu');
@@ -752,8 +720,15 @@ document.querySelectorAll('.level').forEach(b=>{
  });
 });
 
+/* Запуск приложения */
 loadProfile();
 updateProfile();
 refreshStats();
 reset();
 showMenu('menu');
+
+})();
+</script>
+</body>
+ </html>
+
