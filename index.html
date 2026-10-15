@@ -5,399 +5,430 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#080d22">
-<title>Kyo Dash</title>
+<title>Kyo Dash — Big Update</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d22;color:#fff;font-family:Arial,sans-serif}
-body{display:flex;align-items:center;justify-content:center;touch-action:manipulation}
-.app{width:min(100%,1000px);padding:10px;display:flex;flex-direction:column;gap:9px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:800;color:#b8d9ff}
-.brand{color:#48eaff;font-size:17px;letter-spacing:2px}
-.meter{height:7px;background:#172344;border-radius:99px;overflow:hidden}
-.fill{height:100%;width:0;background:linear-gradient(90deg,#26dfff,#5cffba)}
-canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px solid #28477a;border-radius:12px;background:#0c1534;touch-action:none}
-.hint{text-align:center;font-size:11px;color:#8da8d7}
-.overlay{position:fixed;inset:0;z-index:5;background:#040817ee;display:flex;align-items:center;justify-content:center;padding:12px}
-.panel{width:min(94vw,470px);max-height:94vh;overflow:auto;padding:20px;border:1px solid #3266a4;border-radius:22px;text-align:center;background:linear-gradient(150deg,#172754,#0a1026)}
-.logo{font-size:42px;color:#45eaff;margin:0}
-.sub{color:#b9c9f2;font-size:14px}
-.profileBox{margin:14px 0;padding:12px;border:1px solid #2d4c79;border-radius:14px;background:#0b1733}
-.profileLine{font-size:12px;color:#a9c4f2;margin:7px}
-.rainbowNick{font-weight:1000;background:linear-gradient(90deg,#ff3158,#ffad35,#ffff55,#42ff9b,#35eaff,#a66bff,#ff48d1,#ff3158);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:rainbow 2.5s linear infinite}
-@keyframes rainbow{to{background-position:300% 50%}}
-.nickRow{display:flex;gap:7px;margin-top:10px}
-input{min-width:0;flex:1;background:#080f25;border:1px solid #355786;border-radius:9px;padding:10px;color:white}
-button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126;font-weight:900;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#070b1c;color:#fff;font-family:Arial,sans-serif}
+body{touch-action:manipulation}
+button,input,select{font:inherit}
+button{cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 button:active{transform:scale(.97)}
-.nickSave{padding:9px}
-.xpTrack{height:6px;background:#1a2b4d;border-radius:99px;overflow:hidden;margin-top:8px}
-.xpFill{height:100%;width:0;background:linear-gradient(90deg,#35e5ff,#66ffb8)}
-.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:15px 0}
-.level{background:#111b38;color:#d8e6ff;border:1px solid #304873}
-.level.active{border-color:#35e3ff;background:#12314a}
-.level small{display:block;font-size:10px;margin-top:4px}
-.btn{width:100%;padding:13px;margin-top:8px;font-size:15px;background:linear-gradient(90deg,#2adfff,#65ffca)}
-.secondary{background:#192747;color:#cde2ff;border:1px solid #344d79}
-.stats{display:flex;justify-content:center;gap:18px;color:#9eb8e8;font-size:12px;margin:12px}
+.app{width:min(100%,1050px);margin:auto;padding:9px;display:flex;flex-direction:column;gap:8px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap}
+.logoSmall{font-weight:1000;letter-spacing:1.5px;color:#42eaff;font-size:18px}
+.stat{font-size:12px;color:#bad3ff;font-weight:bold}
+.meter{height:7px;background:#192344;border-radius:20px;overflow:hidden}
+#progressFill{height:100%;width:0;background:linear-gradient(90deg,#31dfff,#6dffb6)}
+canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px solid #2d4c80;border-radius:12px;background:#0a1230;touch-action:none}
+.hint{text-align:center;color:#91a8d4;font-size:11px;min-height:14px}
+.smallbtn{padding:8px 10px;border:1px solid #304a77;background:#121e3c;color:#cce9ff;border-radius:9px;font-size:11px;font-weight:bold}
+.overlay{position:fixed;inset:0;z-index:5;background:#030614ed;display:flex;align-items:center;justify-content:center;padding:10px}
+.panel{width:min(96vw,500px);max-height:95dvh;overflow:auto;background:linear-gradient(145deg,#172750,#090f25);border:1px solid #315a91;border-radius:20px;padding:18px;text-align:center;box-shadow:0 0 45px #12295b66}
+.title{font-size:clamp(30px,9vw,47px);margin:0;color:#41e9ff;letter-spacing:1px;text-shadow:0 0 20px #1bcfff55}
+.subtitle{font-size:13px;color:#b4c8ed;line-height:1.5}
+.profile{padding:12px;margin:12px 0;background:#0b1530;border:1px solid #2b4776;border-radius:13px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+.levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:12px 0}
+.btn{width:100%;padding:12px 8px;background:linear-gradient(90deg,#25dfff,#67ffc5);color:#061327;border:0;border-radius:10px;font-weight:900}
+.secondary{background:#142343;border:1px solid #34517f;color:#d9e9ff}
+.danger{background:#48203b;color:#ffcbde;border:1px solid #8d416c}
+.level{background:#111c38;border:1px solid #30466f;color:#e1edff;border-radius:9px;padding:10px 3px;font-weight:900}
+.level.active{border-color:#3be9ff;background:#12314c;box-shadow:inset 0 0 12px #26dfff18}
+.level small{display:block;font-size:9px;margin-top:5px;color:#a9c9f4}
+.card{background:#0b1530;border:1px solid #2a426c;border-radius:12px;padding:11px;text-align:left;min-width:0}
+.card h3{font-size:14px;margin:0 0 7px;color:#58e9ff}
+.card p{font-size:12px;color:#b6c9eb;line-height:1.4;margin:5px 0}
+.muted{color:#8fa8d5;font-size:11px}
+input,select{width:100%;padding:10px;background:#080f23;border:1px solid #34527f;color:white;border-radius:9px;margin:5px 0}
+.xpbar{height:6px;background:#243353;border-radius:20px;overflow:hidden;margin-top:7px}
+#xpFill{height:100%;width:0;background:linear-gradient(90deg,#34dfff,#63ffb3)}
 .hidden{display:none!important}
-.small{font-size:11px;color:#8097c6;margin-top:10px}
-.menuBtn{padding:7px;background:#111d3a;color:#bfe8ff;border:1px solid #294774;white-space:nowrap}
-#errorBox{position:fixed;z-index:20;left:8px;right:8px;bottom:8px;background:#541b2b;color:white;padding:12px;border-radius:10px;font-size:12px;display:none;overflow-wrap:anywhere}
-@media(max-width:420px){
- .app{padding:6px;gap:6px}
- .top{gap:5px;font-size:10px}
- .brand{font-size:14px;letter-spacing:1px}
- .menuBtn{font-size:10px;padding:7px 5px}
+.rainbow{font-weight:1000;background:linear-gradient(90deg,#ff5478,#ffd94e,#56ffac,#42dfff,#c274ff,#ff5478);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rainbow 3s linear infinite}
+@keyframes rainbow{to{background-position:300% 50%}}
+#message{position:fixed;z-index:20;top:12px;left:10px;right:10px;text-align:center;pointer-events:none}
+.toast{display:inline-block;padding:10px 14px;border-radius:10px;background:#17294c;border:1px solid #42eaff;color:white;font-size:13px;box-shadow:0 6px 30px #0008}
+#errorBox{display:none;position:fixed;z-index:30;bottom:5px;left:5px;right:5px;padding:12px;border-radius:10px;background:#681e32;color:#fff;font-size:12px;overflow-wrap:anywhere}
+@media(max-width:440px){
+ .app{padding:5px;gap:5px}
+ .logoSmall{font-size:15px}
+ .smallbtn{padding:7px;font-size:10px}
+ .panel{padding:13px}
+ .card{padding:8px}
 }
-@media(max-height:540px){
- .app{gap:5px;padding:5px}
- .panel{padding:12px;max-height:96vh}
- .logo{font-size:32px}
- .profileBox{margin:7px 0;padding:8px}
- .levels{margin:8px 0}
- .stats{margin:7px}
+@media(max-height:560px){
+ .app{gap:4px;padding:4px}
+ .panel{padding:10px;max-height:98dvh}
+ .profile{padding:7px;margin:7px 0}
+ .grid,.levels{gap:5px;margin:7px 0}
+ .title{font-size:29px}
 }
 </style>
 </head>
 <body>
-
 <main class="app">
-<header class="top">
-<span class="brand">Kyo Dash</span>
-<span id="levelLabel">EASY · 1</span>
-<span id="progressText">0%</span>
-<button class="menuBtn" id="musicBtn" data-action="music">♫ ВКЛ</button>
-<button class="menuBtn" data-action="menu">МЕНЮ</button>
-</header>
-<div class="meter"><div class="fill" id="progressFill"></div></div>
-<canvas id="game" width="900" height="420"></canvas>
-<div class="hint">ТАП — ПРЫЖОК · УДЕРЖИВАЙ — АВТОПРЫЖОК</div>
+ <header class="top">
+  <span class="logoSmall">KYO DASH</span>
+  <span class="stat" id="levelLabel">EASY</span>
+  <span class="stat" id="progressText">0%</span>
+  <button class="smallbtn" data-action="music" id="musicBtn">♫ MUSIC ON</button>
+  <button class="smallbtn" data-action="menu">MENU</button>
+ </header>
+ <div class="meter"><div id="progressFill"></div></div>
+ <canvas id="game" width="900" height="420"></canvas>
+ <div class="hint" id="hint">Тапни по экрану, чтобы прыгнуть · Удерживай для автопрыжка</div>
 </main>
 
 <div class="overlay" id="overlay">
-<section class="panel">
-<h1 class="logo" id="panelTitle">Kyo Dash</h1>
-<p class="sub" id="panelText">Прыгай через шипы и доберись до финиша!</p>
-
-<div class="profileBox">
-<div class="profileLine">ИГРОК: <strong id="profileNick">Player</strong></div>
-<div class="profileLine">УРОВЕНЬ <strong id="profileLevel">1</strong> · XP <strong id="profileXp">0 / 250</strong></div>
-<div class="xpTrack"><div class="xpFill" id="xpFill"></div></div>
-<div class="nickRow">
-<input id="nickInput" maxlength="16" placeholder="Твой ник">
-<button class="nickSave" data-action="nick">СМЕНИТЬ</button>
+ <section class="panel">
+  <h1 class="title" id="panelTitle">Kyo Dash</h1>
+  <p class="subtitle" id="panelSubtitle">BIG UPDATE · Прыгай, собирай награды и создавай уровни!</p>
+  <div id="panelContent"></div>
+ </section>
 </div>
-<div class="small">Профиль и XP сохраняются на устройстве</div>
-</div>
-
-<div class="levels" id="levels">
-<button class="level active" data-action="level" data-level="0">EASY<small>Stereo Madness</small></button>
-<button class="level" data-action="level" data-level="1">MEDIUM<small>Jumper</small></button>
-<button class="level" data-action="level" data-level="2">HARD<small>FingerDash</small></button>
-</div>
-
-<div class="stats">
-<span>РЕКОРД <b id="best">0%</b></span>
-<span>ПОБЕДЫ <b id="wins">0/3</b></span>
-</div>
-
-<button class="btn" id="startBtn" data-action="start">ИГРАТЬ</button>
-<button class="btn secondary" data-action="owner">OWNER MODE</button>
-<div class="small">У каждого уровня своя музыка и расстановка препятствий.</div>
-</section>
-</div>
-
+<div id="message"></div>
 <div id="errorBox"></div>
 
 <script>
 (function(){
 'use strict';
-
 var $=function(id){return document.getElementById(id)};
-var canvas=$('game');
-var ctx=canvas.getContext('2d');
-var overlay=$('overlay');
-var W=900,H=420,G=330,S=34;
-
+var canvas=$('game'),ctx=canvas.getContext('2d');
+var overlay=$('overlay'),content=$('panelContent');
+var W=900,H=420,G=330,CUBE=34;
+var STORE='kyoDashBigUpdateV1';
 var levels=[
- {name:'EASY',speed:285,jump:-555,gravity:1550,length:5700,gap:365},
- {name:'MEDIUM',speed:295,jump:-565,gravity:1600,length:6500,gap:305},
- {name:'HARD',speed:310,jump:-575,gravity:1650,length:7200,gap:265}
+ {name:'EASY',speed:285,jump:-555,gravity:1550,length:5700,gap:390},
+ {name:'MEDIUM',speed:295,jump:-565,gravity:1600,length:6500,gap:350},
+ {name:'HARD',speed:310,jump:-575,gravity:1650,length:7200,gap:330}
 ];
-
-var patterns=[
- ['1','.','.','1','.','2','.','.','1','.','.','1','.','2','.','.','1','.','1','.','.','2','.','.','1','.','.','2','.','.','1','.'],
- ['1','.','2','.','1','.','C','.','2','.','1','.','.','2','.','C','1','.','2','.','1','.','C','.','2','.','1','.','2','.','.','1'],
- ['2','.','1','.','C','.','2','.','1','.','3','.','C','.','2','.','1','.','C','.','2','.','1','.','3','.','2','.','C','.','1','.']
-];
-
-var profile={nickname:'Player',xp:0,isDev:false};
+var profile={nickname:'Player',xp:0,coins:0};
 var selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
-var held=false,obstacles=[];
-var best=[0,0,0],wins=[false,false,false];
-var p={x:150,y:G-S,vy:0,angle:0,onGround:true};
-var ownerMode=false;
-
-/* Три оригинальные синтезированные мелодии */
-var musicEnabled=true;
-var audioCtx=null;
-var musicTimer=null;
-var musicStep=0;
-var musicGeneration=0;
-
-var melodies=[
- {
-  tempo:190,
-  notes:[523,659,784,659,523,392,440,523,659,523,440,392,440,523,659,784,659,523,392,440,523,659,784,880,784,659,523,440,392,440,523,392],
-  bass:[131,0,165,0,196,0,165,0],
-  wave:'square'
- },
- {
-  tempo:145,
-  notes:[392,523,659,784,659,523,392,523,440,587,698,880,698,587,440,587,392,523,659,784,880,784,659,523,440,587,698,880,784,698,587,440],
-  bass:[98,98,131,131,110,110,147,147],
-  wave:'sawtooth'
- },
- {
-  tempo:105,
-  notes:[330,440,659,523,330,440,784,659,349,466,698,587,349,466,880,698,330,523,659,880,784,659,523,440,349,523,698,932,880,698,523,392],
-  bass:[82,82,110,110,73,73,98,98],
-  wave:'square'
- }
+var held=false,obstacles=[],particles=[],custom=[];
+var best=[0,0,0],wins=[false,false,false],achieved={};
+var unlocked=['cyan'],skin='cyan',dailyClaim='',editorTool='spike';
+var ownerMode=false,gravityFlip=false,portalCooldown=0;
+var p={x:150,y:G-CUBE,vy:0,angle:0,onGround:true};
+var musicEnabled=true,audioCtx=null,musicTimer=null,musicStep=0,musicGeneration=0;
+var songData=[
+ {tempo:190,notes:[523,659,784,659,523,392,440,523,659,523,440,392,440,523,659,784,659,523,392,440,523,659,784,880,784,659,523,440,392,440,523,392],bass:[131,0,165,0,196,0,165,0],wave:'square'},
+ {tempo:145,notes:[392,523,659,784,659,523,392,523,440,587,698,880,698,587,440,587,392,523,659,784,880,784,659,523,440,587,698,880,784,698,587,440],bass:[98,98,131,131,110,110,147,147],wave:'sawtooth'},
+ {tempo:105,notes:[330,440,659,523,330,440,784,659,349,466,698,587,349,466,880,698,330,523,659,880,784,659,523,440,349,523,698,932,880,698,523,392],bass:[82,82,110,110,73,73,98,98],wave:'square'}
 ];
-
+var skinsData=[
+ {id:'cyan',name:'Neon Cyan',price:0,color:'#35eaff',glow:'#00cfff'},
+ {id:'fire',name:'Fire Cube',price:100,color:'#ff6748',glow:'#ff2d54'},
+ {id:'lime',name:'Toxic Lime',price:150,color:'#a3ff3c',glow:'#64ff21'},
+ {id:'purple',name:'Void Purple',price:200,color:'#bd79ff',glow:'#8d38ff'},
+ {id:'gold',name:'Golden Star',price:350,color:'#ffd95a',glow:'#ffad20'},
+ {id:'pink',name:'Pink Pulse',price:400,color:'#ff67cb',glow:'#ff30a4'}
+];
+function currentSkin(){
+ return skinsData.find(function(s){return s.id===skin})||skinsData[0];
+}
+function notify(msg){
+ $('message').innerHTML='<span class="toast"></span>';
+ $('message').firstChild.textContent=msg;
+ setTimeout(function(){$('message').innerHTML=''},2300);
+}
+function readStore(){
+ try{
+  var d=JSON.parse(localStorage.getItem(STORE)||'{}');
+  if(d.profile&&typeof d.profile==='object'){
+   profile.nickname=String(d.profile.nickname||'Player').slice(0,16);
+   profile.xp=Math.max(0,Number(d.profile.xp)||0);
+   profile.coins=Math.max(0,Number(d.profile.coins)||0);
+  }
+  if(Array.isArray(d.best)&&d.best.length===3)best=d.best.map(function(v){return Math.max(0,Number(v)||0)});
+  if(Array.isArray(d.wins)&&d.wins.length===3)wins=d.wins;
+  if(d.achieved&&typeof d.achieved==='object')achieved=d.achieved;
+  if(Array.isArray(d.unlocked))unlocked=Array.from(new Set(['cyan'].concat(d.unlocked)));
+  if(skinsData.some(function(s){return s.id===d.skin})&&unlocked.indexOf(d.skin)>=0)skin=d.skin;
+  if(typeof d.dailyClaim==='string')dailyClaim=d.dailyClaim;
+  if(Array.isArray(d.custom))custom=d.custom.filter(function(o){return o&&Number.isFinite(o.x)&&['spike','block','portal'].includes(o.type)}).slice(0,100);
+ }catch(e){}
+}
+function save(){
+ try{
+  localStorage.setItem(STORE,JSON.stringify({
+   profile:profile,best:best,wins:wins,achieved:achieved,
+   unlocked:unlocked,skin:skin,dailyClaim:dailyClaim,custom:custom
+  }));
+ }catch(e){notify('Не удалось сохранить: проверь память браузера')}
+}
+function levelNum(){return Math.floor(profile.xp/250)+1}
+function xpNext(){return profile.xp%250}
+function profileHTML(){
+ return '<div class="profile">'+
+ '<div class="row"><b>Игрок: <span id="nickDisplay"></span></b><b>💰 <span id="coinDisplay"></span></b></div>'+
+ '<p class="muted">Уровень аккаунта <b id="accountLevel"></b> · XP <span id="xpDisplay"></span>/250</p>'+
+ '<div class="xpbar"><div id="xpFill"></div></div>'+
+ '<input id="nickInput" maxlength="16" placeholder="Новый ник">'+
+ '<button class="btn secondary" data-action="nick">СОХРАНИТЬ НИК</button></div>';
+}
+function updateProfile(){
+ var nick=$('nickDisplay'),coins=$('coinDisplay'),lev=$('accountLevel'),xp=$('xpDisplay'),fill=$('xpFill');
+ if(nick){nick.textContent=profile.nickname;nick.classList.toggle('rainbow',ownerMode)}
+ if(coins)coins.textContent=profile.coins;
+ if(lev)lev.textContent=levelNum();
+ if(xp)xp.textContent=xpNext();
+ if(fill)fill.style.width=(xpNext()/250*100)+'%';
+}
+function shell(title,subtitle,html){
+ $('panelTitle').textContent=title;
+ $('panelSubtitle').textContent=subtitle||'';
+ content.innerHTML=html||'';
+ overlay.classList.remove('hidden');
+ updateProfile();
+}
+function menu(){
+ stopMusic();
+ mode='menu';held=false;
+ $('hint').textContent='Тапни по экрану, чтобы прыгнуть · Удерживай для автопрыжка';
+ var lv=levels.map(function(l,i){
+  return '<button class="level '+(i===selected?'active':'')+'" data-action="level" data-level="'+i+'">'+l.name+'<small>Рекорд '+best[i]+'%</small></button>';
+ }).join('');
+ shell('Kyo Dash','BIG UPDATE · Новые скины, достижения и редактор уровней',
+ profileHTML()+
+ '<div class="levels">'+lv+'</div>'+
+ '<button class="btn" data-action="start">▶ ИГРАТЬ</button>'+
+ '<div class="grid">'+
+ '<button class="btn secondary" data-action="shop">🎨 СКИНЫ</button>'+
+ '<button class="btn secondary" data-action="achievements">🏆 ДОСТИЖЕНИЯ</button>'+
+ '<button class="btn secondary" data-action="editor">🛠 РЕДАКТОР</button>'+
+ '<button class="btn secondary" data-action="daily">🎁 НАГРАДА ДНЯ</button>'+
+ '<button class="btn secondary" data-action="owner">👑 OWNER PANEL</button>'+
+ '<button class="btn secondary" data-action="stats">📊 СТАТИСТИКА</button>'+
+ '</div>'+
+ '<p class="muted">Прогресс хранится локально в этом браузере.</p>');
+ refreshHud();draw();
+}
+function backButton(){return '<button class="btn secondary" data-action="menu">← В МЕНЮ</button>'}
+function showShop(){
+ mode='menu';
+ var html='<div class="grid">';
+ skinsData.forEach(function(s){
+  var own=unlocked.indexOf(s.id)>=0;
+  var active=skin===s.id;
+  html+='<div class="card"><div style="height:65px;display:grid;place-items:center"><div style="width:38px;height:38px;background:'+s.color+';box-shadow:0 0 20px '+s.glow+';border:3px solid #fff8;border-radius:4px"></div></div>'+
+   '<h3>'+s.name+'</h3><p>'+ (active?'Выбран':own?'Открыт':'Цена: '+s.price+' монет')+'</p>'+
+   '<button class="btn '+(active?'secondary':'')+'" data-action="'+(active?'noop':own?'equip':'buy')+'" data-skin="'+s.id+'">'+(active?'ВЫБРАН':own?'НАДЕТЬ':'КУПИТЬ')+'</button></div>';
+ });
+ html+='</div>'+backButton();
+ shell('Магазин скинов','Покупай кубики за монеты',html);
+}
+var achievementList=[
+ {id:'first',name:'Первый прыжок',desc:'Начни играть в Kyo Dash',reward:25,check:function(){return (profile.xp>0||wins.some(Boolean))}},
+ {id:'win1',name:'Победитель',desc:'Пройди любой уровень',reward:50,check:function(){return wins.some(Boolean)}},
+ {id:'allwins',name:'Мастер уровней',desc:'Пройди все 3 уровня',reward:150,check:function(){return wins.every(Boolean)}},
+ {id:'coins100',name:'Копилка',desc:'Накопи 100 монет',reward:30,check:function(){return profile.coins>=100}},
+ {id:'level5',name:'Ветеран',desc:'Достигни 5 уровня аккаунта',reward:100,check:function(){return levelNum()>=5}},
+ {id:'editor',name:'Создатель',desc:'Сохрани собственный уровень',reward:50,check:function(){return custom.length>0}},
+ {id:'skin',name:'Новый стиль',desc:'Открой дополнительный скин',reward:50,check:function(){return unlocked.length>=2}}
+];
+function checkAchievements(){
+ achievementList.forEach(function(a){
+  if(!achieved[a.id]&&a.check()){
+   achieved[a.id]=true;
+   profile.coins+=a.reward;
+   notify('🏆 '+a.name+' · +'+a.reward+' монет');
+   save();
+  }
+ });
+}
+function showAchievements(){
+ checkAchievements();
+ var html='<div class="grid">';
+ achievementList.forEach(function(a){
+  var done=!!achieved[a.id];
+  html+='<div class="card"><h3>'+ (done?'🏆 ':'🔒 ')+a.name+'</h3><p>'+a.desc+'</p><p class="muted">Награда: '+a.reward+' монет</p><p style="color:'+(done?'#68ffbd':'#9ab1dc')+'">'+(done?'ВЫПОЛНЕНО':'НЕ ВЫПОЛНЕНО')+'</p></div>';
+ });
+ html+='</div>'+backButton();
+ shell('Достижения','Выполняй задания и получай монеты',html);
+}
+function dayKey(){
+ var d=new Date();
+ return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+function daily(){
+ mode='menu';
+ var claimed=dailyClaim===dayKey();
+ shell('Ежедневная награда','Заходи каждый день за бонусом',
+ '<div class="card" style="text-align:center"><h3 style="font-size:27px">🎁 +75 монет</h3><p>Бонус можно забрать один раз в день на этом устройстве.</p>'+
+ '<button class="btn" data-action="claim" '+(claimed?'disabled':'')+'>'+(claimed?'УЖЕ ПОЛУЧЕНО':'ЗАБРАТЬ НАГРАДУ')+'</button></div>'+backButton());
+}
+function claimDaily(){
+ if(dailyClaim===dayKey()){notify('Награда уже получена сегодня');return}
+ dailyClaim=dayKey();profile.coins+=75;save();checkAchievements();daily();updateProfile();notify('+75 монет!');
+}
+function showStats(){
+ shell('Статистика','Твои результаты',
+ '<div class="card"><h3>Прогресс</h3>'+
+ levels.map(function(l,i){return '<p>'+l.name+': рекорд '+best[i]+'% · '+(wins[i]?'пройден':'не пройден')+'</p>'}).join('')+
+ '<p>Победы: '+wins.filter(Boolean).length+'/3</p><p>Скинов открыто: '+unlocked.length+'/'+skinsData.length+'</p><p>Созданных объектов: '+custom.length+'</p></div>'+backButton());
+}
+function showOwner(){8
+ var pin=prompt('Owner PIN:');
+ if(pin===null){menu();return}
+ if(pin.trim()!=='KYO-OWNER-2026'){
+  notify('Неверный PIN');menu();return;
+ }
+ ownerMode=true;
+ shell('OWNER PANEL','Локальная панель владельца',
+ '<div class="card"><h3>Управление тестовой игрой</h3><p>Режим владельца активен только в этом браузере.</p>'+
+ '<button class="btn" data-action="grant">+500 монет и +250 XP</button>'+
+ '<button class="btn secondary" data-action="unlockall">Открыть все скины</button>'+
+ '<button class="btn secondary" data-action="resetstats">Сбросить рекорды и победы</button>'+
+ '<button class="btn secondary" data-action="owneroff">Выключить Owner Mode</button></div>'+backButton());
+}
+function showEditor(){
+ mode='editor';held=false;stopMusic();
+ editorTool='spike';
+ shell('Редактор уровней','Выбери объект и нажимай на поле, чтобы расставлять элементы',
+ '<div class="levels">'+
+ '<button class="level active" data-action="tool" data-tool="spike">🔺 Шип</button>'+
+ '<button class="level" data-action="tool" data-tool="block">🟦 Блок</button>'+
+ '<button class="level" data-action="tool" data-tool="portal">🌀 Портал</button></div>'+
+ '<p class="muted">Нажимай на игровое поле ниже, чтобы добавить объект. Прокручивай мир кнопками.</p>'+
+ '<div class="grid"><button class="btn secondary" data-action="editorleft">← СДВИГ</button><button class="btn secondary" data-action="editorright">СДВИГ →</button></div>'+
+ '<div class="grid"><button class="btn" data-action="savelevel">💾 СОХРАНИТЬ</button><button class="btn secondary" data-action="testlevel">▶ ТЕСТ</button></div>'+
+ '<button class="btn danger" data-action="clearlevel">ОЧИСТИТЬ ОБЪЕКТЫ</button>'+backButton());
+ world=0;obstacles=custom.map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type}});
+ $('hint').textContent='Редактор: нажми на поле, чтобы поставить выбранный объект';
+ draw();
+}
+function startEditorTest(){
+ if(raf)cancelAnimationFrame(raf);
+ obstacles=custom.map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type}});
+ obstacles.push({x:Math.max(1600,...obstacles.map(function(o){return o.x+100})),w:12,h:80,type:'finish'});
+ selected=0;world=0;progress=0;gravityFlip=false;resetPlayer();
+ mode='playing';overlay.classList.add('hidden');
+ last=performance.now();raf=requestAnimationFrame(loop);
+}
+function resetPlayer(){
+ p.y=G-CUBE;p.vy=0;p.angle=0;p.onGround=true;
+}
+function makeLevel(){
+ obstacles=[];
+ var cfg=levels[selected],x=510,i=0;
+ var pattern=[
+  ['1','.', '.', '1','.', '2','.', '.', '1','.', '1','.', '.', '2','.','1','.','.','2','.'],
+  ['1','.','2','.','1','.','C','.','2','.','1','.','.','2','.','C','1','.','2','.'],
+  ['2','.','1','.','C','.','2','.','1','.','3','.','C','.','2','.','1','.','C','.','2','.']
+ ][selected];
+ while(x<cfg.length-250){
+  var symbol=pattern[i%pattern.length];
+  if(symbol==='1'||symbol==='2'||symbol==='3'){
+   for(var j=0;j<Number(symbol);j++)obstacles.push({x:x+j*34,w:34,h:selected===2?42:38,type:'spike'});
+  }
+  x+=Math.max(cfg.gap,selected===0?370:selected===1?340:330)+[0,25,45,15,35][i%5];
+  i++;
+ }
+ /* Порталы меняют направление гравитации */
+ if(selected>0){
+  for(i=0;i<2;i++){
+   obstacles.push({x:1800+i*2050,w:35,h:110,type:'portal'});
+  }
+ }
+ obstacles.push({x:cfg.length-110,w:12,h:80,type:'finish'});
+}
+function reset(){
+ world=0;progress=0;held=false;gravityFlip=false;portalCooldown=0;
+ particles=[];
+ resetPlayer();
+ makeLevel();
+ refreshHud();
+}
+function refreshHud(){
+ $('levelLabel').textContent=levels[selected].name;
+ $('progressText').textContent=progress+'%';
+ $('progressFill').style.width=progress+'%';
+}
 function initAudio(){
  if(audioCtx)return true;
  var AC=window.AudioContext||window.webkitAudioContext;
  if(!AC)return false;
- try{
-  audioCtx=new AC();
-  return true;
- }catch(e){
-  return false;
- }
+ try{audioCtx=new AC();return true}catch(e){return false}
 }
-
-function playTone(freq,duration,wave,volume){
+function tone(freq,duration,wave,volume){
  if(!audioCtx||!freq||!musicEnabled)return;
  try{
-  var osc=audioCtx.createOscillator();
-  var gain=audioCtx.createGain();
-  var now=audioCtx.currentTime;
+  var osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),now=audioCtx.currentTime;
   osc.type=wave||'square';
   osc.frequency.setValueAtTime(freq,now);
-  gain.gain.setValueAtTime(0.0001,now);
-  gain.gain.exponentialRampToValueAtTime(volume||0.045,now+0.012);
-  gain.gain.setTargetAtTime(0.0001,now+Math.max(0.025,duration*0.65),Math.max(0.015,duration*0.12));
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start(now);
-  osc.stop(now+duration+0.06);
-  osc.onended=function(){
-   try{osc.disconnect();gain.disconnect()}catch(e){}
-  };
+  gain.gain.setValueAtTime(.0001,now);
+  gain.gain.exponentialRampToValueAtTime(volume||.04,now+.012);
+  gain.gain.setTargetAtTime(.0001,now+duration*.6,Math.max(.015,duration*.15));
+  osc.connect(gain);gain.connect(audioCtx.destination);
+  osc.start(now);osc.stop(now+duration+.05);
+  osc.onended=function(){try{osc.disconnect();gain.disconnect()}catch(e){}};
  }catch(e){}
 }
-
+function stopMusic(){
+ musicGeneration++;
+ if(musicTimer!==null){clearInterval(musicTimer);musicTimer=null}
+}
 function musicTick(){
  if(!musicEnabled||mode!=='playing'||!audioCtx)return;
- var song=melodies[selected];
- var beat=song.tempo/1000;
- var note=song.notes[musicStep%song.notes.length];
-
- if(note)playTone(note,beat*0.9,song.wave,selected===2?0.035:0.04);
-
+ var s=songData[selected],beat=s.tempo/1000;
+ var note=s.notes[musicStep%s.notes.length];
+ if(note)tone(note,beat*.9,s.wave,.035);
  if(musicStep%4===0){
-  var bass=song.bass[Math.floor(musicStep/4)%song.bass.length];
-  if(bass)playTone(bass,beat*2,'triangle',0.055);
+  var bass=s.bass[Math.floor(musicStep/4)%s.bass.length];
+  if(bass)tone(bass,beat*1.8,'triangle',.05);
  }
  musicStep++;
 }
 
 function startMusic(){
  stopMusic();
- if(!musicEnabled||mode!=='playing')return;
- if(!initAudio())return;
-
- musicGeneration++;
- var myGeneration=musicGeneration;
+ if(!musicEnabled||mode!=='playing'||!initAudio())return;
+ var gen=musicGeneration;
  musicStep=0;
-
  try{
-  var result=audioCtx.resume();
-  if(result&&result.catch)result.catch(function(){});
+  var r=audioCtx.resume();
+  if(r&&r.catch)r.catch(function(){});
  }catch(e){}
-
  musicTick();
  musicTimer=setInterval(function(){
-  if(myGeneration!==musicGeneration)return;
-  musicTick();
- },melodies[selected].tempo);
-}
-
-function stopMusic(){
- musicGeneration++;
- if(musicTimer!==null){
-  clearInterval(musicTimer);
-  musicTimer=null;
- }
+  if(gen===musicGeneration)musicTick();
+ },songData[selected].tempo);
 }
 
 function updateMusicButton(){
- $('musicBtn').textContent=musicEnabled?'♫ ВКЛ':'♫ ВЫКЛ';
- $('musicBtn').style.color=musicEnabled?'#bfe8ff':'#ff9cae';
+ $('musicBtn').textContent=musicEnabled?'♫ MUSIC ON':'♫ MUSIC OFF';
 }
 
-function safeGet(key,fallback){
- try{
-  var v=localStorage.getItem(key);
-  return v===null?fallback:v;
- }catch(e){return fallback}
-}
-function safeSet(key,value){
- try{localStorage.setItem(key,value)}catch(e){}
-}
-function loadData(){
- try{
-  var d=JSON.parse(safeGet('kyoDashProfile','{}'));
-  profile.xp=Number.isFinite(d.xp)&&d.xp>=0?Math.floor(d.xp):0;
-  profile.isDev=d.isDev===true;
-  profile.nickname=profile.isDev?'[DEV] Kyosuke':
-   (typeof d.nickname==='string'&&d.nickname.trim()?d.nickname.trim().slice(0,16):'Player');
- }catch(e){}
-
- try{
-  var b=JSON.parse(safeGet('kyoDashBest3','[0,0,0]'));
-  if(Array.isArray(b)&&b.length===3)best=b.map(function(n){return Number(n)||0});
- }catch(e){}
-
- try{
-  var w=JSON.parse(safeGet('kyoDashWins3','[false,false,false]'));
-  if(Array.isArray(w)&&w.length===3)wins=w;
- }catch(e){}
-}
-function saveProfile(){
- safeSet('kyoDashProfile',JSON.stringify(profile));
- updateProfile();
-}
-function saveStats(){
- safeSet('kyoDashBest3',JSON.stringify(best));
- safeSet('kyoDashWins3',JSON.stringify(wins));
-}
-function updateProfile(){
- $('profileNick').textContent=profile.nickname;
- $('profileNick').classList.toggle('rainbowNick',profile.isDev);
- $('profileLevel').textContent=Math.floor(profile.xp/250)+1;
- $('profileXp').textContent=(profile.xp%250)+' / 250';
- $('xpFill').style.width=(profile.xp%250)/250*100+'%';
- if(document.activeElement!==$('nickInput'))$('nickInput').value=profile.nickname;
-}
-function refreshStats(){
- $('best').textContent=(best[selected]||0)+'%';
- $('wins').textContent=wins.filter(Boolean).length+'/3';
- document.querySelectorAll('[data-action="level"]').forEach(function(b,i){
-  b.classList.toggle('active',i===selected);
- });
- $('levelLabel').textContent=levels[selected].name+' · '+(selected+1);
-}
-function addSpikes(x,count){
- for(var j=0;j<count;j++){
-  obstacles.push({x:x+j*34,w:34,h:selected===2?42:38,type:'spike'});
- }
-}
-
-/* Генерация уровня с безопасным расстоянием между группами */
-function makeLevel(){
- obstacles=[];
- var cfg=levels[selected];
- var pattern=patterns[selected];
- var x=540;
- var i=0;
-
- while(x<cfg.length-320){
-  var symbol=pattern[i%pattern.length];
-  var spacing=cfg.gap;
-
-  if(selected===0)spacing+=[55,80,40,95,65][i%5];
-  else if(selected===1)spacing+=[25,45,15,55,30][i%5];
-  else spacing+=[8,25,12,32,5][i%5];
-
-  var minimumGap=selected===0?350:selected===1?335:330;
-  spacing=Math.max(spacing,minimumGap);
-
-  if(symbol==='1'||symbol==='2'||symbol==='3'){
-   addSpikes(x,Number(symbol));
-  }
-  x+=spacing;
-  i++;
- }
-
- obstacles.push({x:cfg.length-120,w:12,h:80,type:'finish'});
-}
-
-function updateHud(){
- progress=Math.min(100,Math.floor(world/(levels[selected].length-120)*100));
- $('progressText').textContent=progress+'%';
- $('progressFill').style.width=progress+'%';
-
- if(progress>best[selected]){
-  best[selected]=progress;
-  $('best').textContent=progress+'%';
-  saveStats();
- }
-}
-function reset(){
- world=0;
- progress=0;
- held=false;
- p.y=G-S;
- p.vy=0;
- p.angle=0;
- p.onGround=true;
- makeLevel();
- updateHud();
-}
-function showMenu(kind){
- kind=kind||'menu';
- stopMusic();
- mode=kind;
- held=false;
- overlay.classList.remove('hidden');
- $('levels').classList.toggle('hidden',kind==='dead'||kind==='win');
-
- if(kind==='dead'){
-  $('panelTitle').textContent='УПС!';
-  $('panelText').textContent='Прогресс: '+progress+'%. Попробуй ещё раз!';
-  $('startBtn').textContent='ЕЩЁ РАЗ';
- }else if(kind==='win'){
-  $('panelTitle').textContent='УРОВЕНЬ ПРОЙДЕН!';
-  $('panelText').textContent='Отлично! Уровень '+levels[selected].name+' пройден.';
-  $('startBtn').textContent='ИГРАТЬ СНОВА';
- }else{
-  $('panelTitle').textContent='Kyo Dash';
-  $('panelText').textContent='Прыгай через шипы и доберись до финиша!';
-  $('startBtn').textContent='ИГРАТЬ';
- }
-
- updateProfile();
- refreshStats();
- draw();
-}
 function start(){
  if(raf)cancelAnimationFrame(raf);
  reset();
  mode='playing';
  overlay.classList.add('hidden');
+ $('hint').textContent='ТАП — ПРЫЖОК · УДЕРЖИВАЙ — АВТОПРЫЖОК';
  last=performance.now();
  startMusic();
  raf=requestAnimationFrame(loop);
 }
-function jump(){
- if(mode==='playing'&&p.onGround){
-  p.vy=levels[selected].jump;
-  p.onGround=false;
+
+function addParticle(x,y,color){
+ for(var i=0;i<3;i++){
+  particles.push({
+   x:x,y:y,
+   vx:(Math.random()-.5)*160,
+   vy:(Math.random()-.7)*140,
+   life:.4,color:color
+  });
  }
 }
+
+function jump(){
+ if(mode!=='playing'||!p.onGround)return;
+ var cfg=levels[selected];
+ p.vy=gravityFlip?-cfg.jump:cfg.jump;
+ p.onGround=false;
+ addParticle(p.x+CUBE/2,p.y+CUBE,currentSkin().color);
+}
+
 function die(){
  if(mode!=='playing')return;
  mode='dead';
@@ -405,124 +436,175 @@ function die(){
  stopMusic();
  if(raf)cancelAnimationFrame(raf);
  raf=0;
- showMenu('dead');
+ checkAchievements();
+ shell('СТОЛКНОВЕНИЕ','Прогресс: '+progress+'%. Попробуй ещё раз!',
+ '<button class="btn" data-action="start">↻ ПОПРОБОВАТЬ ЕЩЁ</button>'+
+ '<button class="btn secondary" data-action="menu">В МЕНЮ</button>');
+ draw();
 }
+
 function win(){
  if(mode!=='playing')return;
  mode='win';
  held=false;
- progress=100;
  stopMusic();
- $('progressText').textContent='100%';
- $('progressFill').style.width='100%';
+ if(raf)cancelAnimationFrame(raf);
+ raf=0;
+ progress=100;
  best[selected]=100;
-
  if(!wins[selected]){
+  wins[selected]=true;
   profile.xp+=[100,150,200][selected];
-  saveProfile();
+  profile.coins+=[30,50,75][selected];
  }
- wins[selected]=true;
- saveStats();
- showMenu('win');
+ save();
+ checkAchievements();
+ refreshHud();
+ shell('УРОВЕНЬ ПРОЙДЕН!','Ты завершил '+levels[selected].name+'!',
+ '<div class="card"><h3>🏆 Отличная работа!</h3><p>Награда за победу начислена.</p></div>'+
+ '<button class="btn" data-action="start">ИГРАТЬ СНОВА</button>'+
+ '<button class="btn secondary" data-action="menu">В МЕНЮ</button>');
+ draw();
 }
+
 function update(dt){
  if(mode!=='playing')return;
-
  var cfg=levels[selected];
  world+=cfg.speed*dt;
- p.vy+=cfg.gravity*dt;
+ p.vy+=cfg.gravity*(gravityFlip?-1:1)*dt;
  p.y+=p.vy*dt;
 
- if(p.y>=G-S){
-  p.y=G-S;
+ if(!gravityFlip&&p.y>=G-CUBE){
+  p.y=G-CUBE;
+  p.vy=0;
+  p.onGround=true;
+  p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
+  if(held)jump();
+ }else if(gravityFlip&&p.y<=20){
+  p.y=20;
   p.vy=0;
   p.onGround=true;
   p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
   if(held)jump();
  }else{
   p.onGround=false;
-  p.angle+=cfg.speed*dt/S*(Math.PI/2);
+  p.angle+=cfg.speed*dt/CUBE*(Math.PI/2);
  }
 
- updateHud();
+ if(portalCooldown>0)portalCooldown-=dt;
+ progress=Math.min(100,Math.floor(world/(cfg.length-110)*100));
+ refreshHud();
+
+ if(progress>best[selected]){
+  best[selected]=progress;
+  save();
+ }
 
  for(var i=0;i<obstacles.length;i++){
   var o=obstacles[i],ox=o.x-world;
   if(ox>p.x+100||ox+o.w<p.x-80)continue;
 
   if(o.type==='finish'){
-   if(ox<p.x+S*.6){win();return}
+   if(ox<p.x+CUBE*.6){win();return}
    continue;
   }
 
-  var px1=p.x+5,px2=p.x+S-5;
-  var py1=p.y+5,py2=p.y+S-3;
+  if(o.type==='portal'){
+   if(portalCooldown<=0&&ox<p.x+CUBE&&ox+o.w>p.x){
+    gravityFlip=!gravityFlip;
+    portalCooldown=.7;
+    p.vy=0;
+    p.onGround=false;
+    addParticle(p.x+CUBE/2,p.y,'#bd79ff');
+   }
+   continue;
+  }
+
+  var px1=p.x+5,px2=p.x+CUBE-5;
+  var py1=p.y+5,py2=p.y+CUBE-3;
+
+  if(o.type==='block'){
+   if(px2>ox&&px1<ox+o.w&&py2>G-o.h&&py1<G){
+    die();return;
+   }
+   continue;
+  }
+
   var left=Math.max(px1,ox),right=Math.min(px2,ox+o.w);
   if(left>=right)continue;
-
   var center=ox+o.w/2;
   var sx=Math.max(ox,Math.min(center,(left+right)/2));
   var surfaceY=G-o.h*(1-Math.abs(sx-center)/(o.w/2));
-
   if(py2>surfaceY+2&&py1<G){die();return}
  }
+
+ for(i=particles.length-1;i>=0;i--){
+  var part=particles[i];
+  part.x+=part.vx*dt;
+  part.y+=part.vy*dt;
+  part.life-=dt;
+  if(part.life<=0)particles.splice(i,1);
+ }
 }
+
 function draw(){
  ctx.clearRect(0,0,W,H);
- ctx.fillStyle='#0a1230';
+ var grad=ctx.createLinearGradient(0,0,0,H);
+ grad.addColorStop(0,'#101d43');
+ grad.addColorStop(1,'#080e24');
+ ctx.fillStyle=grad;
  ctx.fillRect(0,0,W,H);
 
- var grad=ctx.createLinearGradient(0,0,0,G);
- grad.addColorStop(0,'#111e48');
- grad.addColorStop(1,'#0a1530');
- ctx.fillStyle=grad;
- ctx.fillRect(0,0,W,G);
-
- ctx.strokeStyle='#213865';
+ ctx.strokeStyle='#20355f';
  ctx.lineWidth=1;
  var off=-(world*.3%45);
  for(var x=off;x<W;x+=45){
-  ctx.beginPath();
-  ctx.moveTo(x,0);
-  ctx.lineTo(x,G);
-  ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,G);ctx.stroke();
  }
  for(var y=22;y<G;y+=45){
-  ctx.beginPath();
-  ctx.moveTo(0,y);
-  ctx.lineTo(W,y);
-  ctx.stroke();
- }
- for(var i=0;i<26;i++){
-  var sx=(i*137-world*.12%900+900)%900;
-  var sy=(i*71)%285;
-  ctx.fillStyle='#668ac5';
-  ctx.fillRect(sx,sy,2,2);
+  ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
  }
 
  ctx.fillStyle='#14264c';
  ctx.fillRect(0,G,W,H-G);
- ctx.fillStyle='#36e8ff';
+ ctx.fillStyle='#35eaff';
  ctx.fillRect(0,G,W,4);
+
  for(x=-(world%50);x<W;x+=50){
   ctx.fillStyle='#2b4779';
   ctx.fillRect(x,G+16,25,4);
  }
 
- for(i=0;i<obstacles.length;i++){
-  var o=obstacles[i],ox=o.x-world;
-  if(ox<-100||ox>W+100)continue;
+ if(gravityFlip){
+  ctx.fillStyle='#bd79ff';
+  ctx.fillRect(0,0,W,4);
+ }
+
+ obstacles.forEach(function(o){
+  var ox=o.x-world;
+  if(ox<-100||ox>W+100)return;
 
   if(o.type==='spike'){
-   ctx.fillStyle=selected===2?'#ff3d8c':selected===1?'#ff6c68':'#ff4d83';
+   ctx.fillStyle=selected===2?'#ff3d8c':selected===1?'#ff7868':'#ff4d83';
    ctx.beginPath();
    ctx.moveTo(ox,G);
    ctx.lineTo(ox+o.w/2,G-o.h);
    ctx.lineTo(ox+o.w,G);
    ctx.closePath();
    ctx.fill();
-   ctx.strokeStyle='#ffb2cb';
+   ctx.strokeStyle='#ffd0e0';
    ctx.lineWidth=2;
+   ctx.stroke();
+  }else if(o.type==='block'){
+   ctx.fillStyle='#42dfff';
+   ctx.fillRect(ox,G-o.h,o.w,o.h);
+   ctx.strokeStyle='#d4fbff';
+   ctx.strokeRect(ox,G-o.h,o.w,o.h);
+  }else if(o.type==='portal'){
+   ctx.strokeStyle='#c18aff';
+   ctx.lineWidth=7;
+   ctx.beginPath();
+   ctx.ellipse(ox+o.w/2,G-o.h/2,o.w/2,o.h/2,0,0,Math.PI*2);
    ctx.stroke();
   }else if(o.type==='finish'){
    ctx.fillStyle='#4dffb4';
@@ -531,32 +613,33 @@ function draw(){
    ctx.font='bold 18px Arial';
    ctx.fillText('FINISH',ox-26,G-o.h-12);
   }
- }
+ });
 
+ particles.forEach(function(q){
+  ctx.globalAlpha=Math.max(0,q.life/.4);
+  ctx.fillStyle=q.color;
+  ctx.fillRect(q.x,q.y,5,5);
+ });
+ ctx.globalAlpha=1;
+
+ var s=currentSkin();
  ctx.save();
- ctx.translate(p.x+S/2,p.y+S/2);
+ ctx.translate(p.x+CUBE/2,p.y+CUBE/2);
  ctx.rotate(p.angle);
- ctx.shadowColor='#00dfff';
- ctx.shadowBlur=14;
- ctx.fillStyle='#35e7ff';
- ctx.fillRect(-S/2,-S/2,S,S);
+ ctx.shadowColor=s.glow;
+ ctx.shadowBlur=17;
+ ctx.fillStyle=s.color;
+ ctx.fillRect(-CUBE/2,-CUBE/2,CUBE,CUBE);
  ctx.shadowBlur=0;
- ctx.strokeStyle='#d8fcff';
+ ctx.strokeStyle='#ffffffd9';
  ctx.lineWidth=3;
- ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
- ctx.fillStyle='#0a2750';
+ ctx.strokeRect(-CUBE/2+2,-CUBE/2+2,CUBE-4,CUBE-4);
+ ctx.fillStyle='#0a2041';
  ctx.fillRect(-9,-7,5,7);
  ctx.fillRect(4,-7,5,7);
  ctx.restore();
-
- if(mode!=='playing'){
-  ctx.fillStyle='#b6d2ff';
-  ctx.font='bold 20px Arial';
-  ctx.textAlign='center';
-  ctx.fillText('READY?',W/2,105);
-  ctx.textAlign='left';
- }
 }
+
 function loop(now){
  var dt=Math.min((now-last)/1000,.025);
  last=now;
@@ -566,148 +649,127 @@ function loop(now){
  else raf=0;
 }
 
-function handleAction(action,button){
- if(action==='start'){
-  start();
-  return;
+function action(name,b){
+ if(name==='menu'){
+  if(raf)cancelAnimationFrame(raf);
+  raf=0;menu();return;
  }
-
- if(action==='music'){
+ if(name==='start'){start();return}
+ if(name==='music'){
   musicEnabled=!musicEnabled;
   updateMusicButton();
   if(musicEnabled&&mode==='playing')startMusic();
   else stopMusic();
   return;
  }
-
- if(action==='menu'){
-  if(raf)cancelAnimationFrame(raf);
-  raf=0;
-  showMenu('menu');
+ if(name==='level'){
+  var n=Number(b.dataset.level);
+  if(n<0||n>2||!Number.isInteger(n))return;
+  selected=n;menu();return;
+ }
+ if(name==='nick'){
+  var input=$('nickInput');
+  var v=input?input.value.trim():'';
+  if(v.length<2){notify('Ник должен содержать хотя бы 2 символа');return}
+  profile.nickname=v.slice(0,16);
+  save();updateProfile();notify('Ник сохранён');return;
+ }
+ if(name==='shop'){showShop();return}
+ if(name==='achievements'){showAchievements();return}
+ if(name==='stats'){showStats();return}
+ if(name==='daily'){daily();return}
+ if(name==='claim'){claimDaily();return}
+ if(name==='buy'||name==='equip'){
+  var id=b.dataset.skin;
+  var s=skinsData.find(function(q){return q.id===id});
+  if(!s)return;
+  if(name==='buy'){
+   if(unlocked.indexOf(id)>=0)skin=id;
+   else if(profile.coins>=s.price){
+    profile.coins-=s.price;unlocked.push(id);skin=id;
+    notify('Скин открыт!');
+   }else{notify('Не хватает монет');return}
+  }else skin=id;
+  save();showShop();checkAchievements();return;
+ }
+ if(name==='noop')return;
+ if(name==='editor'){showEditor();return}
+ if(name==='tool'){
+  editorTool=b.dataset.tool;
+  document.querySelectorAll('[data-action="tool"]').forEach(function(el){
+   el.classList.toggle('active',el===b);
+  });
   return;
  }
-
- if(action==='level'){
-  var next=Number(button.getAttribute('data-level'));
-  if(!Number.isFinite(next)||next<0||next>2)return;
-
-  selected=next;
-  reset();
-  refreshStats();
-  draw();
-
-  /* Если уровень меняют во время игры,
-     музыка сразу переключается на его мелодию. */
-  if(mode==='playing')startMusic();
-  return;
+ if(name==='editorleft'){world=Math.max(0,world-300);draw();return}
+ if(name==='editorright'){world+=300;draw();return}
+ if(name==='savelevel'){
+  custom=obstacles.filter(function(o){
+   return ['spike','block','portal'].includes(o.type);
+  }).map(function(o){
+   return {x:o.x,w:o.w,h:o.h,type:o.type};
+  });
+  save();checkAchievements();notify('Уровень сохранён!');return;
  }
-
- if(action==='nick'){
-  if(profile.isDev){
-   alert('DEV-ник закреплён.');
-   updateProfile();
-   return;
-  }
-  var nick=$('nickInput').value.trim();
-  if(nick.length<2){
-   alert('Ник должен содержать минимум 2 символа.');
-   return;
-  }
-  profile.nickname=nick.slice(0,16);
-  saveProfile();
-  return;
+ if(name==='testlevel'){startEditorTest();return}
+ if(name==='clearlevel'){
+  obstacles=[];custom=[];world=0;save();draw();
+  notify('Объекты удалены');return;
  }
-
- if(action==='owner'){
-  if(ownerMode){
-   alert('Owner Mode уже активирован!');
-   return;
-  }
-
-  var pin=prompt('Введите PIN владельца:');
-  if(pin===null)return;
-
-  var pins=[
-   'OwnerKD-ADS5H-D6E9F037F7',
-   'KenanDrun-AJ9S3L6KS9-8H67HSK',
-   'TESTER-AAA111'
-  ];
-
-  if(pins.indexOf(pin.trim())===-1){
-   alert('Неверный PIN!');
-   return;
-  }
-
-  ownerMode=true;
-
-  if(pin.trim()===pins[0]){
-   profile.isDev=true;
-   profile.nickname='[DEV] Kyosuke';
-   saveProfile();
-  }else if(pin.trim()===pins[2]){
-   profile.isDev=false;
-   profile.nickname='[TEST] TesterKD';
-   saveProfile();
-  }
-
-  alert('Owner Mode активирован!');
-  return;
+ if(name==='owner'){showOwner();return}
+ if(name==='grant'){
+  profile.coins+=500;profile.xp+=250;
+  save();updateProfile();notify('Добавлено!');return;
  }
+ if(name==='unlockall'){
+  unlocked=skinsData.map(function(s){return s.id});
+  save();updateProfile();notify('Все скины открыты');return;
+ }
+ if(name==='resetstats'){
+  best=[0,0,0];wins=[false,false,false];
+  save();notify('Рекорды сброшены');return;
+ }
+ if(name==='owneroff'){ownerMode=false;menu();return}
 }
 
-/* Обработчик кнопок: работает и на сенсорном экране */
-function buttonHandler(e){
- var target=e.target;
- if(!target||!target.closest)return;
-
- var button=target.closest('button[data-action]');
- if(!button)return;
-
+function clickHandler(e){
+ var b=e.target.closest&&e.target.closest('[data-action]');
+ if(!b||b.disabled)return;
  e.preventDefault();
- e.stopPropagation();
-
- try{
-  handleAction(button.getAttribute('data-action'),button);
- }catch(err){
-  showError(err);
- }
+ try{action(b.dataset.action,b)}catch(err){showError(err)}
 }
+document.addEventListener('click',clickHandler,true);
 
-document.addEventListener('click',buttonHandler,true);
-
-/* Сенсорное управление кубиком */
 function press(e){
+ if(mode==='editor'){
+  var rect=canvas.getBoundingClientRect();
+  var cx=(e.clientX-rect.left)*W/rect.width;
+  var wx=world+cx;
+  if(editorTool==='spike')obstacles.push({x:Math.round(wx/34)*34,w:34,h:40,type:'spike'});
+  else if(editorTool==='block')obstacles.push({x:Math.round(wx/34)*34,w:40,h:65,type:'block'});
+  else obstacles.push({x:Math.round(wx/34)*34,w:35,h:110,type:'portal'});
+  draw();return;
+ }
  if(mode!=='playing')return;
  if(e.cancelable)e.preventDefault();
- if(!held){
-  held=true;
-  jump();
- }
+ if(!held){held=true;jump()}
 }
 function release(e){
  held=false;
  if(e&&e.cancelable)e.preventDefault();
 }
-
 canvas.addEventListener('pointerdown',press,{passive:false});
 window.addEventListener('pointerup',release);
 window.addEventListener('pointercancel',release);
 window.addEventListener('blur',release);
-
 window.addEventListener('keydown',function(e){
  if(e.code==='Space'||e.code==='ArrowUp'){
   e.preventDefault();
   if(mode==='playing'){
-   if(!held){
-    held=true;
-    jump();
-   }
-  }else if(e.code==='Space'){
-   start();
-  }
+   if(!held){held=true;jump()}
+  }else if(mode==='menu')start();
  }
 });
-
 window.addEventListener('keyup',function(e){
  if(e.code==='Space'||e.code==='ArrowUp')held=false;
 });
@@ -717,20 +779,19 @@ function showError(err){
  box.style.display='block';
  box.textContent='Ошибка игры: '+(err&&err.message?err.message:String(err));
 }
-
 window.addEventListener('error',function(e){
  showError(e.error||e.message||'Неизвестная ошибка');
 });
+window.addEventListener('unhandledrejection',function(e){
+ showError(e.reason||'Ошибка Promise');
+});
 
-loadData();
-updateProfile();
-refreshStats();
+readStore();
 updateMusicButton();
 reset();
-showMenu('menu');
+menu();
 
 })();
 </script>
 </body>
 </html>
-
