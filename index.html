@@ -8,8 +8,8 @@
 <title>Kyo Dash</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d22;color:white;font-family:Arial,sans-serif;touch-action:pan-y}
-body{display:flex;align-items:center;justify-content:center}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d22;color:#fff;font-family:Arial,sans-serif}
+body{display:flex;align-items:center;justify-content:center;touch-action:manipulation}
 .app{width:min(100%,1000px);padding:10px;display:flex;flex-direction:column;gap:9px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:800;color:#b8d9ff}
 .brand{color:#48eaff;font-size:17px;letter-spacing:2px}
@@ -27,7 +27,7 @@ canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px soli
 @keyframes rainbow{to{background-position:300% 50%}}
 .nickRow{display:flex;gap:7px;margin-top:10px}
 input{min-width:0;flex:1;background:#080f25;border:1px solid #355786;border-radius:9px;padding:10px;color:white}
-button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126;font-weight:900;cursor:pointer;touch-action:manipulation}
+button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126;font-weight:900;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 button:active{transform:scale(.97)}
 .nickSave{padding:9px}
 .xpTrack{height:6px;background:#1a2b4d;border-radius:99px;overflow:hidden;margin-top:8px}
@@ -42,6 +42,7 @@ button:active{transform:scale(.97)}
 .hidden{display:none!important}
 .small{font-size:11px;color:#8097c6;margin-top:10px}
 .menuBtn{padding:7px;background:#111d3a;color:#bfe8ff;border:1px solid #294774}
+#errorBox{position:fixed;z-index:20;left:8px;right:8px;bottom:8px;background:#541b2b;color:white;padding:12px;border-radius:10px;font-size:12px;display:none;overflow-wrap:anywhere}
 @media(max-height:540px){
  .app{gap:5px;padding:5px}
  .panel{padding:12px;max-height:96vh}
@@ -59,7 +60,7 @@ button:active{transform:scale(.97)}
 <span class="brand">Kyo Dash</span>
 <span id="levelLabel">EASY · 1</span>
 <span id="progressText">0%</span>
-<button class="menuBtn" id="menuBtn">МЕНЮ</button>
+<button class="menuBtn" data-action="menu">МЕНЮ</button>
 </header>
 <div class="meter"><div class="fill" id="progressFill"></div></div>
 <canvas id="game" width="900" height="420"></canvas>
@@ -77,15 +78,15 @@ button:active{transform:scale(.97)}
 <div class="xpTrack"><div class="xpFill" id="xpFill"></div></div>
 <div class="nickRow">
 <input id="nickInput" maxlength="16" placeholder="Твой ник">
-<button class="nickSave" id="nickSave">СМЕНИТЬ</button>
+<button class="nickSave" data-action="nick">СМЕНИТЬ</button>
 </div>
 <div class="small">Профиль и XP сохраняются на устройстве</div>
 </div>
 
 <div class="levels" id="levels">
-<button class="level active" data-level="0">EASY<small>Stereo Madness</small></button>
-<button class="level" data-level="1">MEDIUM<small>Jumper</small></button>
-<button class="level" data-level="2">HARD<small>FingerDash</small></button>
+<button class="level active" data-action="level" data-level="0">EASY<small>Stereo Madness</small></button>
+<button class="level" data-action="level" data-level="1">MEDIUM<small>Jumper</small></button>
+<button class="level" data-action="level" data-level="2">HARD<small>FingerDash</small></button>
 </div>
 
 <div class="stats">
@@ -93,301 +94,135 @@ button:active{transform:scale(.97)}
 <span>ПОБЕДЫ <b id="wins">0/3</b></span>
 </div>
 
-<button class="btn" id="startBtn">ИГРАТЬ</button>
-<button class="btn secondary" id="ownerBtn">OWNER MODE</button>
+<button class="btn" id="startBtn" data-action="start">ИГРАТЬ</button>
+<button class="btn secondary" data-action="owner">OWNER MODE</button>
 <div class="small">У каждого уровня собственная расстановка препятствий.</div>
 </section>
 </div>
 
+<div id="errorBox"></div>
+
 <script>
-(()=>{
+(function(){
 'use strict';
 
-const $=id=>document.getElementById(id);
-const canvas=$('game');
-const ctx=canvas.getContext('2d');
-const overlay=$('overlay');
+var $ = function(id){return document.getElementById(id)};
+var canvas = $('game');
+var ctx = canvas.getContext('2d');
+var overlay = $('overlay');
+var W=900,H=420,G=330,S=34;
 
-const W=900,H=420,G=330,S=34;
-
-const OWNER_PINS=[
- 'OwnerKD-ADS5H-D6E9F037F7',
- 'KenanDrun-AJ9S3L6KS9-8H67HSK',
- 'TESTER-AAA111'
-];
-
-let profile={nickname:'Player',xp:0,isDev:false};
-let ownerMode=false;
-
-function loadProfile(){
- try{
-  const saved=JSON.parse(localStorage.getItem('kyoDashProfile')||'{}');
-  profile.xp=Number.isFinite(saved.xp)&&saved.xp>=0?Math.floor(saved.xp):0;
-  profile.isDev=saved.isDev===true;
-  profile.nickname=profile.isDev?'[DEV] Kyosuke':
-   (typeof saved.nickname==='string'&&saved.nickname.trim()
-   ?saved.nickname.trim().slice(0,16):'Player');
- }catch(e){
-  profile={nickname:'Player',xp:0,isDev:false};
- }
-}
-
-function saveProfile(){
- try{localStorage.setItem('kyoDashProfile',JSON.stringify(profile))}catch(e){}
- updateProfile();
-}
-
-function updateProfile(){
- $('profileNick').textContent=profile.nickname;
- $('profileNick').classList.toggle('rainbowNick',profile.isDev);
- $('profileLevel').textContent=Math.floor(profile.xp/250)+1;
- $('profileXp').textContent=(profile.xp%250)+' / 250';
- $('xpFill').style.width=((profile.xp%250)/250*100)+'%';
- if(document.activeElement!==$('nickInput'))$('nickInput').value=profile.nickname;
-}
-
-function activateOwner(pin){
- pin=pin.trim();
- if(!OWNER_PINS.includes(pin)){
-  alert('Неверный PIN!');
-  return;
- }
-
- let deviceId=localStorage.getItem('kyodash-device-id');
- if(!deviceId){
-  deviceId=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
-  localStorage.setItem('kyodash-device-id',deviceId);
- }
-
- const key='kyodash-owner-device-'+pin;
- const savedDevice=localStorage.getItem(key);
-
- if(savedDevice&&savedDevice!==deviceId){
-  alert('Этот PIN уже привязан к другому браузеру!');
-  return;
- }
-
- localStorage.setItem(key,deviceId);
- ownerMode=true;
-
- if(pin==='OwnerKD-ADS5H-D6E9F037F7'){
-  profile.isDev=true;
-  profile.nickname='[DEV] Kyosuke';
-  saveProfile();
-  alert('DEV активирован!');
- }else if(pin==='TESTER-AAA111'){
-  profile.isDev=false;
-  profile.nickname='[TEST] TesterKD';
-  saveProfile();
-  alert('Режим тестера активирован!');
- }else{
-  alert('Owner Mode активирован!');
- }
-}
-
-const LEVELS=[
+var levels=[
  {name:'EASY',speed:285,jump:-555,gravity:1550,length:5700,gap:365},
  {name:'MEDIUM',speed:295,jump:-565,gravity:1600,length:6500,gap:305},
  {name:'HARD',speed:310,jump:-575,gravity:1650,length:7200,gap:265}
 ];
 
-let selected=0;
-let mode='menu';
-let world=0;
-let progress=0;
-let last=0;
-let raf=0;
-let held=false;
-let obstacles=[];
-let best=[0,0,0];
-let wins=[false,false,false];
-
-try{
- best=JSON.parse(localStorage.getItem('kyoDashBest3')||'[0,0,0]');
- wins=JSON.parse(localStorage.getItem('kyoDashWins3')||'[false,false,false]');
- if(!Array.isArray(best)||best.length!==3)best=[0,0,0];
- if(!Array.isArray(wins)||wins.length!==3)wins=[false,false,false];
-}catch(e){
- best=[0,0,0];
- wins=[false,false,false];
-}
-
-const p={x:150,y:G-S,vy:0,angle:0,onGround:true};
-
-const MUSIC=[
- {tempo:190,melody:[523,659,784,659,587,659,880,784,659,523,587,659,392,523,659,523],bass:[131,0,0,0,196,0,0,0,147,0,0,0,196,0,0,0]},
- {tempo:180,melody:[392,523,587,784,659,587,523,440,523,659,784,880,784,659,587,523],bass:[98,0,0,0,130,0,0,0,110,0,0,0,147,0,0,0]},
- {tempo:165,melody:[440,554,659,880,784,659,554,740,659,880,988,880,740,659,554,440],bass:[110,0,0,0,147,0,0,0,165,0,0,0,147,0,0,0]}
-];
-
-let audioCtx=null;
-let musicGain=null;
-let musicTimer=null;
-let musicStep=0;
-let musicToken=0;
-
-function setupAudio(){
- if(audioCtx)return true;
- const AudioClass=window.AudioContext||window.webkitAudioContext;
- if(!AudioClass)return false;
- try{
-  audioCtx=new AudioClass();
-  musicGain=audioCtx.createGain();
-  musicGain.gain.value=0;
-  musicGain.connect(audioCtx.destination);
-  return true;
- }catch(e){return false}
-}
-
-function playNote(freq,duration,type,volume){
- if(!audioCtx||!musicGain||!freq)return;
- try{
-  const now=audioCtx.currentTime;
-  const osc=audioCtx.createOscillator();
-  const gain=audioCtx.createGain();
-  osc.type=type;
-  osc.frequency.setValueAtTime(freq,now);
-  gain.gain.setValueAtTime(.001,now);
-  gain.gain.linearRampToValueAtTime(volume,now+.018);
-  gain.gain.exponentialRampToValueAtTime(.001,now+duration);
-  osc.connect(gain);
-  gain.connect(musicGain);
-  osc.start(now);
-  osc.stop(now+duration+.02);
- }catch(e){}
-}
-
-function stopMusic(){
- musicToken++;
- if(musicTimer!==null){
-  clearInterval(musicTimer);
-  musicTimer=null;
- }
- if(musicGain&&audioCtx){
-  try{
-   const now=audioCtx.currentTime;
-   musicGain.gain.cancelScheduledValues(now);
-   musicGain.gain.setTargetAtTime(0,now,.035);
-  }catch(e){}
- }
-}
-
-function startMusic(){
- stopMusic();
- if(!setupAudio())return;
- const token=musicToken;
- const track=MUSIC[selected];
- musicStep=0;
-
- try{
-  if(audioCtx.state==='suspended')audioCtx.resume();
-  const now=audioCtx.currentTime;
-  musicGain.gain.cancelScheduledValues(now);
-  musicGain.gain.setValueAtTime(0,now);
-  musicGain.gain.linearRampToValueAtTime(.22,now+.15);
- }catch(e){}
-
- function tick(){
-  if(token!==musicToken||mode!=='playing')return;
-  const i=musicStep%track.melody.length;
-  const duration=track.tempo/1000;
-  playNote(track.melody[i],duration*.82,'triangle',.23);
-  if(i%4===0)playNote(track.bass[i],duration*3.4,'sine',.35);
-  musicStep++;
- }
-
- tick();
- musicTimer=setInterval(tick,track.tempo);
-}
-
-function saveStats(){
- try{
-  localStorage.setItem('kyoDashBest3',JSON.stringify(best));
-  localStorage.setItem('kyoDashWins3',JSON.stringify(wins));
- }catch(e){}
-}
-
-function refreshStats(){
- $('best').textContent=(best[selected]||0)+'%';
- $('wins').textContent=wins.filter(Boolean).length+'/3';
- document.querySelectorAll('.level').forEach((b,i)=>{
-  b.classList.toggle('active',i===selected);
- });
- $('levelLabel').textContent=LEVELS[selected].name+' · '+(selected+1);
-}
-
-const PATTERNS=[
+var patterns=[
  ['1','.','.','1','.','2','.','.','1','.','.','1','.','2','.','.','1','.','1','.','.','2','.','.','1','.','.','2','.','.','1','.'],
  ['1','.','2','.','1','.','C','.','2','.','1','.','.','2','.','C','1','.','2','.','1','.','C','.','2','.','1','.','2','.','.','1'],
  ['2','.','1','.','C','.','2','.','1','.','3','.','C','.','2','.','1','.','C','.','2','.','1','.','3','.','2','.','C','.','1','.']
 ];
 
+var profile={nickname:'Player',xp:0,isDev:false};
+var selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
+var held=false,obstacles=[];
+var best=[0,0,0],wins=[false,false,false];
+var p={x:150,y:G-S,vy:0,angle:0,onGround:true};
+var ownerMode=false;
+
+function safeGet(key,fallback){
+ try{
+  var v=localStorage.getItem(key);
+  return v===null?fallback:v;
+ }catch(e){return fallback}
+}
+function safeSet(key,value){
+ try{localStorage.setItem(key,value)}catch(e){}
+}
+function loadData(){
+ try{
+  var d=JSON.parse(safeGet('kyoDashProfile','{}'));
+  profile.xp=Number.isFinite(d.xp)&&d.xp>=0?Math.floor(d.xp):0;
+  profile.isDev=d.isDev===true;
+  profile.nickname=profile.isDev?'[DEV] Kyosuke':
+   (typeof d.nickname==='string'&&d.nickname.trim()?d.nickname.trim().slice(0,16):'Player');
+ }catch(e){}
+ try{
+  var b=JSON.parse(safeGet('kyoDashBest3','[0,0,0]'));
+  if(Array.isArray(b)&&b.length===3)best=b.map(function(n){return Number(n)||0});
+ }catch(e){}
+ try{
+  var w=JSON.parse(safeGet('kyoDashWins3','[false,false,false]'));
+  if(Array.isArray(w)&&w.length===3)wins=w;
+ }catch(e){}
+}
+function saveProfile(){
+ safeSet('kyoDashProfile',JSON.stringify(profile));
+ updateProfile();
+}
+function saveStats(){
+ safeSet('kyoDashBest3',JSON.stringify(best));
+ safeSet('kyoDashWins3',JSON.stringify(wins));
+}
+function updateProfile(){
+ $('profileNick').textContent=profile.nickname;
+ $('profileNick').classList.toggle('rainbowNick',profile.isDev);
+ $('profileLevel').textContent=Math.floor(profile.xp/250)+1;
+ $('profileXp').textContent=(profile.xp%250)+' / 250';
+ $('xpFill').style.width=(profile.xp%250)/250*100+'%';
+ if(document.activeElement!==$('nickInput'))$('nickInput').value=profile.nickname;
+}
+function refreshStats(){
+ $('best').textContent=(best[selected]||0)+'%';
+ $('wins').textContent=wins.filter(Boolean).length+'/3';
+ document.querySelectorAll('[data-action="level"]').forEach(function(b,i){
+  b.classList.toggle('active',i===selected);
+ });
+ $('levelLabel').textContent=levels[selected].name+' · '+(selected+1);
+}
 function addSpikes(x,count){
- const w=34;
- const h=selected===2?42:38;
- for(let j=0;j<count;j++){
-  obstacles.push({x:x+j*w,w,h,type:'spike'});
+ for(var j=0;j<count;j++){
+  obstacles.push({x:x+j*34,w:34,h:selected===2?42:38,type:'spike'});
  }
 }
-
 function makeLevel(){
  obstacles=[];
- const cfg=LEVELS[selected];
- const pattern=PATTERNS[selected];
- let x=540;
- let i=0;
-
+ var cfg=levels[selected],pattern=patterns[selected],x=540,i=0;
  while(x<cfg.length-320){
-  const symbol=pattern[i%pattern.length];
-  let spacing=cfg.gap;
-
+  var symbol=pattern[i%pattern.length];
+  var spacing=cfg.gap;
   if(selected===0)spacing+=[55,80,40,95,65][i%5];
   else if(selected===1)spacing+=[25,45,15,55,30][i%5];
   else spacing+=[8,25,12,32,5][i%5];
 
-  if(symbol==='1'||symbol==='2'||symbol==='3'){
-   addSpikes(x,Number(symbol));
-  }else if(symbol==='C'&&selected>0){
-   obstacles.push({x:x,w:68,y:G-105,h:30,type:'ceiling'});
-  }
+  if(symbol==='1'||symbol==='2'||symbol==='3')addSpikes(x,Number(symbol));
+  else if(symbol==='C'&&selected>0)obstacles.push({x:x,w:68,y:G-105,h:30,type:'ceiling'});
 
   if(selected===2&&i%8===5)addSpikes(x+spacing*.55,2);
-
   x+=spacing;
   i++;
  }
-
  obstacles.push({x:cfg.length-120,w:12,h:80,type:'finish'});
 }
-
 function updateHud(){
- progress=Math.min(100,Math.floor(world/(LEVELS[selected].length-120)*100));
+ progress=Math.min(100,Math.floor(world/(levels[selected].length-120)*100));
  $('progressText').textContent=progress+'%';
  $('progressFill').style.width=progress+'%';
-
  if(progress>best[selected]){
   best[selected]=progress;
   $('best').textContent=progress+'%';
   saveStats();
  }
 }
-
 function reset(){
- world=0;
- progress=0;
- held=false;
- p.y=G-S;
- p.vy=0;
- p.angle=0;
- p.onGround=true;
- makeLevel();
- updateHud();
+ world=0;progress=0;held=false;
+ p.y=G-S;p.vy=0;p.angle=0;p.onGround=true;
+ makeLevel();updateHud();
 }
-
-function showMenu(kind='menu'){
- stopMusic();
- mode=kind;
- held=false;
+function showMenu(kind){
+ kind=kind||'menu';
+ mode=kind;held=false;
  overlay.classList.remove('hidden');
  $('levels').classList.toggle('hidden',kind==='dead'||kind==='win');
 
@@ -397,331 +232,218 @@ function showMenu(kind='menu'){
   $('startBtn').textContent='ЕЩЁ РАЗ';
  }else if(kind==='win'){
   $('panelTitle').textContent='УРОВЕНЬ ПРОЙДЕН!';
-  $('panelText').textContent='Отлично! Уровень '+LEVELS[selected].name+' пройден.';
+  $('panelText').textContent='Отлично! Уровень '+levels[selected].name+' пройден.';
   $('startBtn').textContent='ИГРАТЬ СНОВА';
  }else{
   $('panelTitle').textContent='Kyo Dash';
   $('panelText').textContent='Прыгай через шипы и доберись до финиша!';
   $('startBtn').textContent='ИГРАТЬ';
  }
-
- refreshStats();
- updateProfile();
- draw();
+ updateProfile();refreshStats();draw();
 }
-
 function start(){
- cancelAnimationFrame(raf);
- stopMusic();
+ if(raf)cancelAnimationFrame(raf);
  reset();
  mode='playing';
  overlay.classList.add('hidden');
- startMusic();
  last=performance.now();
  raf=requestAnimationFrame(loop);
 }
-
 function jump(){
  if(mode==='playing'&&p.onGround){
-  p.vy=LEVELS[selected].jump;
+  p.vy=levels[selected].jump;
   p.onGround=false;
  }
 }
-
 function die(){
  if(mode!=='playing')return;
- mode='dead';
- held=false;
- cancelAnimationFrame(raf);
- showMenu('dead');
+ mode='dead';held=false;
+ if(raf)cancelAnimationFrame(raf);
+ raf=0;showMenu('dead');
 }
-
 function win(){
  if(mode!=='playing')return;
- mode='win';
- held=false;
- progress=100;
+ mode='win';held=false;progress=100;
  $('progressText').textContent='100%';
  $('progressFill').style.width='100%';
  best[selected]=100;
-
  if(!wins[selected]){
   profile.xp+=[100,150,200][selected];
   saveProfile();
  }
-
- wins[selected]=true;
- saveStats();
- refreshStats();
- showMenu('win');
+ wins[selected]=true;saveStats();showMenu('win');
 }
-
 function update(dt){
  if(mode!=='playing')return;
-
- const cfg=LEVELS[selected];
+ var cfg=levels[selected];
  world+=cfg.speed*dt;
  p.vy+=cfg.gravity*dt;
  p.y+=p.vy*dt;
 
  if(p.y>=G-S){
-  p.y=G-S;
-  p.vy=0;
-  p.onGround=true;
+  p.y=G-S;p.vy=0;p.onGround=true;
   p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
-
-  // Автопрыжок, пока палец удерживается на экране.
   if(held)jump();
  }else{
   p.onGround=false;
   p.angle+=cfg.speed*dt/S*(Math.PI/2);
  }
-
  updateHud();
 
- for(const o of obstacles){
-  const ox=o.x-world;
+ for(var i=0;i<obstacles.length;i++){
+  var o=obstacles[i],ox=o.x-world;
   if(ox>p.x+100||ox+o.w<p.x-80)continue;
-
   if(o.type==='finish'){
-   if(ox<p.x+S*.6){
-    win();
-    return;
-   }
+   if(ox<p.x+S*.6){win();return}
    continue;
   }
-
-  const px1=p.x+5;
-  const px2=p.x+S-5;
-  const py1=p.y+5;
-  const py2=p.y+S-3;
-
+  var px1=p.x+5,px2=p.x+S-5,py1=p.y+5,py2=p.y+S-3;
   if(o.type==='ceiling'){
-   if(px2>ox+4&&px1<ox+o.w-4&&py2>o.y+4&&py1<o.y+o.h){
-    die();
-    return;
-   }
+   if(px2>ox+4&&px1<ox+o.w-4&&py2>o.y+4&&py1<o.y+o.h){die();return}
    continue;
   }
-
-  const left=Math.max(px1,ox);
-  const right=Math.min(px2,ox+o.w);
+  var left=Math.max(px1,ox),right=Math.min(px2,ox+o.w);
   if(left>=right)continue;
-
-  const center=ox+o.w/2;
-  const sampleX=Math.max(ox,Math.min(center,(left+right)/2));
-  const surfaceY=G-o.h*(1-Math.abs(sampleX-center)/(o.w/2));
-
-  if(py2>surfaceY+2&&py1<G){
-   die();
-   return;
-  }
+  var center=ox+o.w/2;
+  var sx=Math.max(ox,Math.min(center,(left+right)/2));
+  var surfaceY=G-o.h*(1-Math.abs(sx-center)/(o.w/2));
+  if(py2>surfaceY+2&&py1<G){die();return}
  }
 }
-
 function draw(){
  ctx.clearRect(0,0,W,H);
- ctx.fillStyle='#0a1230';
- ctx.fillRect(0,0,W,H);
+ ctx.fillStyle='#0a1230';ctx.fillRect(0,0,W,H);
+ var grad=ctx.createLinearGradient(0,0,0,G);
+ grad.addColorStop(0,'#111e48');grad.addColorStop(1,'#0a1530');
+ ctx.fillStyle=grad;ctx.fillRect(0,0,W,G);
 
- const grad=ctx.createLinearGradient(0,0,0,G);
- grad.addColorStop(0,'#111e48');
- grad.addColorStop(1,'#0a1530');
- ctx.fillStyle=grad;
- ctx.fillRect(0,0,W,G);
-
- ctx.strokeStyle='#213865';
- ctx.lineWidth=1;
- const off=-(world*.3%45);
-
- for(let x=off;x<W;x+=45){
-  ctx.beginPath();
-  ctx.moveTo(x,0);
-  ctx.lineTo(x,G);
-  ctx.stroke();
+ ctx.strokeStyle='#213865';ctx.lineWidth=1;
+ var off=-(world*.3%45);
+ for(var x=off;x<W;x+=45){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,G);ctx.stroke()}
+ for(var y=22;y<G;y+=45){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+ for(var i=0;i<26;i++){
+  var sx=(i*137-world*.12%900+900)%900,sy=(i*71)%285;
+  ctx.fillStyle='#668ac5';ctx.fillRect(sx,sy,2,2);
  }
+ ctx.fillStyle='#14264c';ctx.fillRect(0,G,W,H-G);
+ ctx.fillStyle='#36e8ff';ctx.fillRect(0,G,W,4);
+ for(x=-(world%50);x<W;x+=50){ctx.fillStyle='#2b4779';ctx.fillRect(x,G+16,25,4)}
 
- for(let y=22;y<G;y+=45){
-  ctx.beginPath();
-  ctx.moveTo(0,y);
-  ctx.lineTo(W,y);
-  ctx.stroke();
- }
-
- for(let i=0;i<26;i++){
-  const sx=(i*137-world*.12%900+900)%900;
-  const sy=(i*71)%285;
-  ctx.fillStyle='#668ac5';
-  ctx.fillRect(sx,sy,2,2);
- }
-
- ctx.fillStyle='#14264c';
- ctx.fillRect(0,G,W,H-G);
- ctx.fillStyle='#36e8ff';
- ctx.fillRect(0,G,W,4);
-
- for(let x=-(world%50);x<W;x+=50){
-  ctx.fillStyle='#2b4779';
-  ctx.fillRect(x,G+16,25,4);
- }
-
- for(const o of obstacles){
-  const x=o.x-world;
-  if(x<-100||x>W+100)continue;
-
+ for(i=0;i<obstacles.length;i++){
+  var o=obstacles[i],ox=o.x-world;
+  if(ox<-100||ox>W+100)continue;
   if(o.type==='spike'){
    ctx.fillStyle=selected===2?'#ff3d8c':selected===1?'#ff6c68':'#ff4d83';
-   ctx.beginPath();
-   ctx.moveTo(x,G);
-   ctx.lineTo(x+o.w/2,G-o.h);
-   ctx.lineTo(x+o.w,G);
-   ctx.closePath();
-   ctx.fill();
-   ctx.strokeStyle='#ffb2cb';
-   ctx.lineWidth=2;
-   ctx.stroke();
+   ctx.beginPath();ctx.moveTo(ox,G);ctx.lineTo(ox+o.w/2,G-o.h);ctx.lineTo(ox+o.w,G);ctx.closePath();ctx.fill();
+   ctx.strokeStyle='#ffb2cb';ctx.lineWidth=2;ctx.stroke();
   }else if(o.type==='ceiling'){
-   ctx.fillStyle='#ff385f';
-   ctx.fillRect(x,o.y,o.w,o.h);
-   ctx.fillStyle='#ff9bad';
-   ctx.fillRect(x,o.y+o.h-5,o.w,5);
-
-   for(let k=0;k<o.w;k+=18){
-    ctx.fillStyle='#7d183c';
-    ctx.fillRect(x+k,o.y+6,8,5);
-   }
+   ctx.fillStyle='#ff385f';ctx.fillRect(ox,o.y,o.w,o.h);
+   ctx.fillStyle='#ff9bad';ctx.fillRect(ox,o.y+o.h-5,o.w,5);
   }else{
-   ctx.fillStyle='#4dffb4';
-   ctx.fillRect(x,G-o.h,8,o.h);
-   ctx.fillStyle='#e6fff5';
-   ctx.font='bold 18px Arial';
-   ctx.fillText('FINISH',x-26,G-o.h-12);
+   ctx.fillStyle='#4dffb4';ctx.fillRect(ox,G-o.h,8,o.h);
+   ctx.fillStyle='#e6fff5';ctx.font='bold 18px Arial';ctx.fillText('FINISH',ox-26,G-o.h-12);
   }
  }
-
- ctx.save();
- ctx.translate(p.x+S/2,p.y+S/2);
- ctx.rotate(p.angle);
- ctx.shadowColor='#00dfff';
- ctx.shadowBlur=14;
- ctx.fillStyle='#35e7ff';
- ctx.fillRect(-S/2,-S/2,S,S);
- ctx.shadowBlur=0;
- ctx.strokeStyle='#d8fcff';
- ctx.lineWidth=3;
- ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
- ctx.fillStyle='#0a2750';
- ctx.fillRect(-9,-7,5,7);
- ctx.fillRect(4,-7,5,7);
+ ctx.save();ctx.translate(p.x+S/2,p.y+S/2);ctx.rotate(p.angle);
+ ctx.shadowColor='#00dfff';ctx.shadowBlur=14;ctx.fillStyle='#35e7ff';
+ ctx.fillRect(-S/2,-S/2,S,S);ctx.shadowBlur=0;
+ ctx.strokeStyle='#d8fcff';ctx.lineWidth=3;ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
+ ctx.fillStyle='#0a2750';ctx.fillRect(-9,-7,5,7);ctx.fillRect(4,-7,5,7);
  ctx.restore();
-
  if(mode!=='playing'){
-  ctx.fillStyle='#b6d2ff';
-  ctx.font='bold 20px Arial';
-  ctx.textAlign='center';
-  ctx.fillText('READY?',W/2,105);
-  ctx.textAlign='left';
+  ctx.fillStyle='#b6d2ff';ctx.font='bold 20px Arial';ctx.textAlign='center';
+  ctx.fillText('READY?',W/2,105);ctx.textAlign='left';
  }
 }
-
 function loop(now){
- const dt=Math.min((now-last)/1000,.025);
- last=now;
- update(dt);
- draw();
-
+ var dt=Math.min((now-last)/1000,.025);last=now;
+ update(dt);draw();
  if(mode==='playing')raf=requestAnimationFrame(loop);
+ else raf=0;
 }
 
-/* Управление мышью и сенсорным экраном */
-function press(e){
- if(e)e.preventDefault();
- if(mode!=='playing')return;
- if(!held){
-  held=true;
-  jump();
+function handleAction(action,button){
+ if(action==='start'){start();return}
+ if(action==='menu'){
+  if(raf)cancelAnimationFrame(raf);
+  raf=0;showMenu('menu');return;
+ }
+ if(action==='level'){
+  selected=Number(button.getAttribute('data-level'));
+  if(!Number.isFinite(selected)||selected<0||selected>2)selected=0;
+  reset();refreshStats();draw();return;
+ }
+ if(action==='nick'){
+  if(profile.isDev){alert('DEV-ник закреплён.');updateProfile();return}
+  var nick=$('nickInput').value.trim();
+  if(nick.length<2){alert('Ник должен содержать минимум 2 символа.');return}
+  profile.nickname=nick.slice(0,16);saveProfile();return;
+ }
+ if(action==='owner'){
+  var pin=prompt('Введите PIN владельца:');
+  if(pin===null)return;
+  var pins=['OwnerKD-ADS5H-D6E9F037F7','KenanDrun-AJ9S3L6KS9-8H67HSK','TESTER-AAA111'];
+  if(pins.indexOf(pin.trim())===-1){alert('Неверный PIN!');return}
+  ownerMode=!ownerMode;
+  if(pin.trim()===pins[0]){
+   profile.isDev=true;profile.nickname='[DEV] Kyosuke';saveProfile();
+  }else if(pin.trim()===pins[2]){
+   profile.isDev=false;profile.nickname='[TEST] TesterKD';saveProfile();
+  }
+  alert(ownerMode?'Owner Mode активирован!':'Owner Mode выключен!');
  }
 }
 
-function release(e){
- if(e)e.preventDefault();
- held=false;
-}
+/* Единый обработчик кнопок */
+document.addEventListener('click',function(e){
+ var button=e.target.closest('button[data-action]');
+ if(!button)return;
+ e.preventDefault();
+ e.stopPropagation();
+ try{
+  handleAction(button.getAttribute('data-action'),button);
+ }catch(err){
+  showError(err);
+ }
+},true);
 
-canvas.addEventListener('pointerdown',press);
+/* Сенсорное управление */
+function press(e){
+ if(mode!=='playing')return;
+ if(e.cancelable)e.preventDefault();
+ if(!held){held=true;jump()}
+}
+function release(e){
+ held=false;
+ if(e&&e.cancelable)e.preventDefault();
+}
+canvas.addEventListener('pointerdown',press,{passive:false});
 window.addEventListener('pointerup',release);
 window.addEventListener('pointercancel',release);
-window.addEventListener('blur',()=>{held=false});
+window.addEventListener('blur',release);
 
-window.addEventListener('keydown',e=>{
+window.addEventListener('keydown',function(e){
  if(e.code==='Space'||e.code==='ArrowUp'){
   e.preventDefault();
-
   if(mode==='playing'){
-   if(!held){
-    held=true;
-    jump();
-   }
-  }else if(e.code==='Space'){
-   start();
-  }
+   if(!held){held=true;jump()}
+  }else if(e.code==='Space'){start()}
  }
 });
-
-window.addEventListener('keyup',e=>{
+window.addEventListener('keyup',function(e){
  if(e.code==='Space'||e.code==='ArrowUp')held=false;
 });
 
-$('nickSave').addEventListener('click',()=>{
- if(profile.isDev){
-  alert('DEV-ник закреплён и не меняется через обычное меню.');
-  updateProfile();
-  return;
- }
-
- const nick=$('nickInput').value.trim();
- if(nick.length<2){
-  alert('Ник должен содержать минимум 2 символа.');
-  return;
- }
-
- profile.nickname=nick.slice(0,16);
- saveProfile();
+function showError(err){
+ var box=$('errorBox');
+ box.style.display='block';
+ box.textContent='Ошибка игры: '+(err&&err.message?err.message:String(err));
+}
+window.addEventListener('error',function(e){
+ showError(e.error||e.message||'Неизвестная ошибка');
 });
 
-$('nickInput').addEventListener('keydown',e=>{
- if(e.key==='Enter')$('nickSave').click();
-});
-
-$('startBtn').addEventListener('click',start);
-
-$('ownerBtn').addEventListener('click',()=>{
- if(ownerMode){
-  ownerMode=false;
-  alert('Owner Mode выключен');
-  return;
- }
-
- const pin=prompt('Введите PIN владельца:');
- if(pin!==null)activateOwner(pin);
-});
-
-$('menuBtn').addEventListener('click',()=>{
- cancelAnimationFrame(raf);
- showMenu('menu');
-});
-
-document.querySelectorAll('.level').forEach(b=>{
- b.addEventListener('click',()=>{
-  selected=Number(b.dataset.level);
-  reset();
-  refreshStats();
-  draw();
- });
-});
-
-/* Запуск приложения */
-loadProfile();
+loadData();
 updateProfile();
 refreshStats();
 reset();
@@ -731,4 +453,4 @@ showMenu('menu');
 </script>
 </body>
  </html>
-
+ 
