@@ -124,6 +124,11 @@ var skinsData=[
  {id:'pink',name:'Pink Pulse',price:400,color:'#ff67cb',glow:'#ff30a4'}
 ];
 function currentSkin(){
+ function isReservedNick(name){
+ var n=String(name||'').trim().toUpperCase();
+ n=n.replace(/[\s_\-\[\].]/g,'');
+ return /^(DEV|MOD|MODER|OWNER|ADMIN|STAFF|DEVELOPER|HELPER|ВЛАДЕЛЕЦ|АДМИН|МОДЕРАТОР)/.test(n);
+ }
  return skinsData.find(function(s){return s.id===skin})||skinsData[0];
 }
 function notify(msg){
@@ -270,7 +275,7 @@ function showStats(){
 function showOwner(){8
  var pin=prompt('Owner PIN:');
  if(pin===null){menu();return}
- if(pin.trim()!=='KYO-OWNER-2026'){
+ if(pin.trim()!=='OwnerKD-ADS5H-D6E9F037F7'){
   notify('Неверный PIN');menu();return;
  }
  ownerMode=true;
@@ -650,6 +655,34 @@ function loop(now){
 }
 
 function action(name,b){
+ if(name==='nick'){
+ var input=$('nickInput');
+ var v=input?input.value.trim():'';
+
+ if(ownerMode){
+  profile.nickname='[DEV] Kyosuke';
+  save();
+  updateProfile();
+  notify('Ник владельца установлен');
+  return;
+ }
+
+ if(v.length<2){
+  notify('Ник должен содержать хотя бы 2 символа');
+  return;
+ }
+
+ if(isReservedNick(v)){
+  notify('Этот ник зарезервирован для администрации');
+  return;
+ }
+
+ profile.nickname=v.slice(0,16);
+ save();
+ updateProfile();
+ notify('Ник сохранён');
+ return;
+ }
  if(name==='menu'){
   if(raf)cancelAnimationFrame(raf);
   raf=0;menu();return;
