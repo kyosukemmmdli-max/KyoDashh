@@ -707,5 +707,30 @@ window.addEventListener('keydown',function(e){
   }
  }
 });
+
 window.addEventListener('keyup',function(e){
- if(e.code=
+ if(e.code==='Space'||e.code==='ArrowUp')held=false;
+});
+
+function showError(err){
+ var box=$('errorBox');
+ box.style.display='block';
+ box.textContent='Ошибка игры: '+(err&&err.message?err.message:String(err));
+}
+
+window.addEventListener('error',function(e){
+ showError(e.error||e.message||'Неизвестная ошибка');
+});
+
+loadData();
+updateProfile();
+refreshStats();
+updateMusicButton();
+reset();
+showMenu('menu');
+
+})();
+</script>
+</body>
+</html>
+
