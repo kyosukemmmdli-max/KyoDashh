@@ -68,19 +68,29 @@ button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126
 <section class="panel">
 <h1 class="logo" id="panelTitle">Kyo Dash</h1>
 <p class="sub" id="panelText">Прыгай через шипы и блоки и доберись до финиша!</p>
+
 <div class="profileBox">
 <div class="profileLine">ИГРОК: <strong id="profileNick">Player</strong></div>
 <div class="profileLine">УРОВЕНЬ <strong id="profileLevel">1</strong> · XP <strong id="profileXp">0 / 250</strong></div>
 <div class="xpTrack"><div class="xpFill" id="xpFill"></div></div>
-<div class="nickRow"><input id="nickInput" maxlength="16" placeholder="Твой ник"><button class="nickSave" id="nickSave">СМЕНИТЬ</button></div>
+<div class="nickRow">
+<input id="nickInput" maxlength="16" placeholder="Твой ник">
+<button class="nickSave" id="nickSave">СМЕНИТЬ</button>
+</div>
 <div class="small">Профиль и XP сохраняются на устройстве</div>
 </div>
+
 <div class="levels" id="levels">
 <button class="level active" data-level="0">EASY<small>Stereo Madness</small></button>
 <button class="level" data-level="1">MEDIUM<small>Jumper</small></button>
 <button class="level" data-level="2">HARD<small>FingerDash</small></button>
 </div>
-<div class="stats"><span>РЕКОРД <b id="best">0%</b></span><span>ПОБЕДЫ <b id="wins">0/3</b></span></div>
+
+<div class="stats">
+<span>РЕКОРД <b id="best">0%</b></span>
+<span>ПОБЕДЫ <b id="wins">0/3</b></span>
+</div>
+
 <button class="btn" id="startBtn">ИГРАТЬ</button>
 <button class="btn secondary" id="ownerBtn">OWNER MODE</button>
 <button class="btn secondary hidden" id="menuOnly">ВЫБОР УРОВНЯ</button>
@@ -93,7 +103,8 @@ button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126
 'use strict';
 
 const $=id=>document.getElementById(id);
-const canvas=$('game'),ctx=canvas.getContext('2d');
+const canvas=$('game');
+const ctx=canvas.getContext('2d');
 const overlay=$('overlay');
 
 const OWNER_PINS=[
@@ -112,7 +123,7 @@ function loadProfile(){
   profile.isDev=saved.isDev===true;
   profile.nickname=profile.isDev?'[DEV] Kyosuke':
    (typeof saved.nickname==='string'&&saved.nickname.trim()
-    ?saved.nickname.trim().slice(0,16):'Player');
+   ?saved.nickname.trim().slice(0,16):'Player');
  }catch(e){
   profile={nickname:'Player',xp:0,isDev:false};
  }
@@ -184,9 +195,9 @@ function activateOwner(pin){
 const W=900,H=420,G=330,S=34;
 
 const LEVELS=[
- {name:'EASY',speed:275,jump:-590,gravity:1650,length:5600,gap:225},
- {name:'MEDIUM',speed:290,jump:-600,gravity:1680,length:6500,gap:205},
- {name:'HARD',speed:305,jump:-610,gravity:1720,length:7400,gap:185}
+ {name:'EASY',speed:275,jump:-590,gravity:1650,length:5600,gap:255},
+ {name:'MEDIUM',speed:290,jump:-600,gravity:1680,length:6500,gap:220},
+ {name:'HARD',speed:305,jump:-610,gravity:1720,length:7400,gap:195}
 ];
 
 let selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
@@ -291,7 +302,9 @@ function startMusic(){
   const duration=track.tempo/1000;
   playNote(track.melody[i],duration*.82,'triangle',.23);
 
-  if(i%4===0)playNote(track.bass[i],duration*3.4,'sine',.35);
+  if(i%4===0){
+   playNote(track.bass[i],duration*3.4,'sine',.35);
+  }
   musicStep++;
  }
 
@@ -329,57 +342,58 @@ function refreshStats(){
  $('levelLabel').textContent=LEVELS[selected].name+' · '+(selected+1);
 }
 
-/* Новые препятствия: одиночные и двойные шипы,
-   широкие блоки и платформы. */
+/* Генератор блоков и шипов.
+   count может быть 1, 2 или 3. */
 function makeLevel(){
  obstacles=[];
  const cfg=LEVELS[selected];
 
- const easy=[
-  {type:'spikes',count:1},
-  {type:'platform',w:72,h:44},
-  {type:'spikes',count:2},
-  {type:'platform',w:88,h:55},
-  {type:'spikes',count:1},
-  {type:'spikes',count:2},
-  {type:'platform',w:66,h:40},
-  {type:'spikes',count:1},
-  {type:'spikes',count:2}
+ const patterns=[
+  [
+   {type:'spike',count:1},
+   {type:'spike',count:1},
+   {type:'platform',w:72,h:42},
+   {type:'spike',count:2},
+   {type:'spike',count:1},
+   {type:'platform',w:90,h:52},
+   {type:'spike',count:1},
+   {type:'spike',count:2},
+   {type:'platform',w:68,h:38},
+   {type:'spike',count:1}
+  ],
+  [
+   {type:'spike',count:1},
+   {type:'platform',w:76,h:48},
+   {type:'spike',count:2},
+   {type:'spike',count:1},
+   {type:'platform',w:92,h:58},
+   {type:'spike',count:3},
+   {type:'platform',w:72,h:44},
+   {type:'spike',count:2},
+   {type:'platform',w:86,h:52}
+  ],
+  [
+   {type:'spike',count:2},
+   {type:'platform',w:80,h:55},
+   {type:'spike',count:3},
+   {type:'platform',w:94,h:66},
+   {type:'spike',count:2},
+   {type:'platform',w:72,h:48},
+   {type:'spike',count:3},
+   {type:'platform',w:90,h:60},
+   {type:'spike',count:2}
+  ]
  ];
 
- const medium=[
-  {type:'spikes',count:1},
-  {type:'platform',w:78,h:48},
-  {type:'spikes',count:2},
-  {type:'platform',w:90,h:62},
-  {type:'spikes',count:2},
-  {type:'spikes',count:1},
-  {type:'platform',w:70,h:44},
-  {type:'spikes',count:2},
-  {type:'platform',w:85,h:52}
- ];
-
- const hard=[
-  {type:'spikes',count:2},
-  {type:'platform',w:80,h:58},
-  {type:'spikes',count:2},
-  {type:'platform',w:96,h:70},
-  {type:'spikes',count:3},
-  {type:'platform',w:74,h:50},
-  {type:'spikes',count:2},
-  {type:'platform',w:92,h:64},
-  {type:'spikes',count:3}
- ];
-
- const patterns=[easy,medium,hard][selected];
+ const pattern=patterns[selected];
  let x=560,i=0;
 
- while(x<cfg.length-340){
-  const item=patterns[i%patterns.length];
+ while(x<cfg.length-320){
+  const item=pattern[i%pattern.length];
 
-  if(item.type==='spikes'){
+  if(item.type==='spike'){
    const spikeW=34;
-   const spikeH=selected===2?40:36;
+   const spikeH=selected===2?42:36;
 
    for(let j=0;j<item.count;j++){
     obstacles.push({
@@ -389,23 +403,20 @@ function makeLevel(){
      type:'spike'
     });
    }
-
    x+=item.count*spikeW;
   }else{
    obstacles.push({
-    x,
+    x:x,
     w:item.w,
     h:item.h,
     type:'platform'
    });
-
    x+=item.w;
   }
 
-  // Небольшая случайность расстояния, но без слишком
-  // плотных и практически непроходимых комбинаций.
-  const extra=selected===0?(i%3)*17:
-   selected===1?(i%3)*10:(i%3)*5;
+  // На EASY расстояния больше.
+  const extra=selected===0?(i%3)*25:
+   selected===1?(i%3)*13:(i%3)*7;
 
   x+=cfg.gap+extra;
   i++;
@@ -511,7 +522,6 @@ function win(){
 
  $('progressText').textContent='100%';
  $('progressFill').style.width='100%';
-
  best[selected]=100;
 
  if(!wins[selected]){
@@ -525,8 +535,7 @@ function win(){
  showMenu('win');
 }
 
-/* Физика: можно приземляться на верх блоков.
-   При удержании куб автоматически прыгает после приземления. */
+/* Обновление физики и столкновений. */
 function update(dt){
  if(mode!=='playing')return;
 
@@ -539,14 +548,14 @@ function update(dt){
  p.y+=p.vy*dt;
  p.onGround=false;
 
- // Обычный пол.
+ // Сначала проверяем обычный пол.
  if(p.y+S>=G){
   p.y=G-S;
   p.vy=0;
   p.onGround=true;
  }
 
- // Проверяем блоки и платформы.
+ // Затем верхние поверхности блоков.
  for(const o of obstacles){
   if(o.type!=='platform')continue;
 
@@ -557,7 +566,7 @@ function update(dt){
   if(!overlaps)continue;
 
   const crossedTop=
-   oldBottom<=top+9&&
+   oldBottom<=top+10&&
    p.y+S>=top&&
    p.vy>=0;
 
@@ -565,16 +574,23 @@ function update(dt){
    p.y=top-S;
    p.vy=0;
    p.onGround=true;
-  }else if(p.y+S>top+5&&p.y< G){
-   // Столкновение с боковой стороной блока.
-   die();
-   return;
+  }else{
+   // Не допускаем прохождения сквозь бок блока.
+   const horizontal=p.x+S>ox+3&&p.x<ox+o.w-3;
+   const vertical=p.y+S>top+5&&p.y<G;
+
+   if(horizontal&&vertical){
+    die();
+    return;
+   }
   }
  }
 
  if(p.onGround){
   p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
 
+  // Автопрыжок после каждого приземления,
+  // пока палец остаётся на экране.
   if(held){
    p.vy=cfg.jump;
    p.onGround=false;
@@ -596,12 +612,9 @@ function update(dt){
     return;
    }
   }else if(o.type==='spike'){
-   // Более точная проверка столкновения с треугольным шипом.
    const center=ox+o.w/2;
-   const playerLeft=p.x+5;
-   const playerRight=p.x+S-5;
-   const left=Math.max(playerLeft,ox+o.w*.16);
-   const right=Math.min(playerRight,ox+o.w*.84);
+   const left=Math.max(p.x+5,ox+o.w*.16);
+   const right=Math.min(p.x+S-5,ox+o.w*.84);
 
    if(left<right&&p.y+S>G-o.h){
     const nearest=Math.max(ox,Math.min(center,p.x+S));
@@ -666,7 +679,7 @@ function draw(){
   ctx.fillRect(x,G+16,25,4);
  }
 
- // Препятствия.
+ // Рисуем шипы, платформы и финиш.
  for(const o of obstacles){
   const x=o.x-world;
   if(x<-100||x>W+100)continue;
@@ -687,25 +700,26 @@ function draw(){
    ctx.stroke();
   }else if(o.type==='platform'){
    const top=G-o.h;
-
-   // Основной блок.
    const blockGrad=ctx.createLinearGradient(x,top,x+o.w,G);
    blockGrad.addColorStop(0,'#37dcff');
    blockGrad.addColorStop(1,'#2466ce');
+
    ctx.fillStyle=blockGrad;
    ctx.fillRect(x,top,o.w,G-top);
 
-   // Верхняя светящаяся грань.
+   // Верхняя грань.
    ctx.fillStyle='#b4f7ff';
    ctx.fillRect(x,top,o.w,5);
 
-   // Обводка и узор.
+   // Контур блока.
    ctx.strokeStyle='#75efff';
    ctx.lineWidth=2;
    ctx.strokeRect(x+1,top+1,o.w-2,G-top-2);
 
+   // Внутренние линии.
    ctx.strokeStyle='#2b8fe4';
    ctx.lineWidth=2;
+
    for(let yy=top+17;yy<G-5;yy+=18){
     ctx.beginPath();
     ctx.moveTo(x+7,yy);
@@ -713,7 +727,6 @@ function draw(){
     ctx.stroke();
    }
 
-   // Маленькие светящиеся детали.
    ctx.fillStyle='#e4ffff';
    ctx.fillRect(x+8,top+10,5,5);
    ctx.fillRect(x+o.w-13,top+10,5,5);
@@ -760,7 +773,9 @@ function loop(now){
  update(dt);
  draw();
 
- if(mode==='playing')raf=requestAnimationFrame(loop);
+ if(mode==='playing'){
+  raf=requestAnimationFrame(loop);
+ }
 }
 
 function press(e){
@@ -783,4 +798,9 @@ window.addEventListener('pointerup',release);
 window.addEventListener('pointercancel',release);
 
 window.addEventListener('keydown',e=>{
- if(e.code==='Space'||e.code==='ArrowU
+ if(e.code==='Space'||e.code==='ArrowUp'){
+  e.preventDefault();
+
+  if(mode==='playing'){
+   if(!held){
+ 
