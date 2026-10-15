@@ -92,16 +92,19 @@ input,select{width:100%;padding:10px;background:#080f23;border:1px solid #34527f
 <script>
 (function(){
 'use strict';
+
 var $=function(id){return document.getElementById(id)};
 var canvas=$('game'),ctx=canvas.getContext('2d');
 var overlay=$('overlay'),content=$('panelContent');
 var W=900,H=420,G=330,CUBE=34;
 var STORE='kyoDashBigUpdateV1';
+
 var levels=[
  {name:'EASY',speed:285,jump:-555,gravity:1550,length:5700,gap:390},
  {name:'MEDIUM',speed:295,jump:-565,gravity:1600,length:6500,gap:350},
  {name:'HARD',speed:310,jump:-575,gravity:1650,length:7200,gap:330}
 ];
+
 var profile={nickname:'Player',xp:0,coins:0};
 var selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
 var held=false,obstacles=[],particles=[],custom=[];
@@ -110,11 +113,13 @@ var unlocked=['cyan'],skin='cyan',dailyClaim='',editorTool='spike';
 var ownerMode=false,gravityFlip=false,portalCooldown=0;
 var p={x:150,y:G-CUBE,vy:0,angle:0,onGround:true};
 var musicEnabled=true,audioCtx=null,musicTimer=null,musicStep=0,musicGeneration=0;
+
 var songData=[
  {tempo:190,notes:[523,659,784,659,523,392,440,523,659,523,440,392,440,523,659,784,659,523,392,440,523,659,784,880,784,659,523,440,392,440,523,392],bass:[131,0,165,0,196,0,165,0],wave:'square'},
  {tempo:145,notes:[392,523,659,784,659,523,392,523,440,587,698,880,698,587,440,587,392,523,659,784,880,784,659,523,440,587,698,880,784,698,587,440],bass:[98,98,131,131,110,110,147,147],wave:'sawtooth'},
  {tempo:105,notes:[330,440,659,523,330,440,784,659,349,466,698,587,349,466,880,698,330,523,659,880,784,659,523,440,349,523,698,932,880,698,523,392],bass:[82,82,110,110,73,73,98,98],wave:'square'}
 ];
+
 var skinsData=[
  {id:'cyan',name:'Neon Cyan',price:0,color:'#35eaff',glow:'#00cfff'},
  {id:'fire',name:'Fire Cube',price:100,color:'#ff6748',glow:'#ff2d54'},
@@ -123,36 +128,57 @@ var skinsData=[
  {id:'gold',name:'Golden Star',price:350,color:'#ffd95a',glow:'#ffad20'},
  {id:'pink',name:'Pink Pulse',price:400,color:'#ff67cb',glow:'#ff30a4'}
 ];
-function currentSkin(){
- function isReservedNick(name){
+
+/* Проверка зарезервированных ников.
+   Эта функция находится СНАРУЖИ currentSkin(), чтобы action() могла её вызвать. */
+function isReservedNick(name){
  var n=String(name||'').trim().toUpperCase();
  n=n.replace(/[\s_\-\[\].]/g,'');
  return /^(DEV|MOD|MODER|OWNER|ADMIN|STAFF|DEVELOPER|HELPER|ВЛАДЕЛЕЦ|АДМИН|МОДЕРАТОР)/.test(n);
- }
+}
+
+function currentSkin(){
  return skinsData.find(function(s){return s.id===skin})||skinsData[0];
 }
+
 function notify(msg){
  $('message').innerHTML='<span class="toast"></span>';
  $('message').firstChild.textContent=msg;
  setTimeout(function(){$('message').innerHTML=''},2300);
 }
+
 function readStore(){
  try{
   var d=JSON.parse(localStorage.getItem(STORE)||'{}');
+
   if(d.profile&&typeof d.profile==='object'){
-   profile.nickname=String(d.profile.nickname||'Player').slice(0,16);
+   var storedNick=String(d.profile.nickname||'Player').trim().slice(0,16);
+   profile.nickname=isReservedNick(storedNick)?'Player':storedNick;
    profile.xp=Math.max(0,Number(d.profile.xp)||0);
    profile.coins=Math.max(0,Number(d.profile.coins)||0);
   }
-  if(Array.isArray(d.best)&&d.best.length===3)best=d.best.map(function(v){return Math.max(0,Number(v)||0)});
+
+  if(Array.isArray(d.best)&&d.best.length===3)
+   best=d.best.map(function(v){return Math.max(0,Number(v)||0)});
+
   if(Array.isArray(d.wins)&&d.wins.length===3)wins=d.wins;
   if(d.achieved&&typeof d.achieved==='object')achieved=d.achieved;
-  if(Array.isArray(d.unlocked))unlocked=Array.from(new Set(['cyan'].concat(d.unlocked)));
-  if(skinsData.some(function(s){return s.id===d.skin})&&unlocked.indexOf(d.skin)>=0)skin=d.skin;
+
+  if(Array.isArray(d.unlocked))
+   unlocked=Array.from(new Set(['cyan'].concat(d.unlocked)));
+
+  if(skinsData.some(function(s){return s.id===d.skin})&&unlocked.indexOf(d.skin)>=0)
+   skin=d.skin;
+
   if(typeof d.dailyClaim==='string')dailyClaim=d.dailyClaim;
-  if(Array.isArray(d.custom))custom=d.custom.filter(function(o){return o&&Number.isFinite(o.x)&&['spike','block','portal'].includes(o.type)}).slice(0,100);
+
+  if(Array.isArray(d.custom))
+   custom=d.custom.filter(function(o){
+    return o&&Number.isFinite(o.x)&&['spike','block','portal'].includes(o.type);
+   }).slice(0,100);
  }catch(e){}
 }
+
 function save(){
  try{
   localStorage.setItem(STORE,JSON.stringify({
@@ -161,8 +187,10 @@ function save(){
   }));
  }catch(e){notify('Не удалось сохранить: проверь память браузера')}
 }
+
 function levelNum(){return Math.floor(profile.xp/250)+1}
 function xpNext(){return profile.xp%250}
+
 function profileHTML(){
  return '<div class="profile">'+
  '<div class="row"><b>Игрок: <span id="nickDisplay"></span></b><b>💰 <span id="coinDisplay"></span></b></div>'+
@@ -171,14 +199,20 @@ function profileHTML(){
  '<input id="nickInput" maxlength="16" placeholder="Новый ник">'+
  '<button class="btn secondary" data-action="nick">СОХРАНИТЬ НИК</button></div>';
 }
+
 function updateProfile(){
  var nick=$('nickDisplay'),coins=$('coinDisplay'),lev=$('accountLevel'),xp=$('xpDisplay'),fill=$('xpFill');
- if(nick){nick.textContent=profile.nickname;nick.classList.toggle('rainbow',ownerMode)}
+
+ if(nick){
+  nick.textContent=profile.nickname;
+  nick.classList.toggle('rainbow',ownerMode&&profile.nickname==='[DEV] Kyosuke');
+ }
  if(coins)coins.textContent=profile.coins;
  if(lev)lev.textContent=levelNum();
  if(xp)xp.textContent=xpNext();
  if(fill)fill.style.width=(xpNext()/250*100)+'%';
 }
+
 function shell(title,subtitle,html){
  $('panelTitle').textContent=title;
  $('panelSubtitle').textContent=subtitle||'';
@@ -186,13 +220,16 @@ function shell(title,subtitle,html){
  overlay.classList.remove('hidden');
  updateProfile();
 }
+
 function menu(){
  stopMusic();
  mode='menu';held=false;
  $('hint').textContent='Тапни по экрану, чтобы прыгнуть · Удерживай для автопрыжка';
+
  var lv=levels.map(function(l,i){
   return '<button class="level '+(i===selected?'active':'')+'" data-action="level" data-level="'+i+'">'+l.name+'<small>Рекорд '+best[i]+'%</small></button>';
  }).join('');
+
  shell('Kyo Dash','BIG UPDATE · Новые скины, достижения и редактор уровней',
  profileHTML()+
  '<div class="levels">'+lv+'</div>'+
@@ -206,22 +243,29 @@ function menu(){
  '<button class="btn secondary" data-action="stats">📊 СТАТИСТИКА</button>'+
  '</div>'+
  '<p class="muted">Прогресс хранится локально в этом браузере.</p>');
+
  refreshHud();draw();
 }
+
 function backButton(){return '<button class="btn secondary" data-action="menu">← В МЕНЮ</button>'}
+
 function showShop(){
  mode='menu';
  var html='<div class="grid">';
+
  skinsData.forEach(function(s){
   var own=unlocked.indexOf(s.id)>=0;
   var active=skin===s.id;
+
   html+='<div class="card"><div style="height:65px;display:grid;place-items:center"><div style="width:38px;height:38px;background:'+s.color+';box-shadow:0 0 20px '+s.glow+';border:3px solid #fff8;border-radius:4px"></div></div>'+
    '<h3>'+s.name+'</h3><p>'+ (active?'Выбран':own?'Открыт':'Цена: '+s.price+' монет')+'</p>'+
    '<button class="btn '+(active?'secondary':'')+'" data-action="'+(active?'noop':own?'equip':'buy')+'" data-skin="'+s.id+'">'+(active?'ВЫБРАН':own?'НАДЕТЬ':'КУПИТЬ')+'</button></div>';
  });
+
  html+='</div>'+backButton();
  shell('Магазин скинов','Покупай кубики за монеты',html);
 }
+
 var achievementList=[
  {id:'first',name:'Первый прыжок',desc:'Начни играть в Kyo Dash',reward:25,check:function(){return (profile.xp>0||wins.some(Boolean))}},
  {id:'win1',name:'Победитель',desc:'Пройди любой уровень',reward:50,check:function(){return wins.some(Boolean)}},
@@ -231,6 +275,7 @@ var achievementList=[
  {id:'editor',name:'Создатель',desc:'Сохрани собственный уровень',reward:50,check:function(){return custom.length>0}},
  {id:'skin',name:'Новый стиль',desc:'Открой дополнительный скин',reward:50,check:function(){return unlocked.length>=2}}
 ];
+
 function checkAchievements(){
  achievementList.forEach(function(a){
   if(!achieved[a.id]&&a.check()){
@@ -241,54 +286,75 @@ function checkAchievements(){
   }
  });
 }
+
 function showAchievements(){
  checkAchievements();
  var html='<div class="grid">';
+
  achievementList.forEach(function(a){
   var done=!!achieved[a.id];
   html+='<div class="card"><h3>'+ (done?'🏆 ':'🔒 ')+a.name+'</h3><p>'+a.desc+'</p><p class="muted">Награда: '+a.reward+' монет</p><p style="color:'+(done?'#68ffbd':'#9ab1dc')+'">'+(done?'ВЫПОЛНЕНО':'НЕ ВЫПОЛНЕНО')+'</p></div>';
  });
+
  html+='</div>'+backButton();
  shell('Достижения','Выполняй задания и получай монеты',html);
 }
+
 function dayKey(){
  var d=new Date();
  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
 }
+
 function daily(){
  mode='menu';
  var claimed=dailyClaim===dayKey();
+
  shell('Ежедневная награда','Заходи каждый день за бонусом',
  '<div class="card" style="text-align:center"><h3 style="font-size:27px">🎁 +75 монет</h3><p>Бонус можно забрать один раз в день на этом устройстве.</p>'+
  '<button class="btn" data-action="claim" '+(claimed?'disabled':'')+'>'+(claimed?'УЖЕ ПОЛУЧЕНО':'ЗАБРАТЬ НАГРАДУ')+'</button></div>'+backButton());
 }
+
 function claimDaily(){
  if(dailyClaim===dayKey()){notify('Награда уже получена сегодня');return}
  dailyClaim=dayKey();profile.coins+=75;save();checkAchievements();daily();updateProfile();notify('+75 монет!');
 }
+
 function showStats(){
  shell('Статистика','Твои результаты',
  '<div class="card"><h3>Прогресс</h3>'+
  levels.map(function(l,i){return '<p>'+l.name+': рекорд '+best[i]+'% · '+(wins[i]?'пройден':'не пройден')+'</p>'}).join('')+
  '<p>Победы: '+wins.filter(Boolean).length+'/3</p><p>Скинов открыто: '+unlocked.length+'/'+skinsData.length+'</p><p>Созданных объектов: '+custom.length+'</p></div>'+backButton());
 }
-function showOwner(){8
+
+function showOwner(){
  var pin=prompt('Owner PIN:');
+
  if(pin===null){menu();return}
+
  if(pin.trim()!=='OwnerKD-ADS5H-D6E9F037F7'){
   notify('Неверный PIN');menu();return;
  }
+
  ownerMode=true;
- shell('OWNER PANEL','Локальная панель владельца',
- '<div class="card"><h3>Управление тестовой игрой</h3><p>Режим владельца активен только в этом браузере.</p>'+
+ profile.nickname='[DEV] Kyosuke';
+ save();
+
+ shell('OWNER PANEL','Добро пожаловать, [DEV] Kyosuke',
+ '<div class="card"><h3>Управление тестовой игрой</h3>'+
+ '<p>Владелец: <span class="rainbow">[DEV] Kyosuke</span></p>'+
+ '<p>Режим владельца активен только в этом браузере.</p>'+
  '<button class="btn" data-action="grant">+500 монет и +250 XP</button>'+
  '<button class="btn secondary" data-action="unlockall">Открыть все скины</button>'+
  '<button class="btn secondary" data-action="resetstats">Сбросить рекорды и победы</button>'+
  '<button class="btn secondary" data-action="owneroff">Выключить Owner Mode</button></div>'+backButton());
+
+ updateProfile();
 }
+
 function showEditor(){
  mode='editor';held=false;stopMusic();
  editorTool='spike';
+
  shell('Редактор уровней','Выбери объект и нажимай на поле, чтобы расставлять элементы',
  '<div class="levels">'+
  '<button class="level active" data-action="tool" data-tool="spike">🔺 Шип</button>'+
@@ -298,45 +364,58 @@ function showEditor(){
  '<div class="grid"><button class="btn secondary" data-action="editorleft">← СДВИГ</button><button class="btn secondary" data-action="editorright">СДВИГ →</button></div>'+
  '<div class="grid"><button class="btn" data-action="savelevel">💾 СОХРАНИТЬ</button><button class="btn secondary" data-action="testlevel">▶ ТЕСТ</button></div>'+
  '<button class="btn danger" data-action="clearlevel">ОЧИСТИТЬ ОБЪЕКТЫ</button>'+backButton());
- world=0;obstacles=custom.map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type}});
+
+ world=0;
+ obstacles=custom.map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type}});
  $('hint').textContent='Редактор: нажми на поле, чтобы поставить выбранный объект';
  draw();
 }
+
 function startEditorTest(){
  if(raf)cancelAnimationFrame(raf);
+
  obstacles=custom.map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type}});
  obstacles.push({x:Math.max(1600,...obstacles.map(function(o){return o.x+100})),w:12,h:80,type:'finish'});
+
  selected=0;world=0;progress=0;gravityFlip=false;resetPlayer();
  mode='playing';overlay.classList.add('hidden');
  last=performance.now();raf=requestAnimationFrame(loop);
 }
+
 function resetPlayer(){
  p.y=G-CUBE;p.vy=0;p.angle=0;p.onGround=true;
 }
+
 function makeLevel(){
  obstacles=[];
  var cfg=levels[selected],x=510,i=0;
+
  var pattern=[
   ['1','.', '.', '1','.', '2','.', '.', '1','.', '1','.', '.', '2','.','1','.','.','2','.'],
   ['1','.','2','.','1','.','C','.','2','.','1','.','.','2','.','C','1','.','2','.'],
   ['2','.','1','.','C','.','2','.','1','.','3','.','C','.','2','.','1','.','C','.','2','.']
  ][selected];
+
  while(x<cfg.length-250){
   var symbol=pattern[i%pattern.length];
+
   if(symbol==='1'||symbol==='2'||symbol==='3'){
-   for(var j=0;j<Number(symbol);j++)obstacles.push({x:x+j*34,w:34,h:selected===2?42:38,type:'spike'});
+   for(var j=0;j<Number(symbol);j++)
+    obstacles.push({x:x+j*34,w:34,h:selected===2?42:38,type:'spike'});
   }
+
   x+=Math.max(cfg.gap,selected===0?370:selected===1?340:330)+[0,25,45,15,35][i%5];
   i++;
  }
- /* Порталы меняют направление гравитации */
+
  if(selected>0){
-  for(i=0;i<2;i++){
+  for(i=0;i<2;i++)
    obstacles.push({x:1800+i*2050,w:35,h:110,type:'portal'});
-  }
  }
+
  obstacles.push({x:cfg.length-110,w:12,h:80,type:'finish'});
 }
+
 function reset(){
  world=0;progress=0;held=false;gravityFlip=false;portalCooldown=0;
  particles=[];
@@ -344,19 +423,23 @@ function reset(){
  makeLevel();
  refreshHud();
 }
+
 function refreshHud(){
  $('levelLabel').textContent=levels[selected].name;
  $('progressText').textContent=progress+'%';
  $('progressFill').style.width=progress+'%';
 }
+
 function initAudio(){
  if(audioCtx)return true;
  var AC=window.AudioContext||window.webkitAudioContext;
  if(!AC)return false;
  try{audioCtx=new AC();return true}catch(e){return false}
 }
+
 function tone(freq,duration,wave,volume){
  if(!audioCtx||!freq||!musicEnabled)return;
+
  try{
   var osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),now=audioCtx.currentTime;
   osc.type=wave||'square';
@@ -369,10 +452,15 @@ function tone(freq,duration,wave,volume){
   osc.onended=function(){try{osc.disconnect();gain.disconnect()}catch(e){}};
  }catch(e){}
 }
+
 function stopMusic(){
  musicGeneration++;
- if(musicTimer!==null){clearInterval(musicTimer);musicTimer=null}
+ if(musicTimer!==null){
+  clearInterval(musicTimer);
+  musicTimer=null;
+ }
 }
+
 function musicTick(){
  if(!musicEnabled||mode!=='playing'||!audioCtx)return;
  var s=songData[selected],beat=s.tempo/1000;
@@ -443,8 +531,8 @@ function die(){
  raf=0;
  checkAchievements();
  shell('СТОЛКНОВЕНИЕ','Прогресс: '+progress+'%. Попробуй ещё раз!',
- '<button class="btn" data-action="start">↻ ПОПРОБОВАТЬ ЕЩЁ</button>'+
- '<button class="btn secondary" data-action="menu">В МЕНЮ</button>');
+  '<button class="btn" data-action="start">↻ ПОПРОБОВАТЬ ЕЩЁ</button>'+
+  '<button class="btn secondary" data-action="menu">В МЕНЮ</button>');
  draw();
 }
 
@@ -466,9 +554,9 @@ function win(){
  checkAchievements();
  refreshHud();
  shell('УРОВЕНЬ ПРОЙДЕН!','Ты завершил '+levels[selected].name+'!',
- '<div class="card"><h3>🏆 Отличная работа!</h3><p>Награда за победу начислена.</p></div>'+
- '<button class="btn" data-action="start">ИГРАТЬ СНОВА</button>'+
- '<button class="btn secondary" data-action="menu">В МЕНЮ</button>');
+  '<div class="card"><h3>🏆 Отличная работа!</h3><p>Награда за победу начислена.</p></div>'+
+  '<button class="btn" data-action="start">ИГРАТЬ СНОВА</button>'+
+  '<button class="btn secondary" data-action="menu">В МЕНЮ</button>');
  draw();
 }
 
@@ -656,38 +744,43 @@ function loop(now){
 
 function action(name,b){
  if(name==='nick'){
- var input=$('nickInput');
- var v=input?input.value.trim():'';
+  var input=$('nickInput');
+  var v=input?input.value.trim():'';
 
- if(ownerMode){
-  profile.nickname='[DEV] Kyosuke';
+  if(ownerMode){
+   profile.nickname='[DEV] Kyosuke';
+   save();
+   updateProfile();
+   notify('Радужный ник владельца установлен');
+   return;
+  }
+
+  if(v.length<2){
+   notify('Ник должен содержать хотя бы 2 символа');
+   return;
+  }
+
+  if(isReservedNick(v)){
+   notify('Этот ник зарезервирован для администрации');
+   return;
+  }
+
+  profile.nickname=v.slice(0,16);
   save();
   updateProfile();
-  notify('Ник владельца установлен');
+  notify('Ник сохранён');
   return;
  }
 
- if(v.length<2){
-  notify('Ник должен содержать хотя бы 2 символа');
-  return;
- }
-
- if(isReservedNick(v)){
-  notify('Этот ник зарезервирован для администрации');
-  return;
- }
-
- profile.nickname=v.slice(0,16);
- save();
- updateProfile();
- notify('Ник сохранён');
- return;
- }
  if(name==='menu'){
   if(raf)cancelAnimationFrame(raf);
-  raf=0;menu();return;
+  raf=0;
+  menu();
+  return;
  }
+
  if(name==='start'){start();return}
+
  if(name==='music'){
   musicEnabled=!musicEnabled;
   updateMusicButton();
@@ -695,38 +788,48 @@ function action(name,b){
   else stopMusic();
   return;
  }
+
  if(name==='level'){
   var n=Number(b.dataset.level);
   if(n<0||n>2||!Number.isInteger(n))return;
-  selected=n;menu();return;
+  selected=n;
+  menu();
+  return;
  }
- if(name==='nick'){
-  var input=$('nickInput');
-  var v=input?input.value.trim():'';
-  if(v.length<2){notify('Ник должен содержать хотя бы 2 символа');return}
-  profile.nickname=v.slice(0,16);
-  save();updateProfile();notify('Ник сохранён');return;
- }
+
  if(name==='shop'){showShop();return}
  if(name==='achievements'){showAchievements();return}
  if(name==='stats'){showStats();return}
  if(name==='daily'){daily();return}
  if(name==='claim'){claimDaily();return}
+
  if(name==='buy'||name==='equip'){
   var id=b.dataset.skin;
   var s=skinsData.find(function(q){return q.id===id});
   if(!s)return;
+
   if(name==='buy'){
    if(unlocked.indexOf(id)>=0)skin=id;
    else if(profile.coins>=s.price){
-    profile.coins-=s.price;unlocked.push(id);skin=id;
+    profile.coins-=s.price;
+    unlocked.push(id);
+    skin=id;
     notify('Скин открыт!');
-   }else{notify('Не хватает монет');return}
+   }else{
+    notify('Не хватает монет');
+    return;
+   }
   }else skin=id;
-  save();showShop();checkAchievements();return;
+
+  save();
+  showShop();
+  checkAchievements();
+  return;
  }
+
  if(name==='noop')return;
  if(name==='editor'){showEditor();return}
+
  if(name==='tool'){
   editorTool=b.dataset.tool;
   document.querySelectorAll('[data-action="tool"]').forEach(function(el){
@@ -734,43 +837,79 @@ function action(name,b){
   });
   return;
  }
+
  if(name==='editorleft'){world=Math.max(0,world-300);draw();return}
  if(name==='editorright'){world+=300;draw();return}
+
  if(name==='savelevel'){
   custom=obstacles.filter(function(o){
    return ['spike','block','portal'].includes(o.type);
   }).map(function(o){
    return {x:o.x,w:o.w,h:o.h,type:o.type};
   });
-  save();checkAchievements();notify('Уровень сохранён!');return;
+  save();
+  checkAchievements();
+  notify('Уровень сохранён!');
+  return;
  }
+
  if(name==='testlevel'){startEditorTest();return}
+
  if(name==='clearlevel'){
-  obstacles=[];custom=[];world=0;save();draw();
-  notify('Объекты удалены');return;
+  obstacles=[];
+  custom=[];
+  world=0;
+  save();
+  draw();
+  notify('Объекты удалены');
+  return;
  }
+
  if(name==='owner'){showOwner();return}
+
  if(name==='grant'){
-  profile.coins+=500;profile.xp+=250;
-  save();updateProfile();notify('Добавлено!');return;
+  if(!ownerMode)return;
+  profile.coins+=500;
+  profile.xp+=250;
+  save();
+  updateProfile();
+  notify('Добавлено!');
+  return;
  }
+
  if(name==='unlockall'){
+  if(!ownerMode)return;
   unlocked=skinsData.map(function(s){return s.id});
-  save();updateProfile();notify('Все скины открыты');return;
+  save();
+  updateProfile();
+  notify('Все скины открыты');
+  return;
  }
+
  if(name==='resetstats'){
-  best=[0,0,0];wins=[false,false,false];
-  save();notify('Рекорды сброшены');return;
+  if(!ownerMode)return;
+  best=[0,0,0];
+  wins=[false,false,false];
+  save();
+  notify('Рекорды сброшены');
+  return;
  }
- if(name==='owneroff'){ownerMode=false;menu();return}
+
+ if(name==='owneroff'){
+  ownerMode=false;
+  menu();
+  return;
+ }
 }
 
 function clickHandler(e){
  var b=e.target.closest&&e.target.closest('[data-action]');
  if(!b||b.disabled)return;
  e.preventDefault();
- try{action(b.dataset.action,b)}catch(err){showError(err)}
+ try{action(b.dataset.action,b)}
+ catch(err){showError(err)}
 }
+
 document.addEventListener('click',clickHandler,true);
 
 function press(e){
@@ -778,23 +917,37 @@ function press(e){
   var rect=canvas.getBoundingClientRect();
   var cx=(e.clientX-rect.left)*W/rect.width;
   var wx=world+cx;
-  if(editorTool==='spike')obstacles.push({x:Math.round(wx/34)*34,w:34,h:40,type:'spike'});
-  else if(editorTool==='block')obstacles.push({x:Math.round(wx/34)*34,w:40,h:65,type:'block'});
-  else obstacles.push({x:Math.round(wx/34)*34,w:35,h:110,type:'portal'});
-  draw();return;
+
+  if(editorTool==='spike')
+   obstacles.push({x:Math.round(wx/34)*34,w:34,h:40,type:'spike'});
+  else if(editorTool==='block')
+   obstacles.push({x:Math.round(wx/34)*34,w:40,h:65,type:'block'});
+  else
+   obstacles.push({x:Math.round(wx/34)*34,w:35,h:110,type:'portal'});
+
+  draw();
+  return;
  }
+
  if(mode!=='playing')return;
  if(e.cancelable)e.preventDefault();
- if(!held){held=true;jump()}
+
+ if(!held){
+  held=true;
+  jump();
+ }
 }
+
 function release(e){
  held=false;
  if(e&&e.cancelable)e.preventDefault();
 }
+
 canvas.addEventListener('pointerdown',press,{passive:false});
 window.addEventListener('pointerup',release);
 window.addEventListener('pointercancel',release);
 window.addEventListener('blur',release);
+
 window.addEventListener('keydown',function(e){
  if(e.code==='Space'||e.code==='ArrowUp'){
   e.preventDefault();
@@ -803,6 +956,7 @@ window.addEventListener('keydown',function(e){
   }else if(mode==='menu')start();
  }
 });
+
 window.addEventListener('keyup',function(e){
  if(e.code==='Space'||e.code==='ArrowUp')held=false;
 });
@@ -812,9 +966,11 @@ function showError(err){
  box.style.display='block';
  box.textContent='Ошибка игры: '+(err&&err.message?err.message:String(err));
 }
+
 window.addEventListener('error',function(e){
  showError(e.error||e.message||'Неизвестная ошибка');
 });
+
 window.addEventListener('unhandledrejection',function(e){
  showError(e.reason||'Ошибка Promise');
 });
