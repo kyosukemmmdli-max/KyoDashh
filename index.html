@@ -106,10 +106,10 @@ button:active{transform:scale(.97)}
 (function(){
 'use strict';
 
-var $ = function(id){return document.getElementById(id)};
-var canvas = $('game');
-var ctx = canvas.getContext('2d');
-var overlay = $('overlay');
+var $=function(id){return document.getElementById(id)};
+var canvas=$('game');
+var ctx=canvas.getContext('2d');
+var overlay=$('overlay');
 var W=900,H=420,G=330,S=34;
 
 var levels=[
@@ -132,10 +132,8 @@ var p={x:150,y:G-S,vy:0,angle:0,onGround:true};
 var ownerMode=false;
 
 function safeGet(key,fallback){
- try{
-  var v=localStorage.getItem(key);
-  return v===null?fallback:v;
- }catch(e){return fallback}
+ try{var v=localStorage.getItem(key);return v===null?fallback:v}
+ catch(e){return fallback}
 }
 function safeSet(key,value){
  try{localStorage.setItem(key,value)}catch(e){}
@@ -186,23 +184,32 @@ function addSpikes(x,count){
   obstacles.push({x:x+j*34,w:34,h:selected===2?42:38,type:'spike'});
  }
 }
+
+/* Генерация уровней: только шипы и финиш. Потолков больше нет. */
 function makeLevel(){
  obstacles=[];
  var cfg=levels[selected],pattern=patterns[selected],x=540,i=0;
+
  while(x<cfg.length-320){
   var symbol=pattern[i%pattern.length];
   var spacing=cfg.gap;
+
   if(selected===0)spacing+=[55,80,40,95,65][i%5];
   else if(selected===1)spacing+=[25,45,15,55,30][i%5];
   else spacing+=[8,25,12,32,5][i%5];
 
-  if(symbol==='1'||symbol==='2'||symbol==='3')addSpikes(x,Number(symbol));
-  else if(symbol==='C'&&selected>0)obstacles.push({x:x,w:68,y:G-105,h:30,type:'ceiling'});
+  if(symbol==='1'||symbol==='2'||symbol==='3'){
+   addSpikes(x,Number(symbol));
+  }
 
-  if(selected===2&&i%8===5)addSpikes(x+spacing*.55,2);
+  if(selected===2&&i%8===5){
+   addSpikes(x+spacing*.55,2);
+  }
+
   x+=spacing;
   i++;
  }
+
  obstacles.push({x:cfg.length-120,w:12,h:80,type:'finish'});
 }
 function updateHud(){
@@ -239,6 +246,7 @@ function showMenu(kind){
   $('panelText').textContent='Прыгай через шипы и доберись до финиша!';
   $('startBtn').textContent='ИГРАТЬ';
  }
+
  updateProfile();refreshStats();draw();
 }
 function start(){
@@ -293,70 +301,90 @@ function update(dt){
  for(var i=0;i<obstacles.length;i++){
   var o=obstacles[i],ox=o.x-world;
   if(ox>p.x+100||ox+o.w<p.x-80)continue;
+
   if(o.type==='finish'){
    if(ox<p.x+S*.6){win();return}
    continue;
   }
+
   var px1=p.x+5,px2=p.x+S-5,py1=p.y+5,py2=p.y+S-3;
-  if(o.type==='ceiling'){
-   if(px2>ox+4&&px1<ox+o.w-4&&py2>o.y+4&&py1<o.y+o.h){die();return}
-   continue;
-  }
   var left=Math.max(px1,ox),right=Math.min(px2,ox+o.w);
   if(left>=right)continue;
+
   var center=ox+o.w/2;
   var sx=Math.max(ox,Math.min(center,(left+right)/2));
   var surfaceY=G-o.h*(1-Math.abs(sx-center)/(o.w/2));
+
   if(py2>surfaceY+2&&py1<G){die();return}
  }
 }
 function draw(){
  ctx.clearRect(0,0,W,H);
  ctx.fillStyle='#0a1230';ctx.fillRect(0,0,W,H);
+
  var grad=ctx.createLinearGradient(0,0,0,G);
  grad.addColorStop(0,'#111e48');grad.addColorStop(1,'#0a1530');
  ctx.fillStyle=grad;ctx.fillRect(0,0,W,G);
 
  ctx.strokeStyle='#213865';ctx.lineWidth=1;
  var off=-(world*.3%45);
- for(var x=off;x<W;x+=45){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,G);ctx.stroke()}
- for(var y=22;y<G;y+=45){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+ for(var x=off;x<W;x+=45){
+  ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,G);ctx.stroke();
+ }
+ for(var y=22;y<G;y+=45){
+  ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+ }
  for(var i=0;i<26;i++){
   var sx=(i*137-world*.12%900+900)%900,sy=(i*71)%285;
   ctx.fillStyle='#668ac5';ctx.fillRect(sx,sy,2,2);
  }
+
  ctx.fillStyle='#14264c';ctx.fillRect(0,G,W,H-G);
  ctx.fillStyle='#36e8ff';ctx.fillRect(0,G,W,4);
- for(x=-(world%50);x<W;x+=50){ctx.fillStyle='#2b4779';ctx.fillRect(x,G+16,25,4)}
+ for(x=-(world%50);x<W;x+=50){
+  ctx.fillStyle='#2b4779';ctx.fillRect(x,G+16,25,4);
+ }
 
  for(i=0;i<obstacles.length;i++){
   var o=obstacles[i],ox=o.x-world;
   if(ox<-100||ox>W+100)continue;
+
   if(o.type==='spike'){
    ctx.fillStyle=selected===2?'#ff3d8c':selected===1?'#ff6c68':'#ff4d83';
-   ctx.beginPath();ctx.moveTo(ox,G);ctx.lineTo(ox+o.w/2,G-o.h);ctx.lineTo(ox+o.w,G);ctx.closePath();ctx.fill();
+   ctx.beginPath();
+   ctx.moveTo(ox,G);
+   ctx.lineTo(ox+o.w/2,G-o.h);
+   ctx.lineTo(ox+o.w,G);
+   ctx.closePath();
+   ctx.fill();
    ctx.strokeStyle='#ffb2cb';ctx.lineWidth=2;ctx.stroke();
-  }else if(o.type==='ceiling'){
-   ctx.fillStyle='#ff385f';ctx.fillRect(ox,o.y,o.w,o.h);
-   ctx.fillStyle='#ff9bad';ctx.fillRect(ox,o.y+o.h-5,o.w,5);
-  }else{
+  }else if(o.type==='finish'){
    ctx.fillStyle='#4dffb4';ctx.fillRect(ox,G-o.h,8,o.h);
-   ctx.fillStyle='#e6fff5';ctx.font='bold 18px Arial';ctx.fillText('FINISH',ox-26,G-o.h-12);
+   ctx.fillStyle='#e6fff5';ctx.font='bold 18px Arial';
+   ctx.fillText('FINISH',ox-26,G-o.h-12);
   }
  }
- ctx.save();ctx.translate(p.x+S/2,p.y+S/2);ctx.rotate(p.angle);
- ctx.shadowColor='#00dfff';ctx.shadowBlur=14;ctx.fillStyle='#35e7ff';
- ctx.fillRect(-S/2,-S/2,S,S);ctx.shadowBlur=0;
- ctx.strokeStyle='#d8fcff';ctx.lineWidth=3;ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
- ctx.fillStyle='#0a2750';ctx.fillRect(-9,-7,5,7);ctx.fillRect(4,-7,5,7);
+
+ ctx.save();
+ ctx.translate(p.x+S/2,p.y+S/2);
+ ctx.rotate(p.angle);
+ ctx.shadowColor='#00dfff';ctx.shadowBlur=14;
+ ctx.fillStyle='#35e7ff';ctx.fillRect(-S/2,-S/2,S,S);
+ ctx.shadowBlur=0;
+ ctx.strokeStyle='#d8fcff';ctx.lineWidth=3;
+ ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
+ ctx.fillStyle='#0a2750';
+ ctx.fillRect(-9,-7,5,7);ctx.fillRect(4,-7,5,7);
  ctx.restore();
+
  if(mode!=='playing'){
   ctx.fillStyle='#b6d2ff';ctx.font='bold 20px Arial';ctx.textAlign='center';
   ctx.fillText('READY?',W/2,105);ctx.textAlign='left';
  }
 }
 function loop(now){
- var dt=Math.min((now-last)/1000,.025);last=now;
+ var dt=Math.min((now-last)/1000,.025);
+ last=now;
  update(dt);draw();
  if(mode==='playing')raf=requestAnimationFrame(loop);
  else raf=0;
@@ -364,37 +392,56 @@ function loop(now){
 
 function handleAction(action,button){
  if(action==='start'){start();return}
+
  if(action==='menu'){
   if(raf)cancelAnimationFrame(raf);
   raf=0;showMenu('menu');return;
  }
+
  if(action==='level'){
   selected=Number(button.getAttribute('data-level'));
   if(!Number.isFinite(selected)||selected<0||selected>2)selected=0;
   reset();refreshStats();draw();return;
  }
+
  if(action==='nick'){
-  if(profile.isDev){alert('DEV-ник закреплён.');updateProfile();return}
+  if(profile.isDev){
+   alert('DEV-ник закреплён.');
+   updateProfile();return;
+  }
   var nick=$('nickInput').value.trim();
-  if(nick.length<2){alert('Ник должен содержать минимум 2 символа.');return}
-  profile.nickname=nick.slice(0,16);saveProfile();return;
+  if(nick.length<2){
+   alert('Ник должен содержать минимум 2 символа.');return;
+  }
+  profile.nickname=nick.slice(0,16);
+  saveProfile();return;
  }
+
  if(action==='owner'){
   var pin=prompt('Введите PIN владельца:');
   if(pin===null)return;
+
   var pins=['OwnerKD-ADS5H-D6E9F037F7','KenanDrun-AJ9S3L6KS9-8H67HSK','TESTER-AAA111'];
-  if(pins.indexOf(pin.trim())===-1){alert('Неверный PIN!');return}
+  if(pins.indexOf(pin.trim())===-1){
+   alert('Неверный PIN!');return;
+  }
+
   ownerMode=!ownerMode;
   if(pin.trim()===pins[0]){
-   profile.isDev=true;profile.nickname='[DEV] Kyosuke';saveProfile();
+   profile.isDev=true;
+   profile.nickname='[DEV] Kyosuke';
+   saveProfile();
   }else if(pin.trim()===pins[2]){
-   profile.isDev=false;profile.nickname='[TEST] TesterKD';saveProfile();
+   profile.isDev=false;
+   profile.nickname='[TEST] TesterKD';
+   saveProfile();
   }
+
   alert(ownerMode?'Owner Mode активирован!':'Owner Mode выключен!');
  }
 }
 
-/* Единый обработчик кнопок */
+/* Единый обработчик кнопок — оставлен рабочим */
 document.addEventListener('click',function(e){
  var button=e.target.closest('button[data-action]');
  if(!button)return;
@@ -427,7 +474,9 @@ window.addEventListener('keydown',function(e){
   e.preventDefault();
   if(mode==='playing'){
    if(!held){held=true;jump()}
-  }else if(e.code==='Space'){start()}
+  }else if(e.code==='Space'){
+   start();
+  }
  }
 });
 window.addEventListener('keyup',function(e){
@@ -452,5 +501,4 @@ showMenu('menu');
 })();
 </script>
 </body>
- </html>
- 
+</html>
