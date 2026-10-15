@@ -41,8 +41,14 @@ button:active{transform:scale(.97)}
 .stats{display:flex;justify-content:center;gap:18px;color:#9eb8e8;font-size:12px;margin:12px}
 .hidden{display:none!important}
 .small{font-size:11px;color:#8097c6;margin-top:10px}
-.menuBtn{padding:7px;background:#111d3a;color:#bfe8ff;border:1px solid #294774}
+.menuBtn{padding:7px;background:#111d3a;color:#bfe8ff;border:1px solid #294774;white-space:nowrap}
 #errorBox{position:fixed;z-index:20;left:8px;right:8px;bottom:8px;background:#541b2b;color:white;padding:12px;border-radius:10px;font-size:12px;display:none;overflow-wrap:anywhere}
+@media(max-width:420px){
+ .app{padding:6px;gap:6px}
+ .top{gap:5px;font-size:10px}
+ .brand{font-size:14px;letter-spacing:1px}
+ .menuBtn{font-size:10px;padding:7px 5px}
+}
 @media(max-height:540px){
  .app{gap:5px;padding:5px}
  .panel{padding:12px;max-height:96vh}
@@ -60,6 +66,7 @@ button:active{transform:scale(.97)}
 <span class="brand">Kyo Dash</span>
 <span id="levelLabel">EASY · 1</span>
 <span id="progressText">0%</span>
+<button class="menuBtn" id="musicBtn" data-action="music">♫ ВКЛ</button>
 <button class="menuBtn" data-action="menu">МЕНЮ</button>
 </header>
 <div class="meter"><div class="fill" id="progressFill"></div></div>
@@ -96,7 +103,7 @@ button:active{transform:scale(.97)}
 
 <button class="btn" id="startBtn" data-action="start">ИГРАТЬ</button>
 <button class="btn secondary" data-action="owner">OWNER MODE</button>
-<div class="small">У каждого уровня собственная расстановка препятствий.</div>
+<div class="small">У каждого уровня своя музыка и расстановка препятствий.</div>
 </section>
 </div>
 
@@ -130,6 +137,127 @@ var held=false,obstacles=[];
 var best=[0,0,0],wins=[false,false,false];
 var p={x:150,y:G-S,vy:0,angle:0,onGround:true};
 var ownerMode=false;
+
+/* ===== МУЗЫКА KYO DASH ===== */
+var musicEnabled=true;
+var audioCtx=null;
+var musicTimer=null;
+var musicStep=0;
+var musicGeneration=0;
+
+/* У каждой сложности отдельная мелодия.
+   0 в последовательности означает паузу. */
+var melodies=[
+ {
+  name:'EASY',
+  tempo:190,
+  notes:[523,659,784,659,523,392,440,523,659,523,440,392,440,523,659,784,
+         659,523,392,440,523,659,784,880,784,659,523,440,392,440,523,392],
+  bass:[131,0,165,0,196,0,165,0],
+  wave:'square'
+ },
+ {
+  name:'MEDIUM',
+  tempo:145,
+  notes:[392,523,659,784,659,523,392,523,440,587,698,880,698,587,440,587,
+         392,523,659,784,880,784,659,523,440,587,698,880,784,698,587,440],
+  bass:[98,98,131,131,110,110,147,147],
+  wave:'sawtooth'
+ },
+ {
+  name:'HARD',
+  tempo:105,
+  notes:[330,440,659,523,330,440,784,659,349,466,698,587,349,466,880,698,
+         330,523,659,880,784,659,523,440,349,523,698,932,880,698,523,392],
+  bass:[82,82,110,110,73,73,98,98],
+  wave:'square'
+ }
+];
+
+function initAudio(){
+ if(audioCtx)return true;
+ var AC=window.AudioContext||window.webkitAudioContext;
+ if(!AC)return false;
+ try{
+  audioCtx=new AC();
+  return true;
+ }catch(e){
+  return false;
+ }
+}
+
+function playTone(freq,duration,wave,volume){
+ if(!audioCtx||!freq||!musicEnabled)return;
+ try{
+  var osc=audioCtx.createOscillator();
+  var gain=audioCtx.createGain();
+  var now=audioCtx.currentTime;
+  osc.type=wave||'square';
+  osc.frequency.setValueAtTime(freq,now);
+  gain.gain.setValueAtTime(0.0001,now);
+  gain.gain.exponentialRampToValueAtTime(volume||0.045,now+0.012);
+  gain.gain.setTargetAtTime(0.0001,now+Math.max(0.025,duration*0.65),Math.max(0.015,duration*0.12));
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now+duration+0.06);
+  osc.onended=function(){
+   try{osc.disconnect();gain.disconnect()}catch(e){}
+  };
+ }catch(e){}
+}
+
+function musicTick(){
+ if(!musicEnabled||mode!=='playing'||!audioCtx)return;
+ var song=melodies[selected];
+ var beat=song.tempo/1000;
+ var note=song.notes[musicStep%song.notes.length];
+
+ if(note)playTone(note,beat*0.9,song.wave,selected===2?0.035:0.04);
+
+ /* Басовая партия */
+ if(musicStep%4===0){
+  var bass=song.bass[Math.floor(musicStep/4)%song.bass.length];
+  if(bass)playTone(bass,beat*2,'triangle',0.055);
+ }
+
+ musicStep++;
+}
+
+function startMusic(){
+ stopMusic();
+ if(!musicEnabled||mode!=='playing')return;
+ if(!initAudio())return;
+
+ musicGeneration++;
+ var myGeneration=musicGeneration;
+ musicStep=0;
+
+ var resumeResult;
+ try{resumeResult=audioCtx.resume()}catch(e){}
+ if(resumeResult&&typeof resumeResult.catch==='function'){
+  resumeResult.catch(function(){});
+ }
+
+ musicTick();
+ musicTimer=setInterval(function(){
+  if(myGeneration!==musicGeneration)return;
+  musicTick();
+ },melodies[selected].tempo);
+}
+
+function stopMusic(){
+ musicGeneration++;
+ if(musicTimer!==null){
+  clearInterval(musicTimer);
+  musicTimer=null;
+ }
+}
+
+function updateMusicButton(){
+ $('musicBtn').textContent=musicEnabled?'♫ ВКЛ':'♫ ВЫКЛ';
+ $('musicBtn').style.color=musicEnabled?'#bfe8ff':'#ff9cae';
+}
 
 function safeGet(key,fallback){
  try{var v=localStorage.getItem(key);return v===null?fallback:v}
@@ -185,7 +313,7 @@ function addSpikes(x,count){
  }
 }
 
-/* Исправленная генерация: без дополнительных двойных групп */
+/* У препятствий есть минимальная дистанция */
 function makeLevel(){
  obstacles=[];
  var cfg=levels[selected];
@@ -201,16 +329,12 @@ function makeLevel(){
   else if(selected===1)spacing+=[25,45,15,55,30][i%5];
   else spacing+=[8,25,12,32,5][i%5];
 
-  /* Не даём препятствиям стоять слишком близко */
   var minimumGap=selected===0?350:selected===1?335:330;
   spacing=Math.max(spacing,minimumGap);
 
   if(symbol==='1'||symbol==='2'||symbol==='3'){
    addSpikes(x,Number(symbol));
   }
-
-  /* Удалён старый дополнительный спавн двух шипов на HARD.
-     Именно он создавал почти непроходимые комбинации. */
 
   x+=spacing;
   i++;
@@ -241,6 +365,7 @@ function reset(){
 }
 function showMenu(kind){
  kind=kind||'menu';
+ stopMusic();
  mode=kind;held=false;
  overlay.classList.remove('hidden');
  $('levels').classList.toggle('hidden',kind==='dead'||kind==='win');
@@ -267,6 +392,7 @@ function start(){
  mode='playing';
  overlay.classList.add('hidden');
  last=performance.now();
+ startMusic();
  raf=requestAnimationFrame(loop);
 }
 function jump(){
@@ -278,12 +404,14 @@ function jump(){
 function die(){
  if(mode!=='playing')return;
  mode='dead';held=false;
+ stopMusic();
  if(raf)cancelAnimationFrame(raf);
  raf=0;showMenu('dead');
 }
 function win(){
  if(mode!=='playing')return;
  mode='win';held=false;progress=100;
+ stopMusic();
  $('progressText').textContent='100%';
  $('progressFill').style.width='100%';
  best[selected]=100;
@@ -421,6 +549,17 @@ function loop(now){
 function handleAction(action,button){
  if(action==='start'){start();return}
 
+ if(action==='music'){
+  musicEnabled=!musicEnabled;
+  updateMusicButton();
+  if(musicEnabled&&mode==='playing'){
+   startMusic();
+  }else{
+   stopMusic();
+  }
+  return;
+ }
+
  if(action==='menu'){
   if(raf)cancelAnimationFrame(raf);
   raf=0;
@@ -533,19 +672,4 @@ window.addEventListener('keyup',function(e){
 function showError(err){
  var box=$('errorBox');
  box.style.display='block';
- box.textContent='Ошибка игры: '+(err&&err.message?err.message:String(err));
-}
-window.addEventListener('error',function(e){
- showError(e.error||e.message||'Неизвестная ошибка');
-});
-
-loadData();
-updateProfile();
-refreshStats();
-reset();
-showMenu('menu');
-
-})();
-</script>
-</body>
-</html>
+ box.t
