@@ -2,702 +2,493 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#080d22">
 <title>Kyo Dash</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080d22;color:white;font-family:Arial,sans-serif;touch-action:pan-y}
-body{display:flex;align-items:center;justify-content:center}
-.app{width:min(100%,1000px);padding:10px;display:flex;flex-direction:column;gap:9px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:800;color:#b8d9ff}
-.brand{color:#48eaff;font-size:17px;letter-spacing:2px}
-.meter{height:7px;background:#172344;border-radius:99px;overflow:hidden}
-.fill{height:100%;width:0;background:linear-gradient(90deg,#26dfff,#5cffba)}
-canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px solid #28477a;border-radius:12px;background:#0c1534;touch-action:none}
-.hint{text-align:center;font-size:11px;color:#8da8d7}
-.overlay{position:fixed;inset:0;z-index:5;background:#040817ee;display:flex;align-items:center;justify-content:center;padding:12px}
-.panel{width:min(94vw,470px);max-height:94vh;overflow:auto;padding:20px;border:1px solid #3266a4;border-radius:22px;text-align:center;background:linear-gradient(150deg,#172754,#0a1026)}
-.logo{font-size:42px;color:#45eaff;margin:0}
-.sub{color:#b9c9f2;font-size:14px}
-.profileBox{margin:14px 0;padding:12px;border:1px solid #2d4c79;border-radius:14px;background:#0b1733}
-.profileLine{font-size:12px;color:#a9c4f2;margin:7px}
-.rainbowNick{font-weight:1000;background:linear-gradient(90deg,#ff3158,#ffad35,#ffff55,#42ff9b,#35eaff,#a66bff,#ff48d1,#ff3158);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:rainbow 2.5s linear infinite}
-@keyframes rainbow{to{background-position:300% 50%}}
-.nickRow{display:flex;gap:7px;margin-top:10px}
-input{min-width:0;flex:1;background:#080f25;border:1px solid #355786;border-radius:9px;padding:10px;color:white}
-button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126;font-weight:900;cursor:pointer}
-.nickSave{padding:9px}
-.xpTrack{height:6px;background:#1a2b4d;border-radius:99px;overflow:hidden;margin-top:8px}
-.xpFill{height:100%;width:0;background:linear-gradient(90deg,#35e5ff,#66ffb8)}
-.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:15px 0}
-.level{background:#111b38;color:#d8e6ff;border:1px solid #304873}
-.level.active{border-color:#35e3ff;background:#12314a}
-.level small{display:block;font-size:10px;margin-top:4px}
-.btn{width:100%;padding:13px;margin-top:8px;font-size:15px;background:linear-gradient(90deg,#2adfff,#65ffca)}
-.secondary{background:#192747;color:#cde2ff;border:1px solid #344d79}
-.stats{display:flex;justify-content:center;gap:18px;color:#9eb8e8;font-size:12px;margin:12px}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{background:#080d22;color:#fff;font-family:Arial,sans-serif;touch-action:manipulation}
+button{border:0;border-radius:12px;padding:13px 17px;background:#16c7df;color:#061322;font-weight:900;font-size:15px;cursor:pointer}
+button:active{transform:scale(.97)}
+button.secondary{background:#26395e;color:white}
+button.red{background:#ff456c;color:white}
+button:disabled{opacity:.4}
+#app{height:100%;display:flex;flex-direction:column;max-width:1000px;margin:auto}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;gap:8px}
+.logo{font-size:23px;font-weight:1000;letter-spacing:1px;color:#3deaff;text-shadow:0 0 16px #0abed9}
+#stats{font-size:12px;color:#bdc9e9;text-align:right;line-height:1.6}
+main{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px}
+.screen{width:100%;max-width:680px;text-align:center}
+h1{font-size:clamp(36px,9vw,62px);margin:10px 0;color:#43e8ff;text-shadow:0 0 24px #007eae}
+h2{margin:12px 0}
+.subtitle{color:#b9c8e9;line-height:1.5}
+.buttons{display:flex;flex-direction:column;gap:11px;width:min(330px,90%);margin:24px auto}
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:22px auto;max-width:480px}
+.level{padding:16px 4px;border:2px solid #31446e;background:#111d3b;color:white}
+.level.selected{border-color:#3deaff;box-shadow:0 0 15px #087b9b}
+.level strong{display:block;font-size:17px;margin-bottom:6px}
+.level small{color:#c0cbea}
+#gameWrap{position:relative;width:100%;max-width:850px}
+canvas{display:block;width:100%;height:auto;aspect-ratio:16/9;border:2px solid #263f70;border-radius:12px;background:#101c42;touch-action:none}
+#hud{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font-size:13px;color:#dce8ff}
+#bar{height:7px;border-radius:8px;background:#27365c;overflow:hidden;flex:1}
+#progress{height:100%;width:0;background:#3deaff}
+#gameButtons{display:flex;justify-content:center;gap:9px;margin-top:10px}
+#gameButtons button{padding:10px 16px}
+#overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#050a19c9;border-radius:12px;padding:18px}
+#overlay .panel{width:min(330px,95%);background:#101b39;border:1px solid #3a568d;border-radius:18px;padding:22px}
+#overlay h2{font-size:28px}
+#overlay .buttons{margin:16px auto 0}
+.note{font-size:12px;color:#8fa4d1;line-height:1.5;margin-top:18px}
 .hidden{display:none!important}
-.small{font-size:11px;color:#8097c6;margin-top:10px}
-.menuBtn{padding:7px;background:#111d3a;color:#bfe8ff;border:1px solid #294774}
+footer{text-align:center;padding:8px;font-size:11px;color:#657ba9}
+@media(max-height:560px){
+ header{padding:5px 12px}
+ h1{font-size:36px;margin:3px}
+ .buttons{gap:7px;margin:12px auto}
+ .buttons button{padding:10px}
+ .levels{margin:10px auto}
+ footer{display:none}
+}
 </style>
 </head>
 <body>
-
-<main class="app">
-<header class="top">
-<span class="brand">Kyo Dash</span>
-<span id="levelLabel">EASY · 1</span>
-<span id="progressText">0%</span>
-<button class="menuBtn" id="menuBtn">МЕНЮ</button>
+<div id="app">
+<header>
+ <div class="logo">Kyo Dash</div>
+ <div id="stats">⭐ 0 · XP 0<br>Рекорд: 0%</div>
 </header>
-<div class="meter"><div class="fill" id="progressFill"></div></div>
-<canvas id="game" width="900" height="420"></canvas>
-<div class="hint">ТАП — ПРЫЖОК · УДЕРЖИВАЙ — АВТОПРЫЖОК · КРАСНЫЕ БЛОКИ — НЕ ПРЫГАТЬ</div>
-</main>
 
-<div class="overlay" id="overlay">
-<section class="panel">
-<h1 class="logo" id="panelTitle">Kyo Dash</h1>
-<p class="sub" id="panelText">Прыгай через шипы и доберись до финиша!</p>
-
-<div class="profileBox">
-<div class="profileLine">ИГРОК: <strong id="profileNick">Player</strong></div>
-<div class="profileLine">УРОВЕНЬ <strong id="profileLevel">1</strong> · XP <strong id="profileXp">0 / 250</strong></div>
-<div class="xpTrack"><div class="xpFill" id="xpFill"></div></div>
-<div class="nickRow">
-<input id="nickInput" maxlength="16" placeholder="Твой ник">
-<button class="nickSave" id="nickSave">СМЕНИТЬ</button>
-</div>
-<div class="small">Профиль и XP сохраняются на устройстве</div>
-</div>
-
-<div class="levels" id="levels">
-<button class="level active" data-level="0">EASY<small>Stereo Madness</small></button>
-<button class="level" data-level="1">MEDIUM<small>Jumper</small></button>
-<button class="level" data-level="2">HARD<small>FingerDash</small></button>
-</div>
-
-<div class="stats">
-<span>РЕКОРД <b id="best">0%</b></span>
-<span>ПОБЕДЫ <b id="wins">0/3</b></span>
-</div>
-
-<button class="btn" id="startBtn">ИГРАТЬ</button>
-<button class="btn secondary" id="ownerBtn">OWNER MODE</button>
-<button class="btn secondary hidden" id="menuOnly">ВЫБОР УРОВНЯ</button>
-<div class="small">У каждого уровня собственная расстановка препятствий.</div>
+<main>
+<section id="menu" class="screen">
+ <h1>KYO DASH</h1>
+ <div class="subtitle">Прыгай в ритме. Не касайся шипов.</div>
+ <div class="levels">
+  <button class="level selected" data-level="0"><strong>EASY</strong><small>Stereo Madness</small></button>
+  <button class="level" data-level="1"><strong>MEDIUM</strong><small>Jumper</small></button>
+  <button class="level" data-level="2"><strong>HARD</strong><small>FingerDash</small></button>
+ </div>
+ <div class="buttons">
+  <button id="play">▶ ИГРАТЬ</button>
+  <button id="music" class="secondary">♫ Музыка: ВКЛ</button>
+  <button id="owner" class="secondary">⚙ Панель владельца</button>
+ </div>
+ <div class="note">Нажимай на экран, чтобы прыгать.<br>В воздухе кубик вращается. Избегай шипов!</div>
 </section>
+
+<section id="game" class="screen hidden">
+ <div id="hud">
+  <span id="levelName">EASY</span>
+  <div id="bar"><div id="progress"></div></div>
+  <span id="percent">0%</span>
+ </div>
+ <div id="gameWrap">
+  <canvas id="canvas" width="960" height="540"></canvas>
+  <div id="overlay">
+   <div class="panel">
+    <h2 id="overlayTitle">Уровень завершён!</h2>
+    <p id="overlayText">Отличная работа!</p>
+    <div class="buttons">
+     <button id="again">↻ Ещё раз</button>
+     <button id="toMenu" class="secondary">⌂ В меню</button>
+    </div>
+   </div>
+  </div>
+ </div>
+ <div id="gameButtons">
+  <button id="pause" class="secondary">Ⅱ Пауза</button>
+  <button id="restart" class="secondary">↻ Заново</button>
+  <button id="exit" class="red">✕ Выход</button>
+ </div>
+ <div class="note">Нажми на поле или пробел для прыжка.</div>
+</section>
+
+<section id="ownerScreen" class="screen hidden">
+ <h2>Панель владельца</h2>
+ <p class="subtitle">Настройки локальной игры</p>
+ <div class="buttons">
+  <button id="resetRecords" class="red">Сбросить рекорды</button>
+  <button id="resetProgress" class="red">Сбросить XP и звёзды</button>
+  <button id="ownerBack" class="secondary">← Назад</button>
+ </div>
+ <p class="note">Настройки действуют только на этом устройстве.</p>
+</section>
+</main>
+<footer>Kyo Dash · Fan-made platform game</footer>
 </div>
 
 <script>
-(()=>{
-'use strict';
+"use strict";
 
 const $=id=>document.getElementById(id);
-const canvas=$('game'),ctx=canvas.getContext('2d');
-const overlay=$('overlay');
-const W=900,H=420,G=330,S=34;
+const canvas=$("canvas");
+const ctx=canvas.getContext("2d");
 
-const OWNER_PINS=[
- 'OwnerKD-ADS5H-D6E9F037F7',
- 'KenanDrun-AJ9S3L6KS9-8H67HSK',
- 'TESTER-AAA111'
-];
-
-let profile={nickname:'Player',xp:0,isDev:false};
-let ownerMode=false;
-
-function loadProfile(){
- try{
-  const saved=JSON.parse(localStorage.getItem('kyoDashProfile')||'{}');
-  profile.xp=Number.isFinite(saved.xp)&&saved.xp>=0?Math.floor(saved.xp):0;
-  profile.isDev=saved.isDev===true;
-  profile.nickname=profile.isDev?'[DEV] Kyosuke':
-   (typeof saved.nickname==='string'&&saved.nickname.trim()
-   ?saved.nickname.trim().slice(0,16):'Player');
- }catch(e){
-  profile={nickname:'Player',xp:0,isDev:false};
- }
-}
-
-function saveProfile(){
- try{localStorage.setItem('kyoDashProfile',JSON.stringify(profile))}catch(e){}
- updateProfile();
-}
-
-function updateProfile(){
- const nick=$('profileNick');
- nick.textContent=profile.nickname;
- nick.classList.toggle('rainbowNick',profile.isDev);
- $('profileLevel').textContent=Math.floor(profile.xp/250)+1;
- $('profileXp').textContent=(profile.xp%250)+' / 250';
- $('xpFill').style.width=((profile.xp%250)/250*100)+'%';
- if(document.activeElement!==$('nickInput'))$('nickInput').value=profile.nickname;
-}
-
-function activateOwner(pin){
- pin=pin.trim();
- if(!OWNER_PINS.includes(pin)){alert('Неверный PIN!');return}
-
- let deviceId=localStorage.getItem('kyodash-device-id');
- if(!deviceId){
-  deviceId=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
-  localStorage.setItem('kyodash-device-id',deviceId);
- }
-
- const key='kyodash-owner-device-'+pin;
- const savedDevice=localStorage.getItem(key);
- if(savedDevice&&savedDevice!==deviceId){
-  alert('Этот PIN уже привязан к другому браузеру!');
-  return;
- }
-
- localStorage.setItem(key,deviceId);
- ownerMode=true;
-
- if(pin==='OwnerKD-ADS5H-D6E9F037F7'){
-  profile.isDev=true;
-  profile.nickname='[DEV] Kyosuke';
-  saveProfile();
-  alert('DEV активирован!');
- }else if(pin==='TESTER-AAA111'){
-  profile.isDev=false;
-  profile.nickname='[TEST] TesterKD';
-  saveProfile();
-  alert('Режим тестера активирован!');
- }else{
-  alert('Owner Mode активирован!');
- }
- refreshStats();
-}
-
+const W=960,H=540,GROUND=420;
 const LEVELS=[
- {name:'EASY',speed:275,jump:-590,gravity:1650,length:5600,gap:285},
- {name:'MEDIUM',speed:300,jump:-600,gravity:1700,length:6500,gap:240},
- {name:'HARD',speed:320,jump:-610,gravity:1750,length:7400,gap:205}
+ {name:"EASY",speed:285,jump:610,gravity:1650,length:6200,gap:340},
+ {name:"MEDIUM",speed:300,jump:610,gravity:1700,length:7000,gap:275},
+ {name:"HARD",speed:315,jump:615,gravity:1750,length:7600,gap:235}
 ];
 
-let selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
-let held=false,obstacles=[],best=[0,0,0],wins=[false,false,false];
+let selected=0;
+let running=false,paused=false,dead=false,won=false;
+let world=0,lastTime=0,progress=0;
+let obstacles=[];
+let particles=[];
+let jumpQueued=false;
+let musicOn=true;
+let audio=null,musicTimer=null;
+let score=0;
 
+const saveDefault={stars:0,xp:0,best:[0,0,0],wins:0};
+let save;
 try{
- best=JSON.parse(localStorage.getItem('kyoDashBest3')||'[0,0,0]');
- wins=JSON.parse(localStorage.getItem('kyoDashWins3')||'[false,false,false]');
- if(!Array.isArray(best)||best.length!==3)best=[0,0,0];
- if(!Array.isArray(wins)||wins.length!==3)wins=[false,false,false];
-}catch(e){best=[0,0,0];wins=[false,false,false]}
+ save=Object.assign({},saveDefault,JSON.parse(localStorage.getItem("kyoDashSave")||"{}"));
+ save.best=Array.isArray(save.best)?save.best:[0,0,0];
+ while(save.best.length<3)save.best.push(0);
+}catch(e){save={...saveDefault,best:[0,0,0]};}
 
-const p={x:150,y:G-S,vy:0,angle:0,onGround:true};
-
-const MUSIC=[
- {tempo:190,melody:[523,659,784,659,587,659,880,784,659,523,587,659,392,523,659,523],bass:[131,0,0,0,196,0,0,0,147,0,0,0,196,0,0,0]},
- {tempo:170,melody:[392,523,587,784,659,587,523,440,523,659,784,880,784,659,587,523],bass:[98,0,0,0,130,0,0,0,110,0,0,0,147,0,0,0]},
- {tempo:145,melody:[440,554,659,880,784,659,554,740,659,880,988,880,740,659,554,440],bass:[110,0,0,0,147,0,0,0,165,0,0,0,147,0,0,0]}
-];
-
-let audioCtx=null,musicGain=null,musicTimer=null,musicStep=0,musicToken=0;
-
-function setupAudio(){
- if(audioCtx)return true;
- const AudioClass=window.AudioContext||window.webkitAudioContext;
- if(!AudioClass)return false;
- try{
-  audioCtx=new AudioClass();
-  musicGain=audioCtx.createGain();
-  musicGain.gain.value=0;
-  musicGain.connect(audioCtx.destination);
-  return true;
- }catch(e){return false}
+function persist(){
+ try{localStorage.setItem("kyoDashSave",JSON.stringify(save));}catch(e){}
+ updateStats();
 }
-
-function playNote(freq,duration,type,volume){
- if(!audioCtx||!musicGain||!freq)return;
- try{
-  const now=audioCtx.currentTime;
-  const osc=audioCtx.createOscillator();
-  const gain=audioCtx.createGain();
-  osc.type=type;
-  osc.frequency.setValueAtTime(freq,now);
-  gain.gain.setValueAtTime(.001,now);
-  gain.gain.linearRampToValueAtTime(volume,now+.018);
-  gain.gain.exponentialRampToValueAtTime(.001,now+duration);
-  osc.connect(gain);
-  gain.connect(musicGain);
-  osc.start(now);
-  osc.stop(now+duration+.02);
- }catch(e){}
+function updateStats(){
+ $("stats").innerHTML=`⭐ ${save.stars||0} · XP ${save.xp||0}<br>Рекорд: ${save.best[selected]||0}%`;
 }
-
-function stopMusic(){
- musicToken++;
- if(musicTimer!==null){clearInterval(musicTimer);musicTimer=null}
- if(musicGain&&audioCtx){
-  try{
-   const now=audioCtx.currentTime;
-   musicGain.gain.cancelScheduledValues(now);
-   musicGain.gain.setTargetAtTime(0,now,.035);
-  }catch(e){}
- }
+function showScreen(id){
+ ["menu","game","ownerScreen"].forEach(x=>$(x).classList.toggle("hidden",x!==id));
 }
-
-function startMusic(){
- stopMusic();
- if(!setupAudio())return;
- const token=musicToken,track=MUSIC[selected];
- musicStep=0;
- try{
-  if(audioCtx.state==='suspended')audioCtx.resume();
-  const now=audioCtx.currentTime;
-  musicGain.gain.cancelScheduledValues(now);
-  musicGain.gain.setValueAtTime(0,now);
-  musicGain.gain.linearRampToValueAtTime(.22,now+.15);
- }catch(e){}
-
- function tick(){
-  if(token!==musicToken||mode!=='playing')return;
-  const i=musicStep%track.melody.length;
-  const duration=track.tempo/1000;
-  playNote(track.melody[i],duration*.82,'triangle',.23);
-  if(i%4===0)playNote(track.bass[i],duration*3.4,'sine',.35);
-  musicStep++;
- }
- tick();
- musicTimer=setInterval(tick,track.tempo);
+function chooseLevel(n){
+ selected=n;
+ document.querySelectorAll(".level").forEach((b,i)=>b.classList.toggle("selected",i===n));
+ updateStats();
 }
-
-function saveStats(){
- try{
-  localStorage.setItem('kyoDashBest3',JSON.stringify(best));
-  localStorage.setItem('kyoDashWins3',JSON.stringify(wins));
- }catch(e){}
-}
-
-function refreshStats(){
- $('best').textContent=(best[selected]||0)+'%';
- $('wins').textContent=wins.filter(Boolean).length+'/3';
- document.querySelectorAll('.level').forEach((b,i)=>b.classList.toggle('active',i===selected));
- $('levelLabel').textContent=LEVELS[selected].name+' · '+(selected+1);
-}
-
-/*
- Pattern symbols:
- 1 = один шип
- 2 = два шипа рядом
- 3 = три шипа рядом
- C = низкий потолок: здесь нужно отпустить экран
- . = безопасный участок
-*/
-const PATTERNS=[
- // EASY: знакомство, одиночные и двойные шипы.
- ['.','1','.','1','.','2','..','1','.','1','2','.',
-  '1','..','2','.','1','.','2','..','1','1','.','2',
-  '.','1','..','2','.','1','.','2','..','1','.','2'],
-
- // MEDIUM: серии и потолки, требующие менять ритм.
- ['1','2','C','1','2','1','C','2','1','3','C','1',
-  '2','C','1','2','3','C','2','1','C','3','1','2',
-  'C','2','1','3','C','1','2','C','3','1','2'],
-
- // HARD: быстрые комбинации, двойные группы и потолки.
- ['2','C','3','1','C','2','3','C','1','2','C','3',
-  '2','C','3','1','2','C','3','C','2','1','3','C',
-  '2','3','C','1','2','C','3','2','C','3','1','C']
-];
-
-function addSpikes(x,count){
- const w=34,h=selected===2?43:38;
- for(let j=0;j<count;j++){
-  obstacles.push({x:x+j*w,w,h,type:'spike'});
- }
-}
+document.querySelectorAll(".level").forEach(b=>{
+ b.addEventListener("click",()=>chooseLevel(Number(b.dataset.level)));
+});
 
 function makeLevel(){
  obstacles=[];
  const cfg=LEVELS[selected];
- const pattern=PATTERNS[selected];
- let x=540,i=0;
+ let x=700;
+ let index=0;
+ // EASY: mostly single spikes and generous gaps.
+ // MEDIUM: double spikes and occasional triple groups.
+ // HARD: denser groups with less recovery time.
+ const patterns=[
+  [1,0,0,1,0,0,2,0,0,1,0,0,1,0,0,2,0,0,1,0,0,1,0,0,2,0,0,1,0,0,1,0],
+  [1,0,2,0,1,0,2,0,0,3,0,1,0,2,0,1,0,3,0,0,2,0,1,0,2,0,3,0,1,0],
+  [2,0,3,0,1,0,2,0,3,0,2,0,1,0,3,0,2,0,3,0,1,0,2,0,3,0,2,0]
+ ];
+ const pattern=patterns[selected];
 
- while(x<cfg.length-320){
-  const symbol=pattern[i%pattern.length];
-  let spacing=cfg.gap;
-
-  if(selected===0){
-   spacing+=[35,65,20,80,40][i%5];
-  }else if(selected===1){
-   spacing+=[10,35,0,48,15][i%5];
-  }else{
-   spacing+=[0,15,8,24,0][i%5];
+ while(x<cfg.length-500){
+  const value=pattern[index%pattern.length];
+  if(value>0){
+   const count=value;
+   for(let j=0;j<count;j++){
+    obstacles.push({x:x+j*35,y:GROUND,w:35,h:selected===2?48:43,type:"spike"});
+   }
   }
-
-  if(symbol==='1'||symbol==='2'||symbol==='3'){
-   addSpikes(x,Number(symbol));
-  }else if(symbol==='C'){
-   // Низкий потолок: прыжок под ним приводит к столкновению.
-   // Удерживание прыжка здесь опасно.
-   obstacles.push({
-    x:x,w:selected===2?82:76,
-    y:G-102,h:34,type:'ceiling'
-   });
-  }
-
-  // В сложных уровнях иногда ставим препятствие второй волной.
-  if(selected===1&&i%6===4){
-   addSpikes(x+spacing*.52,2);
-  }
-  if(selected===2&&i%5===3){
-   addSpikes(x+spacing*.48,2);
-  }
-
-  x+=spacing;
-  i++;
+  let gap=cfg.gap;
+  // Space out the EASY obstacles even more.
+  if(selected===0)gap+=((index%3)*24);
+  else if(selected===1)gap+=((index%3)*12);
+  else gap+=((index%2)*8);
+  x+=gap;
+  index++;
  }
-
- obstacles.push({x:cfg.length-130,w:12,h:80,type:'finish'});
+ // Finish platform marker
+ obstacles.push({x:cfg.length-260,y:GROUND,w:20,h:GROUND,type:"finish"});
 }
 
-function updateHud(){
- progress=Math.min(100,Math.floor(world/(LEVELS[selected].length-130)*100));
- $('progressText').textContent=progress+'%';
- $('progressFill').style.width=progress+'%';
-
- if(progress>best[selected]){
-  best[selected]=progress;
-  $('best').textContent=progress+'%';
-  saveStats();
- }
-}
-
-function reset(){
- world=0;
- progress=0;
- held=false;
- p.y=G-S;
- p.vy=0;
- p.angle=0;
- p.onGround=true;
+let player;
+function resetGame(){
+ const cfg=LEVELS[selected];
+ world=0;progress=0;dead=false;won=false;paused=false;
+ jumpQueued=false;particles=[];
+ player={x:170,y:GROUND-36,size:36,vy:0,angle:0,onGround:true};
  makeLevel();
- updateHud();
-}
-
-function showMenu(kind='menu'){
+ $("overlay").style.display="none";
+ $("progress").style.width="0%";
+ $("percent").textContent="0%";
+ $("levelName").textContent=cfg.name;
+ $("pause").textContent="Ⅱ Пауза";
+ running=true;
+ lastTime=performance.now();
+ showScreen("game");
  stopMusic();
- mode=kind;
- held=false;
- overlay.classList.remove('hidden');
- $('levels').classList.toggle('hidden',kind==='dead'||kind==='win');
- $('menuOnly').classList.toggle('hidden',kind==='menu');
-
- if(kind==='dead'){
-  $('panelTitle').textContent='УПС!';
-  $('panelText').textContent='Прогресс: '+progress+'%. Попробуй ещё раз!';
-  $('startBtn').textContent='ЕЩЁ РАЗ';
- }else if(kind==='win'){
-  $('panelTitle').textContent='УРОВЕНЬ ПРОЙДЕН!';
-  $('panelText').textContent='Отлично! Уровень '+LEVELS[selected].name+' пройден.';
-  $('startBtn').textContent='ИГРАТЬ СНОВА';
- }else{
-  $('panelTitle').textContent='Kyo Dash';
-  $('panelText').textContent='Прыгай через шипы и доберись до финиша!';
-  $('startBtn').textContent='ИГРАТЬ';
-  $('menuOnly').classList.add('hidden');
- }
- refreshStats();
- updateProfile();
- draw();
+ if(musicOn)startMusic();
+ requestAnimationFrame(loop);
 }
-
-function start(){
- cancelAnimationFrame(raf);
- stopMusic();
- reset();
- mode='playing';
- overlay.classList.add('hidden');
- startMusic();
- last=performance.now();
- raf=requestAnimationFrame(loop);
-}
-
 function jump(){
- if(mode==='playing'&&p.onGround){
-  p.vy=LEVELS[selected].jump;
-  p.onGround=false;
+ if(!running||paused||dead||won)return;
+ if(player.onGround){
+  player.vy=-LEVELS[selected].jump;
+  player.onGround=false;
  }
 }
-
 function die(){
- if(mode!=='playing')return;
- mode='dead';
- held=false;
- cancelAnimationFrame(raf);
- showMenu('dead');
+ if(dead||won)return;
+ dead=true;running=false;
+ stopMusic();
+ const best=Math.max(save.best[selected]||0,Math.floor(progress));
+ save.best[selected]=best;
+ persist();
+ $("overlayTitle").textContent="💥 Столкновение!";
+ $("overlayText").textContent=`Прогресс: ${Math.floor(progress)}% · Рекорд: ${best}%`;
+ $("overlay").style.display="flex";
 }
-
-function win(){
- if(mode!=='playing')return;
- mode='win';
- held=false;
- progress=100;
- $('progressText').textContent='100%';
- $('progressFill').style.width='100%';
- best[selected]=100;
-
- if(!wins[selected]){
-  profile.xp+=[100,150,200][selected];
-  saveProfile();
+function finish(){
+ if(won||dead)return;
+ won=true;running=false;progress=100;
+ stopMusic();
+ save.best[selected]=100;
+ save.wins=(save.wins||0)+1;
+ save.xp=(save.xp||0)+100;
+ save.stars=(save.stars||0)+1;
+ persist();
+ $("progress").style.width="100%";
+ $("percent").textContent="100%";
+ $("overlayTitle").textContent="🏆 Уровень пройден!";
+ $("overlayText").textContent="Ты получил ⭐ 1 и 100 XP!";
+ $("overlay").style.display="flex";
+}
+function pauseGame(){
+ if(!running&&!paused)return;
+ if(dead||won)return;
+ paused=!paused;
+ $("pause").textContent=paused?"▶ Продолжить":"Ⅱ Пауза";
+ if(paused)stopMusic();
+ else{
+  lastTime=performance.now();
+  if(musicOn)startMusic();
+  requestAnimationFrame(loop);
  }
- wins[selected]=true;
- saveStats();
- refreshStats();
- showMenu('win');
 }
+function restart(){resetGame();}
 
+function loop(now){
+ if(!running||paused)return;
+ const dt=Math.min((now-lastTime)/1000,0.033);
+ lastTime=now;
+ update(dt);
+ draw();
+ if(running&&!paused)requestAnimationFrame(loop);
+}
 function update(dt){
- if(mode!=='playing')return;
  const cfg=LEVELS[selected];
  world+=cfg.speed*dt;
- p.vy+=cfg.gravity*dt;
- p.y+=p.vy*dt;
 
- if(p.y>=G-S){
-  p.y=G-S;
-  p.vy=0;
-  p.onGround=true;
-  p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
+ // Geometry Dash-like jump: one jump per landing.
+ player.vy+=cfg.gravity*dt;
+ player.y+=player.vy*dt;
 
-  // Автопрыжок только при удержании.
-  // Потолки специально требуют отпустить экран.
-  if(held){
-   p.vy=cfg.jump;
-   p.onGround=false;
-  }
+ if(player.y+player.size>=GROUND){
+  player.y=GROUND-player.size;
+  player.vy=0;
+  player.onGround=true;
+  player.angle=Math.round(player.angle/(Math.PI/2))*(Math.PI/2);
  }else{
-  p.onGround=false;
-  p.angle+=cfg.speed*dt/S*(Math.PI/2);
+  player.onGround=false;
+  // One 90-degree turn per cube-width travelled.
+  player.angle+=cfg.speed*dt/player.size*(Math.PI/2);
  }
 
- updateHud();
+ progress=Math.min(100,world/cfg.length*100);
+ $("progress").style.width=progress+"%";
+ $("percent").textContent=Math.floor(progress)+"%";
 
+ const px=player.x,py=player.y,s=player.size;
  for(const o of obstacles){
-  const ox=o.x-world;
-  if(ox>p.x+100||ox+o.w<p.x-80)continue;
-
-  if(o.type==='finish'){
-   if(ox<p.x+S*.6){win();return}
+  const sx=o.x-world+player.x;
+  if(o.type==="finish"){
+   if(world>=cfg.length-220){finish();return;}
    continue;
   }
-
-  const px1=p.x+5,px2=p.x+S-5;
-  const py1=p.y+5,py2=p.y+S-3;
-
-  if(o.type==='ceiling'){
-   // Проверка столкновения куба с нижней стороной потолка.
-   if(px2>ox+4&&px1<ox+o.w-4&&
-      py2>o.y+4&&py1<o.y+o.h){
-    die();
-    return;
-   }
-   continue;
-  }
-
-  // Более точная проверка шипа: треугольная форма.
-  const left=Math.max(px1,ox);
-  const right=Math.min(px2,ox+o.w);
-  if(left>=right)continue;
-
-  const center=ox+o.w/2;
-  const sampleX=Math.max(ox,Math.min(center,(left+right)/2));
-  const surfaceY=G-o.h*(1-Math.abs(sampleX-center)/(o.w/2));
-
-  if(py2>surfaceY+2&&py1<G){
-   die();
-   return;
+  if(sx>px+s+20||sx+o.w<px-5)continue;
+  if(spikeCollision(px,py,s,sx,o)){
+   die();return;
   }
  }
+ if(world>=cfg.length)finish();
+}
+function spikeCollision(px,py,s,sx,o){
+ // Approximate the triangular hitbox used for spikes in GD.
+ const left=Math.max(px+5,sx+5);
+ const right=Math.min(px+s-5,sx+o.w-5);
+ if(left>=right)return false;
+ const mid=(left+right)/2;
+ const points=[left,mid,right];
+ for(const x of points){
+  const rel=(x-sx)/o.w;
+  const spikeTop=GROUND-o.h*(1-Math.abs(rel-0.5)*2);
+  if(py+s-4>spikeTop+5 && py+ s*0.55<GROUND)return true;
+ }
+ return false;
 }
 
 function draw(){
  ctx.clearRect(0,0,W,H);
- ctx.fillStyle='#0a1230';
- ctx.fillRect(0,0,W,H);
+ const cfg=LEVELS[selected];
 
- const grad=ctx.createLinearGradient(0,0,0,G);
- grad.addColorStop(0,'#111e48');
- grad.addColorStop(1,'#0a1530');
- ctx.fillStyle=grad;
- ctx.fillRect(0,0,W,G);
-
- ctx.strokeStyle='#213865';
- ctx.lineWidth=1;
- const off=-(world*.3%45);
-
- for(let x=off;x<W;x+=45){
-  ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,G);ctx.stroke();
+ // Background grid
+ ctx.fillStyle="#101b40";ctx.fillRect(0,0,W,H);
+ ctx.strokeStyle="#1d3261";ctx.lineWidth=1;
+ for(let x=-(world*.22%60);x<W;x+=60){
+  ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,GROUND);ctx.stroke();
  }
- for(let y=22;y<G;y+=45){
+ for(let y=30;y<GROUND;y+=45){
   ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
  }
- for(let i=0;i<26;i++){
-  const sx=(i*137-world*.12%900+900)%900;
-  const sy=(i*71)%285;
-  ctx.fillStyle='#668ac5';
-  ctx.fillRect(sx,sy,2,2);
+ // distant neon blocks
+ ctx.fillStyle="#172a54";
+ for(let i=0;i<14;i++){
+  let x=((i*115-world*.35)%1200+1200)%1200-100;
+  let h=35+(i%4)*20;
+  ctx.fillRect(x,GROUND-h,45,h);
  }
+ // Ground
+ ctx.fillStyle="#152750";ctx.fillRect(0,GROUND,W,H-GROUND);
+ ctx.fillStyle="#32e5ff";ctx.fillRect(0,GROUND,W,5);
+ ctx.fillStyle="#294477";
+ for(let x=-(world%45);x<W;x+=45)ctx.fillRect(x,GROUND+15,25,5);
 
- ctx.fillStyle='#14264c';
- ctx.fillRect(0,G,W,H-G);
- ctx.fillStyle='#36e8ff';
- ctx.fillRect(0,G,W,4);
-
- for(let x=-(world%50);x<W;x+=50){
-  ctx.fillStyle='#2b4779';
-  ctx.fillRect(x,G+16,25,4);
- }
-
+ // Obstacles
  for(const o of obstacles){
-  const x=o.x-world;
+  const x=o.x-world+player.x;
   if(x<-100||x>W+100)continue;
-
-  if(o.type==='spike'){
-   ctx.fillStyle=selected===2?'#ff3d8c':selected===1?'#ff6c68':'#ff4d83';
-   ctx.beginPath();
-   ctx.moveTo(x,G);
-   ctx.lineTo(x+o.w/2,G-o.h);
-   ctx.lineTo(x+o.w,G);
-   ctx.closePath();
-   ctx.fill();
-   ctx.strokeStyle='#ffb2cb';
-   ctx.lineWidth=2;
-   ctx.stroke();
-  }else if(o.type==='ceiling'){
-   ctx.fillStyle='#ff385f';
-   ctx.fillRect(x,o.y,o.w,o.h);
-   ctx.fillStyle='#ff9bad';
-   ctx.fillRect(x,o.y+o.h-5,o.w,5);
-   for(let k=0;k<o.w;k+=18){
-    ctx.fillStyle='#7d183c';
-    ctx.fillRect(x+k,o.y+6,8,5);
-   }
-  }else{
-   ctx.fillStyle='#4dffb4';
-   ctx.fillRect(x,G-o.h,8,o.h);
-   ctx.fillStyle='#e6fff5';
-   ctx.font='bold 18px Arial';
-   ctx.fillText('FINISH',x-26,G-o.h-12);
+  if(o.type==="finish"){
+   ctx.fillStyle="#3effb0";
+   ctx.fillRect(x,GROUND-120,7,120);
+   ctx.fillRect(x+7,GROUND-120,45,24);
+   ctx.fillStyle="#07152a";
+   ctx.font="bold 14px Arial";
+   ctx.fillText("FINISH",x+10,GROUND-103);
+   continue;
   }
+  ctx.fillStyle=selected===2?"#ff477c":"#ff526e";
+  ctx.strokeStyle="#ffd6e0";ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(x,GROUND);
+  ctx.lineTo(x+o.w/2,GROUND-o.h);
+  ctx.lineTo(x+o.w,GROUND);
+  ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.fillStyle="#fff";
+  ctx.beginPath();
+  ctx.moveTo(x+o.w*.43,GROUND-o.h*.72);
+  ctx.lineTo(x+o.w*.5,GROUND-o.h*.9);
+  ctx.lineTo(x+o.w*.57,GROUND-o.h*.72);
+  ctx.closePath();ctx.fill();
  }
 
+ // Player with GD-style rotation
  ctx.save();
- ctx.translate(p.x+S/2,p.y+S/2);
- ctx.rotate(p.angle);
- ctx.shadowColor='#00dfff';
- ctx.shadowBlur=14;
- ctx.fillStyle='#35e7ff';
- ctx.fillRect(-S/2,-S/2,S,S);
+ ctx.translate(player.x+player.size/2,player.y+player.size/2);
+ ctx.rotate(player.angle);
+ ctx.shadowColor="#39efff";ctx.shadowBlur=18;
+ ctx.fillStyle="#37eaff";
+ ctx.fillRect(-player.size/2,-player.size/2,player.size,player.size);
  ctx.shadowBlur=0;
- ctx.strokeStyle='#d8fcff';
- ctx.lineWidth=3;
- ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
- ctx.fillStyle='#0a2750';
- ctx.fillRect(-9,-7,5,7);
- ctx.fillRect(4,-7,5,7);
+ ctx.strokeStyle="#eaffff";ctx.lineWidth=3;
+ ctx.strokeRect(-player.size/2,-player.size/2,player.size,player.size);
+ ctx.fillStyle="#102044";
+ ctx.fillRect(-10,-7,6,9);
+ ctx.fillRect(4,-7,6,9);
+ ctx.fillRect(-7,7,14,4);
  ctx.restore();
 
- if(mode==='menu'){
-  ctx.fillStyle='#b6d2ff';
-  ctx.font='bold 20px Arial';
-  ctx.textAlign='center';
-  ctx.fillText('READY?',W/2,105);
-  ctx.textAlign='left';
- }
+ // Air/level details
+ ctx.fillStyle="#fff";
+ ctx.font="bold 14px Arial";
+ ctx.fillText(cfg.name,20,28);
+ ctx.fillStyle="#91a9d9";
+ ctx.font="12px Arial";
+ ctx.fillText("KYO DASH",20,47);
 }
 
-function loop(now){
- const dt=Math.min((now-last)/1000,.025);
- last=now;
- update(dt);
- draw();
- if(mode==='playing')raf=requestAnimationFrame(loop);
-}
+canvas.addEventListener("pointerdown",e=>{
+ e.preventDefault();
+ if(running&&!paused)jump();
+},{passive:false});
 
-function press(e){
- if(e)e.preventDefault();
- if(mode!=='playing')return;
- if(!held){
-  held=true;
-  jump();
- }
-}
-
-function release(e){
- if(e)e.preventDefault();
- held=false;
-}
-
-canvas.addEventListener('pointerdown',press);
-window.addEventListener('pointerup',release);
-window.addEventListener('pointercancel',release);
-window.addEventListener('blur',()=>{held=false});
-
-window.addEventListener('keydown',e=>{
- if(e.code==='Space'||e.code==='ArrowUp'){
+document.addEventListener("keydown",e=>{
+ if(e.code==="Space"||e.code==="ArrowUp"||e.code==="KeyW"){
   e.preventDefault();
-  if(mode==='playing'){
-   if(!held){held=true;jump()}
-  }else if(e.code==='Space'){
-   start();
-  }
+  if(running&&!paused)jump();
  }
+ if(e.code==="Escape")pauseGame();
+});
+$("play").addEventListener("click",resetGame);
+$("again").addEventListener("click",resetGame);
+$("restart").addEventListener("click",resetGame);
+$("pause").addEventListener("click",pauseGame);
+$("exit").addEventListener("click",()=>{
+ running=false;paused=false;stopMusic();$("overlay").style.display="none";showScreen("menu");updateStats();
+});
+$("toMenu").addEventListener("click",()=>{
+ running=false;paused=false;stopMusic();$("overlay").style.display="none";showScreen("menu");updateStats();
 });
 
-window.addEventListener('keyup',e=>{
- if(e.code==='Space'||e.code==='ArrowUp')held=false;
+$("music").addEventListener("click",()=>{
+ musicOn=!musicOn;
+ $("music").textContent="♫ Музыка: "+(musicOn?"ВКЛ":"ВЫКЛ");
+ if(musicOn&&running&&!paused)startMusic();else stopMusic();
 });
 
-$('nickSave').addEventListener('click',()=>{
- if(profile.isDev){
-  alert('DEV-ник закреплён и не меняется через обычное меню.');
-  updateProfile();
-  return;
- }
- const nick=$('nickInput').value.trim();
- if(nick.length<2){
-  alert('Ник должен содержать минимум 2 символа.');
-  return;
- }
- profile.nickname=nick.slice(0,16);
- saveProfile();
-});
-
-$('nickInput').addEventListener('keydown',e=>{
- if(e.key==='Enter')$('nickSave').click();
-});
-
-$('startBtn').addEventListener('click',start);
-
-$('ownerBtn').addEventListener('click',()=>{
- if(ownerMode){
-  ownerMode=false;
-  alert('Owner Mode выключен');
-  return;
- }
- const pin=prompt('Введите PIN владельца:');
- if(pin!==null)activateOwner(pin);
-});
-
-$('menuOnly').addEventListener('click',()=>showMenu('menu'));
-
-$('menuBtn').addEventListener('click',()=>{
- cancelAnimationFrame(raf);
- showMenu('menu');
-});
-
-document.querySelectorAll('.level').forEach(b=>{
- b.addEventListener('click',()=>{
-  selected=Number(b.dataset.level);
-  refreshStats();
-  makeLevel();
-  draw();
- });
+// Simple original electronic backing melody using Web Audio.
+function startMusic(){
+ stopMusic();
+ if(!musicOn)return;
+ try{
+  audio=audio||new (window.AudioContext||window.webkitAudioContext)();
+  if(audio.state==="suspended")audio.resume();
+  const notes=[261.63,329.63,392,329.63,293.66,349.23,440,349.23];
+  let i=0;
+  musicTimer=setInterval(()=>{
+   if(!audio||!musicOn||!running||paused)return;
+   const osc=audio.createOscillator();
+   const gain=audio.createGain();
+   osc.type="square";
+   osc.frequency.value=notes[i++%notes.length];
+   gain.gain.setValueAtTime(.035,audio.currentTime);
+   gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.12);
+   osc.connect(gain);gain.connect(audio.destination);
+   osc.start();osc.stop(audio.currentTime+.13);
+  },170);
+ }catch(e){}
 }
+function stopMusic(){
+ if(musicTimer){clearInterval(musicTimer);musicTimer=null;}
+}
+
+$("owner").addEventListener("click",()=>{
+ const pin=prompt("Введите PIN владельца:");
+ if(pin==="OwnerKD-ADS5H-D6E9F037F7"||pin==="KenanDrun-AJ9S3L6KS9-8H67HSK"){
+  running=false;paused=false;stopMusic();showScreen("ownerScreen");
+ }else if(pin!==null){
+  alert("Неверный PIN");
+ }
+});
+$("ownerBack").addEventListener("click",()=>{showScreen("menu");updateStats();});
+$("resetRecords").addEventListener("click",()=>{
+ if(confirm("Сбросить рекорды всех уровней?")){
+  save.best=[0,0,0];persist();alert("Рекорды сброшены");
+ }
+});
+$("resetProgress").addEventListener("click",()=>{
+ if(confirm("Сбросить XP, звёзды и победы?")){
+  save.stars=0;save.xp=0;save.wins=0;persist();alert("Прогресс сброшен");
+ }
+});
+
+chooseLevel(0);
+updateStats();
+showScreen("menu");
+</script>
+</body>
+ </html>
+
