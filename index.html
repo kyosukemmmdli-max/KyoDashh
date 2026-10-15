@@ -23,15 +23,7 @@ canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px soli
 .sub{color:#b9c9f2;font-size:14px}
 .profileBox{margin:14px 0;padding:12px;border:1px solid #2d4c79;border-radius:14px;background:#0b1733}
 .profileLine{font-size:12px;color:#a9c4f2;margin:7px}
-.rainbowNick{
- font-weight:1000;
- background:linear-gradient(90deg,#ff3158,#ffad35,#ffff55,#42ff9b,#35eaff,#a66bff,#ff48d1,#ff3158);
- background-size:300% 100%;
- -webkit-background-clip:text;
- background-clip:text;
- color:transparent!important;
- animation:rainbow 2.5s linear infinite
-}
+.rainbowNick{font-weight:1000;background:linear-gradient(90deg,#ff3158,#ffad35,#ffff55,#42ff9b,#35eaff,#a66bff,#ff48d1,#ff3158);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:rainbow 2.5s linear infinite}
 @keyframes rainbow{to{background-position:300% 50%}}
 .nickRow{display:flex;gap:7px;margin-top:10px}
 input{min-width:0;flex:1;background:#080f25;border:1px solid #355786;border-radius:9px;padding:10px;color:white}
@@ -52,7 +44,6 @@ button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126
 </style>
 </head>
 <body>
-
 <main class="app">
 <header class="top">
 <span class="brand">Kyo Dash</span>
@@ -60,42 +51,32 @@ button{border:0;border-radius:10px;padding:11px;background:#35e5ff;color:#071126
 <span id="progressText">0%</span>
 <button class="menuBtn" id="menuBtn">МЕНЮ</button>
 </header>
-
 <div class="meter"><div class="fill" id="progressFill"></div></div>
 <canvas id="game" width="900" height="420"></canvas>
-<div class="hint">ТАП — ПРЫЖОК · УДЕРЖИВАЙ — АВТОПРЫЖКИ</div>
+<div class="hint">ТАП — ПРЫЖОК · ОТПУСТИ И НАЖМИ СНОВА ДЛЯ СЛЕДУЮЩЕГО ПРЫЖКА</div>
 </main>
 
 <div class="overlay" id="overlay">
 <section class="panel">
 <h1 class="logo" id="panelTitle">Kyo Dash</h1>
 <p class="sub" id="panelText">Прыгай через шипы и доберись до финиша!</p>
-
 <div class="profileBox">
 <div class="profileLine">ИГРОК: <strong id="profileNick">Player</strong></div>
 <div class="profileLine">УРОВЕНЬ <strong id="profileLevel">1</strong> · XP <strong id="profileXp">0 / 250</strong></div>
 <div class="xpTrack"><div class="xpFill" id="xpFill"></div></div>
-<div class="nickRow">
-<input id="nickInput" maxlength="16" placeholder="Твой ник">
-<button class="nickSave" id="nickSave">СМЕНИТЬ</button>
-</div>
+<div class="nickRow"><input id="nickInput" maxlength="16" placeholder="Твой ник"><button class="nickSave" id="nickSave">СМЕНИТЬ</button></div>
 <div class="small">Профиль и XP сохраняются на устройстве</div>
 </div>
-
 <div class="levels" id="levels">
-<button class="level active" data-level="0">EASY<small>Легко</small></button>
-<button class="level" data-level="1">MEDIUM<small>Средне</small></button>
-<button class="level" data-level="2">HARD<small>Сложно</small></button>
+<button class="level active" data-level="0">EASY<small>Stereo Madness</small></button>
+<button class="level" data-level="1">MEDIUM<small>Jumper</small></button>
+<button class="level" data-level="2">HARD<small>FingerDash</small></button>
 </div>
-
-<div class="stats">
-<span>РЕКОРД <b id="best">0%</b></span>
-<span>ПОБЕДЫ <b id="wins">0/3</b></span>
-</div>
-
+<div class="stats"><span>РЕКОРД <b id="best">0%</b></span><span>ПОБЕДЫ <b id="wins">0/3</b></span></div>
 <button class="btn" id="startBtn">ИГРАТЬ</button>
 <button class="btn secondary" id="ownerBtn">OWNER MODE</button>
 <button class="btn secondary hidden" id="menuOnly">ВЫБОР УРОВНЯ</button>
+<div class="small">Профиль хранится локально в браузере.</div>
 </section>
 </div>
 
@@ -186,7 +167,6 @@ function activateOwner(pin){
   saveProfile();
   alert('TESTER активирован! Ник: [TEST] TesterKD');
  }else{
-  // KenanDrun активирует Owner Mode, но не меняет профиль.
   alert('Owner Mode активирован!');
  }
 
@@ -196,16 +176,14 @@ function activateOwner(pin){
 const W=900,H=420,G=330,S=34;
 
 const LEVELS=[
- {name:'EASY',speed:275,jump:-590,gravity:1650,length:5100,gap:300},
- {name:'MEDIUM',speed:300,jump:-600,gravity:1700,length:5900,gap:250},
- {name:'HARD',speed:320,jump:-610,gravity:1750,length:6500,gap:215}
+ {name:'EASY',speed:275,jump:-590,gravity:1650,length:5600,gap:245},
+ {name:'MEDIUM',speed:300,jump:-600,gravity:1700,length:6500,gap:215},
+ {name:'HARD',speed:320,jump:-610,gravity:1750,length:7400,gap:195}
 ];
 
 let selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
 let held=false,obstacles=[],best=[0,0,0],wins=[false,false,false];
 
-/* Оригинальная музыка Kyo Dash.
-   Мелодии генерируются синтезатором, внешние файлы не нужны. */
 const MUSIC=[
  {
   tempo:190,
@@ -228,7 +206,6 @@ let audioCtx=null,musicGain=null,musicTimer=null,musicStep=0,musicToken=0;
 
 function setupAudio(){
  if(audioCtx)return true;
-
  const AudioClass=window.AudioContext||window.webkitAudioContext;
  if(!AudioClass)return false;
 
@@ -256,15 +233,14 @@ function playNote(freq,duration,type,volume){
   osc.type=type;
   osc.frequency.setValueAtTime(freq,now);
 
-  gain.gain.setValueAtTime(0.001,now);
-  gain.gain.linearRampToValueAtTime(volume,now+0.018);
-  gain.gain.exponentialRampToValueAtTime(0.001,now+duration);
+  gain.gain.setValueAtTime(.001,now);
+  gain.gain.linearRampToValueAtTime(volume,now+.018);
+  gain.gain.exponentialRampToValueAtTime(.001,now+duration);
 
   osc.connect(gain);
   gain.connect(musicGain);
-
   osc.start(now);
-  osc.stop(now+duration+0.02);
+  osc.stop(now+duration+.02);
  }catch(e){}
 }
 
@@ -280,14 +256,13 @@ function stopMusic(){
   try{
    const now=audioCtx.currentTime;
    musicGain.gain.cancelScheduledValues(now);
-   musicGain.gain.setTargetAtTime(0,now,0.035);
+   musicGain.gain.setTargetAtTime(0,now,.035);
   }catch(e){}
  }
 }
 
 function startMusic(){
  stopMusic();
-
  if(!setupAudio())return;
 
  const token=musicToken;
@@ -296,11 +271,10 @@ function startMusic(){
 
  try{
   if(audioCtx.state==='suspended')audioCtx.resume();
-
   const now=audioCtx.currentTime;
   musicGain.gain.cancelScheduledValues(now);
   musicGain.gain.setValueAtTime(0,now);
-  musicGain.gain.linearRampToValueAtTime(0.22,now+0.15);
+  musicGain.gain.linearRampToValueAtTime(.22,now+.15);
  }catch(e){}
 
  function tick(){
@@ -309,10 +283,10 @@ function startMusic(){
   const i=musicStep%track.melody.length;
   const duration=track.tempo/1000;
 
-  playNote(track.melody[i],duration*0.82,'triangle',0.23);
+  playNote(track.melody[i],duration*.82,'triangle',.23);
 
   if(i%4===0){
-   playNote(track.bass[i],duration*3.4,'sine',0.35);
+   playNote(track.bass[i],duration*3.4,'sine',.35);
   }
 
   musicStep++;
@@ -327,7 +301,10 @@ try{
  wins=JSON.parse(localStorage.getItem('kyoDashWins3')||'[false,false,false]');
  if(!Array.isArray(best)||best.length!==3)best=[0,0,0];
  if(!Array.isArray(wins)||wins.length!==3)wins=[false,false,false];
-}catch(e){}
+}catch(e){
+ best=[0,0,0];
+ wins=[false,false,false];
+}
 
 const p={x:150,y:G-S,vy:0,angle:0,onGround:true};
 
@@ -352,29 +329,77 @@ function refreshStats(){
 function makeLevel(){
  obstacles=[];
  const cfg=LEVELS[selected];
- let x=590,i=0;
 
- while(x<cfg.length-260){
-  const pattern=(i*7+selected*3)%7;
-  let count=1;
+ // EASY: одиночные, двойные и редкие серии шипов.
+ const easy=[
+  [1],[1],[2],[1],[1,1],[1],[2],[1],
+  [1,1],[1],[2],[1],[1,2],[1]
+ ];
 
-  if(selected===1&&(pattern===0||pattern===4||pattern===6))count=2;
-  if(selected===2&&(pattern===0||pattern===3||pattern===6))count=2;
-  if(selected===2&&pattern===2)count=3;
+ // MEDIUM: двойные, тройные и комбинированные группы.
+ const medium=[
+  [1],[2],[1,1],[2],[3],[1],[2,1],
+  [1,1],[3],[2],[1,2],[3],[2,1],[2]
+ ];
 
-  for(let j=0;j<count;j++){
-   obstacles.push({x:x+j*37,w:37,h:37,type:'spike'});
+ // HARD: плотные комбинации и серии тройных шипов.
+ const hard=[
+  [2],[3],[1,2],[3],[2,2],[1],[3],
+  [2,1],[3],[2,2],[3],[1,3],[2],[3]
+ ];
+
+ const patterns=[easy,medium,hard][selected];
+ let x=560,i=0;
+
+ while(x<cfg.length-300){
+  const pattern=patterns[i%patterns.length];
+  const first=pattern[0];
+  const spikeW=selected===2?35:34;
+  const spikeH=selected===2?42:37;
+
+  for(let j=0;j<first;j++){
+   obstacles.push({
+    x:x+j*spikeW,
+    w:spikeW,
+    h:spikeH,
+    type:'spike'
+   });
   }
 
-  x+=cfg.gap+(pattern%3)*24;
+  if(pattern.length>1){
+   const secondX=x+first*spikeW+
+    (selected===0?115:selected===1?95:80);
+
+   for(let j=0;j<pattern[1];j++){
+    obstacles.push({
+     x:secondX+j*spikeW,
+     w:spikeW,
+     h:spikeH,
+     type:'spike'
+    });
+   }
+  }
+
+  const extra=selected===0?(i%3)*24:
+   selected===1?(i%3)*13:(i%3)*9;
+
+  x+=cfg.gap+extra;
   i++;
  }
 
- obstacles.push({x:cfg.length-130,w:12,h:80,type:'finish'});
+ obstacles.push({
+  x:cfg.length-130,
+  w:12,
+  h:80,
+  type:'finish'
+ });
 }
 
 function updateHud(){
- progress=Math.min(100,Math.floor(world/(LEVELS[selected].length-130)*100));
+ progress=Math.min(100,Math.floor(
+  world/(LEVELS[selected].length-130)*100
+ ));
+
  $('progressText').textContent=progress+'%';
  $('progressFill').style.width=progress+'%';
 
@@ -401,8 +426,8 @@ function showMenu(kind='menu'){
  stopMusic();
  mode=kind;
  held=false;
-
  overlay.classList.remove('hidden');
+
  $('levels').classList.toggle('hidden',kind==='dead'||kind==='win');
  $('menuOnly').classList.toggle('hidden',kind==='menu');
 
@@ -480,8 +505,8 @@ function update(dt){
  if(mode!=='playing')return;
 
  const cfg=LEVELS[selected];
- world+=cfg.speed*dt;
 
+ world+=cfg.speed*dt;
  p.vy+=cfg.gravity*dt;
  p.y+=p.vy*dt;
 
@@ -490,8 +515,6 @@ function update(dt){
   p.vy=0;
   p.onGround=true;
   p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
-
-  if(held)jump();
  }else{
   p.onGround=false;
   p.angle+=cfg.speed*dt/S*(Math.PI/2);
@@ -510,13 +533,15 @@ function update(dt){
     return;
    }
   }else{
-   const left=Math.max(p.x+4,ox);
-   const right=Math.min(p.x+S-4,ox+o.w);
+   // Приближённая треугольная зона столкновения шипа.
+   const left=Math.max(p.x+5,ox+o.w*.16);
+   const right=Math.min(p.x+S-5,ox+o.w*.84);
 
    if(left<right&&p.y+S>G-o.h){
     const center=ox+o.w/2;
-    const nearest=center<left?left:(center>right?right:center);
-    const surfaceY=G-o.h*(1-Math.abs(nearest-center)/(o.w/2));
+    const nearest=Math.max(ox,Math.min(center,p.x+S));
+    const surfaceY=G-o.h*
+     (1-Math.abs(nearest-center)/(o.w/2));
 
     if(p.y+S-3>surfaceY&&p.y<G){
      die();
@@ -565,7 +590,6 @@ function draw(){
 
  ctx.fillStyle='#14264c';
  ctx.fillRect(0,G,W,H-G);
-
  ctx.fillStyle='#36e8ff';
  ctx.fillRect(0,G,W,4);
 
@@ -576,11 +600,12 @@ function draw(){
 
  for(const o of obstacles){
   const x=o.x-world;
-
   if(x<-70||x>W+70)continue;
 
   if(o.type==='spike'){
-   ctx.fillStyle=selected===2?'#ff3d8c':'#ff4d83';
+   ctx.fillStyle=selected===2?'#ff3d8c':
+    selected===1?'#ff6c68':'#ff4d83';
+
    ctx.beginPath();
    ctx.moveTo(x,G);
    ctx.lineTo(x+o.w/2,G-o.h);
@@ -604,22 +629,17 @@ function draw(){
  ctx.save();
  ctx.translate(p.x+S/2,p.y+S/2);
  ctx.rotate(p.angle);
-
  ctx.shadowColor='#00dfff';
  ctx.shadowBlur=14;
-
  ctx.fillStyle='#35e7ff';
  ctx.fillRect(-S/2,-S/2,S,S);
-
  ctx.shadowBlur=0;
  ctx.strokeStyle='#d8fcff';
  ctx.lineWidth=3;
  ctx.strokeRect(-S/2+2,-S/2+2,S-4,S-4);
-
  ctx.fillStyle='#0a2750';
  ctx.fillRect(-9,-7,5,7);
  ctx.fillRect(4,-7,5,7);
-
  ctx.restore();
 
  if(mode==='menu'){
@@ -647,8 +667,12 @@ function press(e){
  if(e)e.preventDefault();
  if(mode!=='playing')return;
 
- held=true;
- jump();
+ // Один новый прыжок на каждое нажатие.
+ // Удерживание не вызывает повторные прыжки.
+ if(!held){
+  held=true;
+  jump();
+ }
 }
 
 function release(e){
@@ -665,7 +689,10 @@ window.addEventListener('keydown',e=>{
   e.preventDefault();
 
   if(mode==='playing'){
-   if(!held)press(e);
+   if(!held){
+    held=true;
+    jump();
+   }
   }else if(e.code==='Space'){
    start();
   }
@@ -673,7 +700,7 @@ window.addEventListener('keydown',e=>{
 });
 
 window.addEventListener('keyup',e=>{
- if(e.code==='Space'||e.code==='ArrowUp')release(e);
+ if(e.code==='Space'||e.code==='ArrowUp')held=false;
 });
 
 $('nickSave').addEventListener('click',()=>{
@@ -722,6 +749,7 @@ document.querySelectorAll('.level').forEach(b=>{
  b.addEventListener('click',()=>{
   selected=Number(b.dataset.level);
   refreshStats();
+  makeLevel();
   draw();
  });
 });
