@@ -15,7 +15,7 @@ button{cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-se
 button:active{transform:scale(.97)}
 .app{width:min(100%,1050px);margin:auto;padding:9px;display:flex;flex-direction:column;gap:8px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap}
-.logoSmall{font-weight:1000;letter-spacing:1.5px;color:#42eaff;font-size:18px;cursor:default;user-select:none;-webkit-user-select:none}
+.logoSmall{font-weight:1000;letter-spacing:1.5px;color:#42eaff;font-size:18px;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
 .stat{font-size:12px;color:#bad3ff;font-weight:bold}
 .meter{height:7px;background:#192344;border-radius:20px;overflow:hidden}
 #progressFill{height:100%;width:0;background:linear-gradient(90deg,#31dfff,#6dffb6)}
@@ -55,32 +55,29 @@ input,select{width:100%;padding:10px;background:#080f23;border:1px solid #34527f
 </head>
 <body>
 <main class="app">
- <header class="top">
-  <span class="logoSmall" id="gameLogo">KYO DASH</span>
-  <span class="stat" id="levelLabel">EASY</span>
-  <span class="stat" id="progressText">0%</span>
-  <button class="smallbtn" data-action="music" id="musicBtn">♫ MUSIC ON</button>
-  <button class="smallbtn" data-action="menu">MENU</button>
- </header>
- <div class="meter"><div id="progressFill"></div></div>
- <canvas id="game" width="900" height="420"></canvas>
- <div class="hint" id="hint">Тапни по экрану, чтобы прыгнуть · Удерживай для автопрыжка</div>
+<header class="top">
+<span class="logoSmall" id="gameLogo">KYO DASH</span>
+<span class="stat" id="levelLabel">EASY</span>
+<span class="stat" id="progressText">0%</span>
+<button class="smallbtn" data-action="music" id="musicBtn">♫ MUSIC ON</button>
+<button class="smallbtn" data-action="menu">MENU</button>
+</header>
+<div class="meter"><div id="progressFill"></div></div>
+<canvas id="game" width="900" height="420"></canvas>
+<div class="hint" id="hint">Тапни по экрану, чтобы прыгнуть · Удерживай для автопрыжка</div>
 </main>
-
 <div class="overlay" id="overlay">
- <section class="panel">
-  <h1 class="title" id="panelTitle">Kyo Dash</h1>
-  <p class="subtitle" id="panelSubtitle">BIG UPDATE · Прыгай, собирай награды и создавай уровни!</p>
-  <div id="panelContent"></div>
- </section>
+<section class="panel">
+<h1 class="title" id="panelTitle">Kyo Dash</h1>
+<p class="subtitle" id="panelSubtitle">BIG UPDATE · Прыгай, собирай награды и создавай уровни!</p>
+<div id="panelContent"></div>
+</section>
 </div>
 <div id="message"></div>
 <div id="errorBox"></div>
-
 <script>
 (function(){
 'use strict';
-
 var $=function(id){return document.getElementById(id)};
 var canvas=$('game'),ctx=canvas.getContext('2d');
 var overlay=$('overlay'),content=$('panelContent');
@@ -104,43 +101,38 @@ function requestOwnerAccess(){
   showOwnerPanel();
   return;
  }
-
  var pin=prompt('👑 Kyo Dash Owner Panel\nВведите PIN владельца:');
  if(pin===null)return;
-
  if(pin.trim()!==OWNER_PIN){
   alert('🚫 Неверный PIN');
   return;
  }
-
- try{
-  localStorage.setItem(OWNER_KEY,'yes');
- }catch(e){
-  alert('Не удалось сохранить доступ в этом браузере.');
- }
-
+ try{localStorage.setItem(OWNER_KEY,'yes')}
+ catch(e){alert('Не удалось сохранить доступ в этом браузере.')}
  ownerMode=true;
  showOwnerPanel();
 }
 
-$('gameLogo').addEventListener('click',function(){
+var gameLogo=$('gameLogo');
+gameLogo.addEventListener('contextmenu',function(e){e.preventDefault()});
+gameLogo.addEventListener('selectstart',function(e){e.preventDefault()});
+gameLogo.addEventListener('click',function(e){
+ e.preventDefault();
  logoClicks++;
  if(logoClickTimer)clearTimeout(logoClickTimer);
-
- logoClickTimer=setTimeout(function(){logoClicks=0},1800);
-
+ logoClickTimer=setTimeout(function(){logoClicks=0},2500);
  if(logoClicks>=7){
   logoClicks=0;
+  clearTimeout(logoClickTimer);
   requestOwnerAccess();
  }
 });
 
 var levels=[
- {name:'EASY',speed:285,jump:-555,gravity:1550,length:5700,gap:390},
- {name:'MEDIUM',speed:295,jump:-565,gravity:1600,length:6500,gap:350},
- {name:'HARD',speed:310,jump:-575,gravity:1650,length:7200,gap:330}
+{name:'EASY',speed:285,jump:-555,gravity:1550,length:5700,gap:390},
+{name:'MEDIUM',speed:295,jump:-565,gravity:1600,length:6500,gap:350},
+{name:'HARD',speed:310,jump:-575,gravity:1650,length:7200,gap:330}
 ];
-
 var profile={nickname:'Player',xp:0,coins:0};
 var selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
 var held=false,obstacles=[],particles=[],custom=[];
@@ -151,35 +143,31 @@ var p={x:150,y:G-CUBE,vy:0,angle:0,onGround:true};
 var musicEnabled=true,audioCtx=null,musicTimer=null,musicStep=0,musicGeneration=0;
 
 var songData=[
- {tempo:190,notes:[523,659,784,659,523,392,440,523,659,523,440,392,440,523,659,784,659,523,392,440,523,659,784,880,784,659,523,440,392,440,523,392],bass:[131,0,165,0,196,0,165,0],wave:'square'},
- {tempo:145,notes:[392,523,659,784,659,523,392,523,440,587,698,880,698,587,440,587,392,523,659,784,880,784,659,523,440,587,698,880,784,698,587,440],bass:[98,98,131,131,110,110,147,147],wave:'sawtooth'},
- {tempo:105,notes:[330,440,659,523,330,440,784,659,349,466,698,587,349,466,880,698,330,523,659,880,784,659,523,440,349,523,698,932,880,698,523,392],bass:[82,82,110,110,73,73,98,98],wave:'square'}
+{tempo:190,notes:[523,659,784,659,523,392,440,523,659,523,440,392,440,523,659,784,659,523,392,440,523,659,784,880,784,659,523,440,392,440,523,392],bass:[131,0,165,0,196,0,165,0],wave:'square'},
+{tempo:145,notes:[392,523,659,784,659,523,392,523,440,587,698,880,698,587,440,587,392,523,659,784,880,784,659,523,440,587,698,880,784,698,587,440],bass:[98,98,131,131,110,110,147,147],wave:'sawtooth'},
+{tempo:105,notes:[330,440,659,523,330,440,784,659,349,466,698,587,349,466,880,698,330,523,659,880,784,659,523,440,349,523,698,932,880,698,523,392],bass:[82,82,110,110,73,73,98,98],wave:'square'}
 ];
-
 var skinsData=[
- {id:'cyan',name:'Neon Cyan',price:0,color:'#35eaff',glow:'#00cfff'},
- {id:'fire',name:'Fire Cube',price:100,color:'#ff6748',glow:'#ff2d54'},
- {id:'lime',name:'Toxic Lime',price:150,color:'#a3ff3c',glow:'#64ff21'},
- {id:'purple',name:'Void Purple',price:200,color:'#bd79ff',glow:'#8d38ff'},
- {id:'gold',name:'Golden Star',price:350,color:'#ffd95a',glow:'#ffad20'},
- {id:'pink',name:'Pink Pulse',price:400,color:'#ff67cb',glow:'#ff30a4'}
+{id:'cyan',name:'Neon Cyan',price:0,color:'#35eaff',glow:'#00cfff'},
+{id:'fire',name:'Fire Cube',price:100,color:'#ff6748',glow:'#ff2d54'},
+{id:'lime',name:'Toxic Lime',price:150,color:'#a3ff3c',glow:'#64ff21'},
+{id:'purple',name:'Void Purple',price:200,color:'#bd79ff',glow:'#8d38ff'},
+{id:'gold',name:'Golden Star',price:350,color:'#ffd95a',glow:'#ffad20'},
+{id:'pink',name:'Pink Pulse',price:400,color:'#ff67cb',glow:'#ff30a4'}
 ];
 
 function isReservedNick(name){
  var n=String(name||'').trim().toUpperCase().replace(/[\s_\-\[\].]/g,'');
  return /^(DEV|MOD|MODER|OWNER|ADMIN|STAFF|DEVELOPER|HELPER|ВЛАДЕЛЕЦ|АДМИН|МОДЕРАТОР)/.test(n);
 }
-
 function currentSkin(){
  return skinsData.find(function(s){return s.id===skin})||skinsData[0];
 }
-
 function notify(msg){
  $('message').innerHTML='<span class="toast"></span>';
  $('message').firstChild.textContent=msg;
  setTimeout(function(){$('message').innerHTML=''},2300);
 }
-
 function readStore(){
  try{
   var d=JSON.parse(localStorage.getItem(STORE)||'{}');
@@ -200,7 +188,6 @@ function readStore(){
   }).slice(0,100);
  }catch(e){}
 }
-
 function save(){
  try{
   localStorage.setItem(STORE,JSON.stringify({
@@ -209,10 +196,9 @@ function save(){
   }));
  }catch(e){notify('Не удалось сохранить: проверь память браузера')}
 }
-
 function levelNum(){return Math.floor(profile.xp/250)+1}
 function xpNext(){return profile.xp%250}
-
+ 
 function profileHTML(){
  return '<div class="profile">'+
  '<div class="row"><b>Игрок: <span id="nickDisplay"></span></b><b>💰 <span id="coinDisplay"></span></b></div>'+
@@ -221,7 +207,6 @@ function profileHTML(){
  '<input id="nickInput" maxlength="16" placeholder="Новый ник">'+
  '<button class="btn secondary" data-action="nick">СОХРАНИТЬ НИК</button></div>';
 }
-
 function updateProfile(){
  var nick=$('nickDisplay'),coins=$('coinDisplay'),lev=$('accountLevel'),xp=$('xpDisplay'),fill=$('xpFill');
  if(nick){
@@ -233,7 +218,6 @@ function updateProfile(){
  if(xp)xp.textContent=xpNext();
  if(fill)fill.style.width=(xpNext()/250*100)+'%';
 }
-
 function shell(title,subtitle,html){
  $('panelTitle').textContent=title;
  $('panelSubtitle').textContent=subtitle||'';
@@ -241,7 +225,6 @@ function shell(title,subtitle,html){
  overlay.classList.remove('hidden');
  updateProfile();
 }
-
 function menu(){
  stopMusic();
  mode='menu';held=false;
@@ -249,7 +232,6 @@ function menu(){
  var lv=levels.map(function(l,i){
   return '<button class="level '+(i===selected?'active':'')+'" data-action="level" data-level="'+i+'">'+l.name+'<small>Рекорд '+best[i]+'%</small></button>';
  }).join('');
-
  shell('Kyo Dash','BIG UPDATE · Новые скины, достижения и редактор уровней',
  profileHTML()+
  '<div class="levels">'+lv+'</div>'+
@@ -260,13 +242,10 @@ function menu(){
  '<button class="btn secondary" data-action="editor">🛠 РЕДАКТОР</button>'+
  '<button class="btn secondary" data-action="daily">🎁 НАГРАДА ДНЯ</button>'+
  '<button class="btn secondary" data-action="stats">📊 СТАТИСТИКА</button>'+
- '</div>'+
- '<p class="muted">Прогресс хранится локально в этом браузере.</p>');
+ '</div><p class="muted">Прогресс хранится локально в этом браузере.</p>');
  refreshHud();draw();
 }
-
 function backButton(){return '<button class="btn secondary" data-action="menu">← В МЕНЮ</button>'}
-
 function showShop(){
  mode='menu';
  var html='<div class="grid">';
@@ -279,7 +258,6 @@ function showShop(){
  html+='</div>'+backButton();
  shell('Магазин скинов','Покупай кубики за монеты',html);
 }
-
 var achievementList=[
  {id:'first',name:'Первый прыжок',desc:'Начни играть в Kyo Dash',reward:25,check:function(){return profile.xp>0||wins.some(Boolean)}},
  {id:'win1',name:'Победитель',desc:'Пройди любой уровень',reward:50,check:function(){return wins.some(Boolean)}},
@@ -289,7 +267,6 @@ var achievementList=[
  {id:'editor',name:'Создатель',desc:'Сохрани собственный уровень',reward:50,check:function(){return custom.length>0}},
  {id:'skin',name:'Новый стиль',desc:'Открой дополнительный скин',reward:50,check:function(){return unlocked.length>=2}}
 ];
-
 function checkAchievements(){
  achievementList.forEach(function(a){
   if(!achieved[a.id]&&a.check()){
@@ -298,7 +275,6 @@ function checkAchievements(){
   }
  });
 }
-
 function showAchievements(){
  checkAchievements();
  var html='<div class="grid">';
@@ -309,30 +285,24 @@ function showAchievements(){
  html+='</div>'+backButton();
  shell('Достижения','Выполняй задания и получай монеты',html);
 }
-
 function dayKey(){
  var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
 }
-
 function daily(){
  mode='menu';var claimed=dailyClaim===dayKey();
  shell('Ежедневная награда','Заходи каждый день за бонусом',
  '<div class="card" style="text-align:center"><h3 style="font-size:27px">🎁 +75 монет</h3><p>Бонус можно забрать один раз в день на этом устройстве.</p><button class="btn" data-action="claim" '+(claimed?'disabled':'')+'>'+(claimed?'УЖЕ ПОЛУЧЕНО':'ЗАБРАТЬ НАГРАДУ')+'</button></div>'+backButton());
 }
-
 function claimDaily(){
  if(dailyClaim===dayKey()){notify('Награда уже получена сегодня');return}
  dailyClaim=dayKey();profile.coins+=75;save();checkAchievements();daily();updateProfile();notify('+75 монет!');
 }
-
 function showStats(){
  shell('Статистика','Твои результаты',
  '<div class="card"><h3>Прогресс</h3>'+
  levels.map(function(l,i){return '<p>'+l.name+': рекорд '+best[i]+'% · '+(wins[i]?'пройден':'не пройден')+'</p>'}).join('')+
  '<p>Победы: '+wins.filter(Boolean).length+'/3</p><p>Скинов открыто: '+unlocked.length+'/'+skinsData.length+'</p><p>Созданных объектов: '+custom.length+'</p></div>'+backButton());
 }
-
-/* Окно владельца открывается только после проверки доступа. */
 function showOwnerPanel(){
  if(!hasOwnerAccess()){ownerMode=false;return}
  ownerMode=true;
@@ -349,7 +319,6 @@ function showOwnerPanel(){
  '<button class="btn danger" data-action="revokeowner">Удалить доступ владельца на этом устройстве</button></div>'+backButton());
  updateProfile();
 }
-
 function showEditor(){
  mode='editor';held=false;stopMusic();editorTool='spike';
  shell('Редактор уровней','Выбери объект и нажимай на поле, чтобы расставлять элементы',
@@ -362,7 +331,6 @@ function showEditor(){
  obstacles=custom.map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type}});
  $('hint').textContent='Редактор: нажми на поле, чтобы поставить выбранный объект';draw();
 }
-
 function startEditorTest(){
  if(raf)cancelAnimationFrame(raf);
  obstacles=custom.map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type}});
@@ -370,9 +338,7 @@ function startEditorTest(){
  selected=0;world=0;progress=0;gravityFlip=false;resetPlayer();
  mode='playing';overlay.classList.add('hidden');last=performance.now();raf=requestAnimationFrame(loop);
 }
-
 function resetPlayer(){p.y=G-CUBE;p.vy=0;p.angle=0;p.onGround=true}
-
 function makeLevel(){
  obstacles=[];
  var cfg=levels[selected],x=510,i=0;
@@ -381,7 +347,6 @@ function makeLevel(){
   ['1','.','2','.','1','.','C','.','2','.','1','.','.','2','.','C','1','.','2','.'],
   ['2','.','1','.','C','.','2','.','1','.','3','.','C','.','2','.','1','.','C','.','2','.']
  ][selected];
-
  while(x<cfg.length-250){
   var symbol=pattern[i%pattern.length];
   if(symbol==='1'||symbol==='2'||symbol==='3'){
@@ -393,582 +358,467 @@ function makeLevel(){
  if(selected>0)for(i=0;i<2;i++)obstacles.push({x:1800+i*2050,w:35,h:110,type:'portal'});
  obstacles.push({x:cfg.length-110,w:12,h:80,type:'finish'});
 }
-
 function reset(){
  world=0;progress=0;held=false;gravityFlip=false;portalCooldown=0;particles=[];
  resetPlayer();makeLevel();refreshHud();
 }
-
 function refreshHud(){
  $('levelLabel').textContent=levels[selected].name;
  $('progressText').textContent=progress+'%';
  $('progressFill').style.width=progress+'%';
-}
-
+ }
+ 
 function initAudio(){
- if(audioCtx)return true;
- var AC=window.AudioContext||window.webkitAudioContext;
- if(!AC)return false;
- try{audioCtx=new AC();return true}catch(e){return false}
+ try{
+  if(!audioCtx){
+   var AC=window.AudioContext||window.webkitAudioContext;
+   if(AC)audioCtx=new AC();
+  }
+  if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
+ }catch(e){}
 }
 
-function tone(freq,duration,wave,volume){
- if(!audioCtx||!freq||!musicEnabled)return;
+function tone(freq,duration,type,volume){
+ if(!audioCtx)return;
  try{
   var osc=audioCtx.createOscillator();
   var gain=audioCtx.createGain();
-  var now=audioCtx.currentTime;
-  osc.type=wave||'square';
-  osc.frequency.setValueAtTime(freq,now);
-  gain.gain.setValueAtTime(.0001,now);
-  gain.gain.exponentialRampToValueAtTime(volume||.04,now+.012);
-  gain.gain.setTargetAtTime(.0001,now+duration*.6,Math.max(.015,duration*.15));
+  osc.type=type||'square';
+  osc.frequency.value=freq;
+  gain.gain.setValueAtTime(volume||0.035,audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+duration);
   osc.connect(gain);
   gain.connect(audioCtx.destination);
-  osc.start(now);
-  osc.stop(now+duration+.05);
-  osc.onended=function(){
-   try{osc.disconnect();gain.disconnect()}catch(e){}
-  };
+  osc.start();
+  osc.stop(audioCtx.currentTime+duration);
  }catch(e){}
 }
 
 function stopMusic(){
- musicGeneration++;
- if(musicTimer!==null){
+ musicPlaying=false;
+ if(musicTimer){
   clearInterval(musicTimer);
   musicTimer=null;
  }
+ updateMusicButton();
 }
 
 function musicTick(){
- if(!musicEnabled||mode!=='playing'||!audioCtx)return;
- var s=songData[selected];
- var beat=s.tempo/1000;
- var note=s.notes[musicStep%s.notes.length];
- if(note)tone(note,beat*.9,s.wave,.035);
-
- if(musicStep%4===0){
-  var bass=s.bass[Math.floor(musicStep/4)%s.bass.length];
-  if(bass)tone(bass,beat*1.8,'triangle',.05);
- }
- musicStep++;
+ if(!musicPlaying||!audioCtx)return;
+ var notes=[392,440,523,440,349,392,466,392];
+ tone(notes[musicBeat%notes.length],0.12,'square',0.018);
+ musicBeat++;
 }
 
 function startMusic(){
- stopMusic();
- if(!musicEnabled||mode!=='playing'||!initAudio())return;
- var gen=musicGeneration;
- musicStep=0;
-
- try{
-  var r=audioCtx.resume();
-  if(r&&r.catch)r.catch(function(){});
- }catch(e){}
-
- musicTick();
- musicTimer=setInterval(function(){
-  if(gen===musicGeneration)musicTick();
- },songData[selected].tempo);
+ initAudio();
+ musicPlaying=!musicPlaying;
+ if(musicPlaying){
+  musicTick();
+  musicTimer=setInterval(musicTick,180);
+ }else{
+  if(musicTimer)clearInterval(musicTimer);
+  musicTimer=null;
+ }
+ updateMusicButton();
 }
 
 function updateMusicButton(){
- $('musicBtn').textContent=musicEnabled?'♫ MUSIC ON':'♫ MUSIC OFF';
+ var b=$('musicBtn');
+ if(b)b.textContent=musicPlaying?'♫ Музыка: ВКЛ':'♫ Музыка: ВЫКЛ';
 }
 
 function start(){
- if(raf)cancelAnimationFrame(raf);
- reset();
- mode='playing';
+ initAudio();
+ if(gameState==='playing')return;
+ if(gameState==='dead'||gameState==='won')reset();
+ gameState='playing';
  overlay.classList.add('hidden');
- $('hint').textContent='ТАП — ПРЫЖОК · УДЕРЖИВАЙ — АВТОПРЫЖОК';
- last=performance.now();
- startMusic();
- raf=requestAnimationFrame(loop);
+ lastTime=performance.now();
+ requestAnimationFrame(loop);
 }
 
-function addParticle(x,y,color){
- for(var i=0;i<3;i++){
+function addParticle(x,y,color,count){
+ count=count||8;
+ for(var i=0;i<count;i++){
   particles.push({
    x:x,y:y,
-   vx:(Math.random()-.5)*160,
-   vy:(Math.random()-.7)*140,
-   life:.4,color:color
+   vx:(Math.random()-.5)*6,
+   vy:(Math.random()-.7)*6,
+   life:30+Math.random()*20,
+   max:50,
+   size:3+Math.random()*5,
+   color:color||'#56e8ff'
   });
  }
 }
 
 function jump(){
- if(mode!=='playing'||!p.onGround)return;
- var cfg=levels[selected];
- p.vy=gravityFlip?-cfg.jump:cfg.jump;
- p.onGround=false;
- addParticle(p.x+CUBE/2,p.y+CUBE,currentSkin().color);
+ if(gameState!=='playing')return;
+ if(!player.onGround)return;
+ player.vy=-10.5;
+ player.onGround=false;
+ player.rotation+=Math.PI/2;
+ tone(540,0.08,'square',0.025);
+ addParticle(player.x+player.size/2,G, '#56e8ff',4);
 }
 
 function die(){
- if(mode!=='playing')return;
- mode='dead';
- held=false;
- stopMusic();
- if(raf)cancelAnimationFrame(raf);
- raf=0;
- checkAchievements();
-
- shell('СТОЛКНОВЕНИЕ','Прогресс: '+progress+'%. Попробуй ещё раз!',
-  '<button class="btn" data-action="start">↻ ПОПРОБОВАТЬ ЕЩЁ</button>'+
-  '<button class="btn secondary" data-action="menu">В МЕНЮ</button>');
- draw();
+ if(gameState!=='playing')return;
+ gameState='dead';
+ profile.deaths=(profile.deaths||0)+1;
+ save();
+ addParticle(player.x+player.size/2,player.y+player.size/2,'#ff5577',22);
+ tone(120,0.3,'sawtooth',0.05);
+ showEndPanel(false);
 }
 
 function win(){
- if(mode!=='playing')return;
- mode='win';
- held=false;
- stopMusic();
-
- if(raf)cancelAnimationFrame(raf);
- raf=0;
- progress=100;
- best[selected]=100;
-
- if(!wins[selected]){
-  wins[selected]=true;
-  profile.xp+=[100,150,200][selected];
-  profile.coins+=[30,50,75][selected];
- }
-
+ if(gameState!=='playing')return;
+ gameState='won';
+ profile.wins=(profile.wins||0)+1;
+ profile.xp=(profile.xp||0)+100;
+ profile.stars=(profile.stars||0)+10;
+ profile.coins=(profile.coins||0)+25;
  save();
- checkAchievements();
- refreshHud();
+ tone(660,0.12,'square',0.04);
+ setTimeout(function(){tone(880,0.2,'square',0.04)},120);
+ showEndPanel(true);
+}
 
- shell('УРОВЕНЬ ПРОЙДЕН!','Ты завершил '+levels[selected].name+'!',
-  '<div class="card"><h3>🏆 Отличная работа!</h3><p>Награда за победу начислена.</p></div>'+
-  '<button class="btn" data-action="start">ИГРАТЬ СНОВА</button>'+
-  '<button class="btn secondary" data-action="menu">В МЕНЮ</button>');
- draw();
+function showEndPanel(won){
+ overlay.classList.remove('hidden');
+ content.innerHTML=
+  '<div class="panel-title">'+(won?'УРОВЕНЬ ПРОЙДЕН!':'СТОЛКНОВЕНИЕ!')+'</div>'+
+  '<p>'+(won?'⭐ +10 звёзд · 🪙 +25 монет · XP +100':'Попробуй ещё раз!')+'</p>'+
+  '<button class="primary" data-action="start">↻ Играть снова</button>'+
+  '<button data-action="levels">☰ Выбрать уровень</button>'+
+  '<button data-action="menu">⌂ Главное меню</button>';
 }
 
 function update(dt){
- if(mode!=='playing')return;
- var cfg=levels[selected];
- world+=cfg.speed*dt;
- p.vy+=cfg.gravity*(gravityFlip?-1:1)*dt;
- p.y+=p.vy*dt;
+ if(gameState!=='playing')return;
 
- if(!gravityFlip&&p.y>=G-CUBE){
-  p.y=G-CUBE;
-  p.vy=0;
-  p.onGround=true;
-  p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
-  if(held)jump();
- }else if(gravityFlip&&p.y<=20){
-  p.y=20;
-  p.vy=0;
-  p.onGround=true;
-  p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
-  if(held)jump();
- }else{
-  p.onGround=false;
-  p.angle+=cfg.speed*dt/CUBE*(Math.PI/2);
+ var step=dt/16.67;
+ var speed=levels[selected].speed||5;
+ worldX+=speed*step;
+ player.vy+=0.58*step;
+ player.y+=player.vy*step;
+
+ if(player.y+player.size>=G){
+  player.y=G-player.size;
+  player.vy=0;
+  player.onGround=true;
  }
 
- if(portalCooldown>0)portalCooldown-=dt;
- progress=Math.min(100,Math.floor(world/(cfg.length-110)*100));
- refreshHud();
-
- if(progress>best[selected]){
-  best[selected]=progress;
-  save();
+ if(holding&&player.onGround){
+  jump();
  }
 
+ var obstacles=levels[selected].obstacles||[];
  for(var i=0;i<obstacles.length;i++){
-  var o=obstacles[i],ox=o.x-world;
-  if(ox>p.x+100||ox+o.w<p.x-80)continue;
+  var o=obstacles[i];
+  var ox=o.x-worldX+cameraX;
+  if(ox<-100||ox>W+100)continue;
 
-  if(o.type==='finish'){
-   if(ox<p.x+CUBE*.6){win();return}
-   continue;
-  }
+  var px=player.x,py=player.y,ps=player.size;
+  var hitX=px+ps>ox+5&&px<ox+o.w-5;
+  var hitY=py+ps>G-o.h+8;
 
-  if(o.type==='portal'){
-   if(portalCooldown<=0&&ox<p.x+CUBE&&ox+o.w>p.x){
-    gravityFlip=!gravityFlip;
-    portalCooldown=.7;
-    p.vy=0;
-    p.onGround=false;
-    addParticle(p.x+CUBE/2,p.y,'#bd79ff');
-   }
-   continue;
-  }
-
-  var px1=p.x+5,px2=p.x+CUBE-5;
-  var py1=p.y+5,py2=p.y+CUBE-3;
-
-  if(o.type==='block'){
-   if(px2>ox&&px1<ox+o.w&&py2>G-o.h&&py1<G){
-    die();
-    return;
-   }
-   continue;
-  }
-
-  var left=Math.max(px1,ox);
-  var right=Math.min(px2,ox+o.w);
-  if(left>=right)continue;
-
-  var center=ox+o.w/2;
-  var sx=Math.max(ox,Math.min(center,(left+right)/2));
-  var surfaceY=G-o.h*(1-Math.abs(sx-center)/(o.w/2));
-
-  if(py2>surfaceY+2&&py1<G){
+  if(hitX&&hitY){
    die();
    return;
   }
  }
 
- for(i=particles.length-1;i>=0;i--){
-  var part=particles[i];
-  part.x+=part.vx*dt;
-  part.y+=part.vy*dt;
-  part.life-=dt;
-  if(part.life<=0)particles.splice(i,1);
+ var finish=levels[selected].length||5000;
+ progress=Math.min(100,Math.floor(worldX/finish*100));
+ refreshHud();
+
+ for(var j=particles.length-1;j>=0;j--){
+  var p=particles[j];
+  p.x+=p.vx*step;
+  p.y+=p.vy*step;
+  p.vy+=0.12*step;
+  p.life-=step;
+  if(p.life<=0)particles.splice(j,1);
  }
+
+ if(worldX>=finish)win();
 }
 
 function draw(){
  ctx.clearRect(0,0,W,H);
- var grad=ctx.createLinearGradient(0,0,0,H);
- grad.addColorStop(0,'#101d43');
- grad.addColorStop(1,'#080e24');
- ctx.fillStyle=grad;
+
+ var bg=ctx.createLinearGradient(0,0,0,H);
+ bg.addColorStop(0,'#101a3b');
+ bg.addColorStop(1,'#24123f');
+ ctx.fillStyle=bg;
  ctx.fillRect(0,0,W,H);
 
- ctx.strokeStyle='#20355f';
+ ctx.strokeStyle='rgba(95,220,255,.12)';
  ctx.lineWidth=1;
- var off=-(world*.3%45);
-
- for(var x=off;x<W;x+=45){
+ for(var gx=0;gx<W;gx+=40){
   ctx.beginPath();
-  ctx.moveTo(x,0);
-  ctx.lineTo(x,G);
+  ctx.moveTo(gx,0);
+  ctx.lineTo(gx,H);
+  ctx.stroke();
+ }
+ for(var gy=10;gy<H;gy+=40){
+  ctx.beginPath();
+  ctx.moveTo(0,gy);
+  ctx.lineTo(W,gy);
   ctx.stroke();
  }
 
- for(var y=22;y<G;y+=45){
-  ctx.beginPath();
-  ctx.moveTo(0,y);
-  ctx.lineTo(W,y);
-  ctx.stroke();
- }
-
- ctx.fillStyle='#14264c';
+ ctx.fillStyle='#17264b';
  ctx.fillRect(0,G,W,H-G);
- ctx.fillStyle='#35eaff';
+ ctx.fillStyle='#56e8ff';
  ctx.fillRect(0,G,W,4);
 
- for(x=-(world%50);x<W;x+=50){
-  ctx.fillStyle='#2b4779';
-  ctx.fillRect(x,G+16,25,4);
+ var obstacles=levels[selected].obstacles||[];
+ for(var i=0;i<obstacles.length;i++){
+  var o=obstacles[i];
+  var ox=o.x-worldX+cameraX;
+  if(ox<-80||ox>W+80)continue;
+
+  ctx.fillStyle='#ff5577';
+  ctx.beginPath();
+  ctx.moveTo(ox,G);
+  ctx.lineTo(ox+o.w/2,G-o.h);
+  ctx.lineTo(ox+o.w,G);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle='#ffd2df';
+  ctx.lineWidth=2;
+  ctx.stroke();
  }
 
- if(gravityFlip){
-  ctx.fillStyle='#bd79ff';
-  ctx.fillRect(0,0,W,4);
+ var finishX=(levels[selected].length||5000)-worldX+cameraX;
+ if(finishX>-50&&finishX<W+50){
+  ctx.fillStyle='#ffe66d';
+  ctx.fillRect(finishX,G-100,5,100);
+  ctx.fillStyle='#ffe66d';
+  ctx.beginPath();
+  ctx.moveTo(finishX+5,G-100);
+  ctx.lineTo(finishX+42,G-87);
+  ctx.lineTo(finishX+5,G-74);
+  ctx.closePath();
+  ctx.fill();
  }
 
- obstacles.forEach(function(o){
-  var ox=o.x-world;
-  if(ox<-100||ox>W+100)return;
-
-  if(o.type==='spike'){
-   ctx.fillStyle=selected===2?'#ff3d8c':selected===1?'#ff7868':'#ff4d83';
-   ctx.beginPath();
-   ctx.moveTo(ox,G);
-   ctx.lineTo(ox+o.w/2,G-o.h);
-   ctx.lineTo(ox+o.w,G);
-   ctx.closePath();
-   ctx.fill();
-   ctx.strokeStyle='#ffd0e0';
-   ctx.lineWidth=2;
-   ctx.stroke();
-  }else if(o.type==='block'){
-   ctx.fillStyle='#42dfff';
-   ctx.fillRect(ox,G-o.h,o.w,o.h);
-   ctx.strokeStyle='#d4fbff';
-   ctx.strokeRect(ox,G-o.h,o.w,o.h);
-  }else if(o.type==='portal'){
-   ctx.strokeStyle='#c18aff';
-   ctx.lineWidth=7;
-   ctx.beginPath();
-   ctx.ellipse(ox+o.w/2,G-o.h/2,o.w/2,o.h/2,0,0,Math.PI*2);
-   ctx.stroke();
-  }else if(o.type==='finish'){
-   ctx.fillStyle='#4dffb4';
-   ctx.fillRect(ox,G-o.h,8,o.h);
-   ctx.fillStyle='#e6fff5';
-   ctx.font='bold 18px Arial';
-   ctx.fillText('FINISH',ox-26,G-o.h-12);
-  }
- });
-
- particles.forEach(function(q){
-  ctx.globalAlpha=Math.max(0,q.life/.4);
-  ctx.fillStyle=q.color;
-  ctx.fillRect(q.x,q.y,5,5);
- });
+ for(var j=0;j<particles.length;j++){
+  var p=particles[j];
+  ctx.globalAlpha=Math.max(0,p.life/p.max);
+  ctx.fillStyle=p.color;
+  ctx.fillRect(p.x,p.y,p.size,p.size);
+ }
  ctx.globalAlpha=1;
 
- var s=currentSkin();
- ctx.save();
- ctx.translate(p.x+CUBE/2,p.y+CUBE/2);
- ctx.rotate(p.angle);
- ctx.shadowColor=s.glow;
- ctx.shadowBlur=17;
- ctx.fillStyle=s.color;
- ctx.fillRect(-CUBE/2,-CUBE/2,CUBE,CUBE);
- ctx.shadowBlur=0;
- ctx.strokeStyle='#ffffffd9';
- ctx.lineWidth=3;
- ctx.strokeRect(-CUBE/2+2,-CUBE/2+2,CUBE-4,CUBE-4);
- ctx.fillStyle='#0a2041';
- ctx.fillRect(-9,-7,5,7);
- ctx.fillRect(4,-7,5,7);
- ctx.restore();
+ if(gameState==='playing'||gameState==='ready'){
+  ctx.save();
+  ctx.translate(player.x+player.size/2,player.y+player.size/2);
+  ctx.rotate(player.rotation);
+  ctx.fillStyle=currentSkin().color||'#56e8ff';
+  ctx.fillRect(-player.size/2,-player.size/2,player.size,player.size);
+  ctx.strokeStyle='#ffffff';
+  ctx.lineWidth=2;
+  ctx.strokeRect(-player.size/2,-player.size/2,player.size,player.size);
+  ctx.fillStyle='#10203a';
+  ctx.fillRect(-8,-5,5,5);
+  ctx.fillRect(3,-5,5,5);
+  ctx.restore();
+ }
+
+ if(gameState==='playing'&&holding&&player.onGround){
+  // Удержание экрана включает автопрыжок.
+ }
 }
 
 function loop(now){
- var dt=Math.min((now-last)/1000,.025);
- last=now;
+ if(gameState!=='playing'){
+  draw();
+  return;
+ }
+ var dt=Math.min(34,now-lastTime||16.67);
+ lastTime=now;
  update(dt);
  draw();
- if(mode==='playing')raf=requestAnimationFrame(loop);
- else raf=0;
+ if(gameState==='playing')requestAnimationFrame(loop);
 }
 
 function action(name,b){
- if(name==='nick'){
-  var input=$('nickInput');
-  var v=input?input.value.trim():'';
-
-  if(ownerMode){
-   profile.nickname='[DEV] Kyosuke';
-   save();
-   updateProfile();
-   notify('Радужный ник владельца установлен');
-   return;
-  }
-
-  if(v.length<2){notify('Ник должен содержать хотя бы 2 символа');return}
-  if(isReservedNick(v)){notify('Этот ник зарезервирован для администрации');return}
-  profile.nickname=v.slice(0,16);
-  save();
-  updateProfile();
-  notify('Ник сохранён');
+ if(name==='start'){
+  start();
   return;
  }
-
  if(name==='menu'){
-  if(raf)cancelAnimationFrame(raf);
-  raf=0;
+  stopMusic();
   menu();
   return;
  }
-
- if(name==='start'){start();return}
-
- if(name==='music'){
-  musicEnabled=!musicEnabled;
-  updateMusicButton();
-  if(musicEnabled&&mode==='playing')startMusic();
-  else stopMusic();
+ if(name==='levels'){
+  showLevels();
   return;
  }
-
- if(name==='level'){
-  var n=Number(b.dataset.level);
-  if(n<0||n>2||!Number.isInteger(n))return;
-  selected=n;
-  menu();
-  return;
- }
-
- if(name==='shop'){showShop();return}
- if(name==='achievements'){showAchievements();return}
- if(name==='stats'){showStats();return}
- if(name==='daily'){daily();return}
- if(name==='claim'){claimDaily();return}
-
- if(name==='buy'||name==='equip'){
-  var id=b.dataset.skin;
-  var s=skinsData.find(function(q){return q.id===id});
-  if(!s)return;
-
-  if(name==='buy'){
-   if(unlocked.indexOf(id)>=0)skin=id;
-   else if(profile.coins>=s.price){
-    profile.coins-=s.price;
-    unlocked.push(id);
-    skin=id;
-    notify('Скин открыт!');
-   }else{notify('Не хватает монет');return}
-  }else skin=id;
-
-  save();
+ if(name==='shop'){
   showShop();
-  checkAchievements();
   return;
  }
-
- if(name==='noop')return;
- if(name==='editor'){showEditor();return}
-
- if(name==='tool'){
-  editorTool=b.dataset.tool;
-  document.querySelectorAll('[data-action="tool"]').forEach(function(el){
-   el.classList.toggle('active',el===b);
-  });
+ if(name==='stats'){
+  showStats();
   return;
  }
-
- if(name==='editorleft'){world=Math.max(0,world-300);draw();return}
- if(name==='editorright'){world+=300;draw();return}
-
- if(name==='savelevel'){
-  custom=obstacles.filter(function(o){
-   return ['spike','block','portal'].includes(o.type);
-  }).map(function(o){return {x:o.x,w:o.w,h:o.h,type:o.type}});
-  save();
-  checkAchievements();
-  notify('Уровень сохранён!');
+ if(name==='achievements'){
+  showAchievements();
   return;
  }
-
- if(name==='testlevel'){startEditorTest();return}
-
- if(name==='clearlevel'){
-  obstacles=[];
-  custom=[];
-  world=0;
-  save();
-  draw();
-  notify('Объекты удалены');
+ if(name==='daily'){
+  claimDaily();
   return;
  }
-
- if(name==='owner'){requestOwnerAccess();return}
-
- if(['grant','unlockall','resetstats','owneroff','revokeowner'].includes(name)&&!hasOwnerAccess()){
-  ownerMode=false;
-  notify('Нет доступа владельца');
+ if(name==='music'){
+  startMusic();
+  return;
+ }
+ if(name==='profile'){
+  updateProfile();
+  return;
+ }
+ if(name==='editor'){
+  showEditor();
+  return;
+ }
+ if(name==='testeditor'){
+  startEditorTest();
+  return;
+ }
+ if(name==='back'){
   menu();
   return;
  }
+ if(name==='retry'){
+  reset();
+  start();
+  return;
+ }
 
- if(name==='grant'){
-  if(!ownerMode)return;
-  profile.coins+=500;
-  profile.xp+=250;
+ if(name==='owneroff'){
+  ownerMode=false;
+  menu();
+  return;
+ }
+ if(name==='revokeowner'){
+  try{localStorage.removeItem(OWNER_KEY)}catch(e){}
+  ownerMode=false;
+  profile.nick='Player';
   save();
-  updateProfile();
-  notify('Добавлено!');
+  menu();
+  notify('Доступ владельца отключён');
   return;
  }
 
  if(name==='unlockall'){
-  if(!ownerMode)return;
-  unlocked=skinsData.map(function(s){return s.id});
+  if(!hasOwnerAccess()){notify('Нет доступа');return}
+  levels.forEach(function(l){l.unlocked=true});
   save();
-  updateProfile();
-  notify('Все скины открыты');
+  showOwnerPanel();
+  notify('Уровни открыты');
   return;
  }
-
  if(name==='resetstats'){
-  if(!ownerMode)return;
-  best=[0,0,0];
-  wins=[false,false,false];
+  if(!hasOwnerAccess()){notify('Нет доступа');return}
+  profile.xp=0;
+  profile.stars=0;
+  profile.coins=0;
+  profile.wins=0;
+  profile.deaths=0;
   save();
-  notify('Рекорды сброшены');
+  showOwnerPanel();
+  notify('Статистика сброшена');
   return;
  }
-
- if(name==='owneroff'){ownerMode=false;menu();return}
-
- if(name==='revokeowner'){
-  try{localStorage.removeItem(OWNER_KEY)}catch(e){}
-  ownerMode=false;
-  profile.nickname='Player';
+ if(name==='grant'){
+  if(!hasOwnerAccess()){notify('Нет доступа');return}
+  var amount=Number($('grantAmount')&&$('grantAmount').value)||0;
+  var kind=$('grantKind')&&$('grantKind').value||'stars';
+  amount=Math.max(0,Math.min(1000000,Math.floor(amount)));
+  if(kind==='stars')profile.stars=(profile.stars||0)+amount;
+  else if(kind==='coins')profile.coins=(profile.coins||0)+amount;
+  else if(kind==='xp')profile.xp=(profile.xp||0)+amount;
   save();
-  menu();
-  notify('Доступ владельца удалён');
+  showOwnerPanel();
+  notify('Начислено: '+amount);
+  return;
+ }
+ if(name==='savelevel'){
+  save();
+  notify('Сохранено');
   return;
  }
 }
 
 function clickHandler(e){
- var b=e.target.closest&&e.target.closest('[data-action]');
- if(!b||b.disabled)return;
+ var b=e.target.closest('[data-action]');
+ if(!b)return;
  e.preventDefault();
- try{action(b.dataset.action,b)}
- catch(err){showError(err)}
+ action(b.getAttribute('data-action'),b);
 }
 
-document.addEventListener('click',clickHandler,true);
+document.addEventListener('click',clickHandler);
+
+var holding=false;
+var holdPointer=null;
 
 function press(e){
- if(mode==='editor'){
-  var rect=canvas.getBoundingClientRect();
-  var cx=(e.clientX-rect.left)*W/rect.width;
-  var wx=world+cx;
-
-  if(editorTool==='spike')obstacles.push({x:Math.round(wx/34)*34,w:34,h:40,type:'spike'});
-  else if(editorTool==='block')obstacles.push({x:Math.round(wx/34)*34,w:40,h:65,type:'block'});
-  else obstacles.push({x:Math.round(wx/34)*34,w:35,h:110,type:'portal'});
-
-  draw();
-  return;
+ if(e&&e.target&&e.target.closest&&e.target.closest('button'))return;
+ if(gameState!=='playing')return;
+ holding=true;
+ holdPointer=e.pointerId;
+ if(e.pointerId!==undefined&&canvas.setPointerCapture){
+  try{canvas.setPointerCapture(e.pointerId)}catch(err){}
  }
-
- if(mode!=='playing')return;
- if(e.cancelable)e.preventDefault();
- if(!held){held=true;jump()}
+ if(player.onGround)jump();
 }
 
 function release(e){
- held=false;
- if(e&&e.cancelable)e.preventDefault();
+ holding=false;
+ holdPointer=null;
 }
 
-canvas.addEventListener('pointerdown',press,{passive:false});
-window.addEventListener('pointerup',release);
-window.addEventListener('pointercancel',release);
-window.addEventListener('blur',release);
+canvas.addEventListener('pointerdown',press);
+canvas.addEventListener('pointerup',release);
+canvas.addEventListener('pointercancel',release);
+canvas.addEventListener('pointerleave',release);
 
 window.addEventListener('keydown',function(e){
  if(e.code==='Space'||e.code==='ArrowUp'){
   e.preventDefault();
-  if(mode==='playing'){if(!held){held=true;jump()}}
-  else if(mode==='menu')start();
+  if(gameState!=='playing')start();
+  else if(player.onGround)jump();
  }
 });
-
 window.addEventListener('keyup',function(e){
- if(e.code==='Space'||e.code==='ArrowUp')held=false;
+ if(e.code==='Space'||e.code==='ArrowUp')release(e);
 });
 
-function showError(err){
- var box=$('errorBox');
- box.style.display='block';
- box.textContent='Ошибка игры: '+(err&&err.message?err.message:String(err));
+function showError(message){
+ try{
+  var el=$('errorMessage');
+  if(el){
+   el.textContent='Ошибка: '+message;
+   el.style.display='block';
+  }
+ }catch(e){}
 }
 
 window.addEventListener('error',function(e){
- showError(e.error||e.message||'Неизвестная ошибка');
+ showError(e.message||'неизвестная ошибка');
 });
 
 window.addEventListener('unhandledrejection',function(e){
- showError(e.reason||'Ошибка Promise');
+ showError(e.reason&&e.reason.message?e.reason.message:String(e.reason||'ошибка'));
 });
 
 readStore();
@@ -980,3 +830,4 @@ menu();
 </script>
 </body>
 </html>
+ 
