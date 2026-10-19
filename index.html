@@ -1,1298 +1,1098 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#080d22">
 <title>Kyo Dash — Big Update</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden}
-body{
-  background:#080d22;color:#fff;
-  font-family:Arial,Helvetica,sans-serif;
-  user-select:none;-webkit-user-select:none;
-  touch-action:manipulation
-}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#070b1c;color:#fff;font-family:Arial,sans-serif}
+body{touch-action:manipulation}
 button,input,select{font:inherit}
-button{
-  border:2px solid #55eaff;border-radius:12px;
-  padding:12px 16px;color:white;font-weight:bold;
-  background:linear-gradient(135deg,#182d63,#111735);
-  cursor:pointer;box-shadow:0 0 12px #00cfff35
-}
-button:active{transform:scale(.96)}
-button:disabled{opacity:.4}
+button{cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+button:active{transform:scale(.97)}
+.app{width:min(100%,1050px);margin:auto;padding:9px;display:flex;flex-direction:column;gap:8px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap}
+.logoSmall{font-weight:1000;letter-spacing:1.5px;color:#42eaff;font-size:18px;cursor:default;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+.stat{font-size:12px;color:#bad3ff;font-weight:bold}
+.meter{height:7px;background:#192344;border-radius:20px;overflow:hidden}
+#progressFill{height:100%;width:0;background:linear-gradient(90deg,#31dfff,#6dffb6)}
+canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px solid #2d4c80;border-radius:12px;background:#0a1230;touch-action:none}
+.hint{text-align:center;color:#91a8d4;font-size:11px;min-height:14px}
+.smallbtn{padding:8px 10px;border:1px solid #304a77;background:#121e3c;color:#cce9ff;border-radius:9px;font-size:11px;font-weight:bold}
+.overlay{position:fixed;inset:0;z-index:5;background:#030614ed;display:flex;align-items:center;justify-content:center;padding:10px}
+.panel{width:min(96vw,500px);max-height:95dvh;overflow:auto;background:linear-gradient(145deg,#172750,#090f25);border:1px solid #315a91;border-radius:20px;padding:18px;text-align:center;box-shadow:0 0 45px #12295b66}
+.title{font-size:clamp(30px,9vw,47px);margin:0;color:#41e9ff;letter-spacing:1px;text-shadow:0 0 20px #1bcfff55}
+.subtitle{font-size:13px;color:#b4c8ed;line-height:1.5}
+.profile{padding:12px;margin:12px 0;background:#0b1530;border:1px solid #2b4776;border-radius:13px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+.levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:12px 0}
+.btn{width:100%;padding:12px 8px;background:linear-gradient(90deg,#25dfff,#67ffc5);color:#061327;border:0;border-radius:10px;font-weight:900;margin:3px 0}
+.secondary{background:#142343;border:1px solid #34517f;color:#d9e9ff}
+.danger{background:#48203b;color:#ffcbde;border:1px solid #8d416c}
+.level{background:#111c38;border:1px solid #30466f;color:#e1edff;border-radius:9px;padding:10px 3px;font-weight:900}
+.level.active{border-color:#3be9ff;background:#12314c;box-shadow:inset 0 0 12px #26dfff18}
+.level small{display:block;font-size:9px;margin-top:5px;color:#a9c9f4}
+.card{background:#0b1530;border:1px solid #2a426c;border-radius:12px;padding:11px;text-align:left;min-width:0}
+.card h3{font-size:14px;margin:0 0 7px;color:#58e9ff}
+.card p{font-size:12px;color:#b6c9eb;line-height:1.4;margin:5px 0}
+.muted{color:#8fa8d5;font-size:11px}
+input,select{width:100%;padding:10px;background:#080f23;border:1px solid #34527f;color:white;border-radius:9px;margin:5px 0}
+.xpbar{height:6px;background:#243353;border-radius:20px;overflow:hidden;margin-top:7px}
+#xpFill{height:100%;width:0;background:linear-gradient(90deg,#34dfff,#63ffb3)}
 .hidden{display:none!important}
-#app{height:100%;width:100%;position:relative}
-.screen{
-  position:absolute;inset:0;overflow-y:auto;
-  padding:18px 14px 28px;
-  background:radial-gradient(ellipse at top,#17275a,#080d22 70%)
-}
-h1,h2,h3,p{margin:8px 0}
-h1{text-align:center;font-size:clamp(30px,8vw,48px)}
-h2{text-align:center;color:#65f4ff}
-.subtitle{text-align:center;color:#9db5df}
-.panel{
-  background:#111a38eF;border:1px solid #314c87;
-  border-radius:16px;padding:14px;margin:12px 0
-}
-.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-.row>*{flex:1}
-.center{text-align:center}
-.small{font-size:12px;color:#a6b9dd}
-.coins{color:#ffdf57;font-weight:bold}
-.xp{color:#65f4ff;font-weight:bold}
-.menu-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
-.menu-buttons button{min-height:52px}
-.primary{background:linear-gradient(135deg,#0878ff,#642cff)}
-.green{border-color:#55ffad}
-.red{border-color:#ff617f}
-.gold{border-color:#ffd95b}
-.purple{border-color:#c18aff}
-.rainbow{
-  background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,violet,red);
-  background-size:300% 100%;background-clip:text;
-  -webkit-background-clip:text;color:transparent;
-  animation:rainbow 3s linear infinite;font-weight:900
-}
-@keyframes rainbow{to{background-position:300% 0}}
-#topBar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.stat{padding:8px 10px;border-radius:10px;background:#18244a}
-#gameScreen{padding:0;background:#080d22;overflow:hidden}
-#gameCanvas{display:block;width:100%;height:100%;touch-action:none}
-#gameHUD{
-  position:absolute;top:10px;left:10px;right:10px;
-  display:flex;align-items:center;justify-content:space-between;
-  gap:8px;pointer-events:none
-}
-#gameHUD button{pointer-events:auto;padding:8px 12px}
-#progressWrap{
-  position:absolute;top:58px;left:10%;width:80%;height:10px;
-  border:1px solid #b3f8ff;border-radius:10px;
-  background:#17213d;overflow:hidden
-}
-#progressBar{height:100%;width:0;background:#50f3ff}
-#gameMessage{
-  position:absolute;left:10%;right:10%;top:40%;
-  text-align:center;font-size:24px;font-weight:bold;
-  text-shadow:0 0 12px #00d9ff;pointer-events:none
-}
-#gameActions{
-  position:absolute;left:8px;right:8px;bottom:12px;
-  display:flex;justify-content:center;gap:10px
-}
-#gameActions button{pointer-events:auto}
-.card-grid{
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px
-}
-.card{
-  background:#182346;border:1px solid #354d82;
-  border-radius:14px;padding:12px;text-align:center
-}
-.skin-preview{
-  width:42px;height:42px;margin:6px auto;
-  border:3px solid white;border-radius:5px;
-  box-shadow:0 0 14px #55eaff
-}
-.locked{filter:grayscale(1);opacity:.6}
-input,select{
-  min-width:0;max-width:100%;padding:11px;
-  border-radius:10px;border:1px solid #48649b;
-  background:#080f28;color:white
-}
-#toast{
-  position:absolute;z-index:50;bottom:25px;left:8%;width:84%;
-  padding:13px;border-radius:12px;text-align:center;
-  background:#152b52;border:1px solid #5deaff;
-  display:none
-}
-#modal{
-  position:absolute;z-index:40;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  padding:18px;background:#000b
-}
-#modalBox{
-  width:min(440px,100%);max-height:85vh;overflow:auto;
-  background:#101a39;border:2px solid #55eaff;
-  border-radius:18px;padding:18px
-}
-#modalContent{margin:12px 0}
-#editorCanvas{
-  width:100%;height:220px;background:#070c1c;
-  border:1px solid #3e5b91;border-radius:10px
-}
-@media(max-width:380px){
-  .menu-buttons{grid-template-columns:1fr}
-  .screen{padding-left:10px;padding-right:10px}
-}
+.rainbow{font-weight:1000;background:linear-gradient(90deg,#ff5478,#ffd94e,#56ffac,#42dfff,#c274ff,#ff5478);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rainbow 3s linear infinite}
+@keyframes rainbow{to{background-position:300% 50%}}
+#message{position:fixed;z-index:20;top:12px;left:10px;right:10px;text-align:center;pointer-events:none}
+.toast{display:inline-block;padding:10px 14px;border-radius:10px;background:#17294c;border:1px solid #42eaff;color:white;font-size:13px;box-shadow:0 6px 30px #0008}
+#errorBox{display:none;position:fixed;z-index:30;bottom:5px;left:5px;right:5px;padding:12px;border-radius:10px;background:#681e32;color:#fff;font-size:12px;overflow-wrap:anywhere}
+@media(max-width:440px){.app{padding:5px;gap:5px}.logoSmall{font-size:15px}.smallbtn{padding:7px;font-size:10px}.panel{padding:13px}.card{padding:8px}}
+@media(max-height:560px){.app{gap:4px;padding:4px}.panel{padding:10px;max-height:98dvh}.profile{padding:7px;margin:7px 0}.grid,.levels{gap:5px;margin:7px 0}.title{font-size:29px}}
 </style>
 </head>
 <body>
-<div id="app">
+<main class="app">
+ <header class="top">
+  <span class="logoSmall" id="gameLogo">KYO DASH</span>
+  <span class="stat" id="levelLabel">EASY</span>
+  <span class="stat" id="progressText">0%</span>
+  <button class="smallbtn" data-action="music" id="musicBtn">♫ MUSIC ON</button>
+  <button class="smallbtn" data-action="menu">MENU</button>
+ </header>
+ <div class="meter"><div id="progressFill"></div></div>
+ <canvas id="game" width="900" height="420"></canvas>
+ <div class="hint" id="hint">Тапни по экрану, чтобы прыгнуть · Удерживай для автопрыжка</div>
+</main>
 
-<!-- ГЛАВНОЕ МЕНЮ -->
-<section id="menuScreen" class="screen">
-  <h1 id="gameTitle">Kyo Dash</h1>
-  <p class="subtitle">BIG UPDATE • Jump • Dodge • Win</p>
-
-  <div class="panel">
-    <div id="topBar">
-      <div class="stat">👤 <span id="nickname">Player</span></div>
-      <div class="stat coins">🪙 <span id="coinCount">0</span></div>
-      <div class="stat xp">⭐ XP: <span id="xpCount">0</span></div>
-    </div>
-    <div class="row" style="margin-top:12px">
-      <input id="nicknameInput" maxlength="18" placeholder="Твой ник">
-      <button id="saveNickBtn">Сохранить ник</button>
-    </div>
-  </div>
-
-  <div class="panel">
-    <h3 class="center">🎮 Выбери уровень</h3>
-    <div class="row">
-      <button class="levelBtn green" data-level="0">Easy</button>
-      <button class="levelBtn gold" data-level="1">Medium</button>
-      <button class="levelBtn red" data-level="2">Hard</button>
-    </div>
-    <p class="small center" id="selectedLevelText">Выбран уровень: Easy</p>
-    <button id="playBtn" class="primary" style="width:100%;font-size:20px">▶ ИГРАТЬ</button>
-  </div>
-
-  <div class="menu-buttons">
-    <button id="shopBtn">🛒 Магазин</button>
-    <button id="statsBtn">📊 Статистика</button>
-    <button id="achievementsBtn">🏆 Достижения</button>
-    <button id="dailyBtn">🎁 Награда дня</button>
-    <button id="editorBtn">🧱 Редактор уровней</button>
-    <button id="musicBtn">🎵 Музыка: ВКЛ</button>
-  </div>
-
-  <div class="panel">
-    <h3 class="center">🔐 Доступ</h3>
-    <div class="row">
-      <button id="ownerLoginBtn" class="gold">🔐 ВХОД ВЛАДЕЛЬЦА</button>
-      <button id="testerLoginBtn" class="purple">🧪 TESTER MODE</button>
-    </div>
-    <p class="small center">Служебные режимы доступны только по PIN-коду.</p>
-  </div>
-
-  <div id="ownerStatus" class="panel hidden">
-    <h3 class="center rainbow">[DEV] Kyosuke</h3>
-    <p class="center">OWNER MODE АКТИВЕН</p>
-    <button id="ownerPanelBtn" class="gold" style="width:100%">⚙️ Панель владельца</button>
-    <button id="ownerOffBtn" style="width:100%;margin-top:8px">Выключить Owner Mode</button>
-  </div>
-
-  <div id="testerStatus" class="panel hidden">
-    <h3 class="center">🧪 TESTER MODE</h3>
-    <button id="testerCoinsBtn" class="purple" style="width:100%">+500 монет</button>
-    <button id="testerOffBtn" style="width:100%;margin-top:8px">Выйти из TESTER MODE</button>
-  </div>
-
-  <p class="small center">Kyo Dash • Прогресс сохраняется на этом устройстве</p>
-</section>
-
-<!-- ЭКРАН ИГРЫ -->
-<section id="gameScreen" class="screen hidden">
-  <canvas id="gameCanvas"></canvas>
-  <div id="gameHUD">
-    <button id="backBtn">← Меню</button>
-    <strong id="gameLevelName">Easy</strong>
-    <strong id="gameCoins" class="coins">🪙 0</strong>
-  </div>
-  <div id="progressWrap"><div id="progressBar"></div></div>
-  <div id="gameMessage"></div>
-  <div id="gameActions">
-    <button id="restartBtn">↻ Заново</button>
-    <button id="pauseBtn">Ⅱ Пауза</button>
-  </div>
-</section>
-
-<!-- МОДАЛЬНОЕ ОКНО -->
-<div id="modal" class="hidden">
-  <div id="modalBox">
-    <h2 id="modalTitle">Kyo Dash</h2>
-    <div id="modalContent"></div>
-    <button id="modalCloseBtn" style="width:100%">Закрыть</button>
-  </div>
+<div class="overlay" id="overlay">
+ <section class="panel">
+  <h1 class="title" id="panelTitle">Kyo Dash</h1>
+  <p class="subtitle" id="panelSubtitle">BIG UPDATE · Прыгай, собирай награды и создавай уровни!</p>
+  <div id="panelContent"></div>
+ </section>
 </div>
+<div id="message"></div>
+<div id="errorBox"></div>
 
-<div id="toast"></div>
-</div>
-
-<!-- ЧАСТЬ 2: ВСТАВЬ СЮДА JAVASCRIPT -->
 <script>
- 
-"use strict";
+(function(){
+'use strict';
 
-const OWNER_PIN = "OwnerKD-ADS5H-D6E9F037F7";
-const TESTER_PIN = "TESTER-KYO-DASH";
+var $=function(id){return document.getElementById(id)};
+var canvas=$('game'),ctx=canvas.getContext('2d');
+var overlay=$('overlay'),content=$('panelContent');
+var W=900,H=420,G=330,CUBE=34;
+var STORE='kyoDashBigUpdateV1';
 
-const $ = id => document.getElementById(id);
+/* OWNER ACCESS */
+var OWNER_PIN='OwnerKD-ADS5H-D6E9F037F7';
+var OWNER_KEY='kyoDashOwnerAuthorizedV1';
+var ownerMode=false;
+var logoClicks=0;
+var logoClickTimer=null;
 
-const DEFAULT_PROFILE = {
-  nick: "Player",
-  coins: 0,
-  xp: 0,
-  games: 0,
-  wins: 0,
-  deaths: 0,
-  bestProgress: 0,
-  selectedSkin: 0,
-  skins: [0],
-  achievements: [],
-  lastDaily: "",
-  music: true,
-  customLevels: []
-};
-
-function readJSON(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
+function hasOwnerAccess(){
+ try{return localStorage.getItem(OWNER_KEY)==='yes'}catch(e){return false}
 }
 
-function readStore() {
-  const saved = readJSON("kyoDashProfile", {});
-  const profile = { ...DEFAULT_PROFILE, ...saved };
+function requestOwnerAccess(){
+ if(hasOwnerAccess()){
+  ownerMode=true;
+  showOwnerPanel();
+  return;
+ }
 
-  if (!Array.isArray(profile.skins)) profile.skins = [0];
-  if (!Array.isArray(profile.achievements)) profile.achievements = [];
-  if (!Array.isArray(profile.customLevels)) profile.customLevels = [];
+ var pin=prompt('👑 Kyo Dash Owner Panel\nВведите PIN владельца:');
+ if(pin===null)return;
 
-  // Зарезервированный ник владельца не выдаётся обычному игроку.
-  if (profile.nick === "[DEV] Kyosuke") profile.nick = "Player";
+ if(pin.trim()!==OWNER_PIN){
+  alert('🚫 Неверный PIN');
+  return;
+ }
 
-  profile.coins = Math.max(0, Number(profile.coins) || 0);
-  profile.xp = Math.max(0, Number(profile.xp) || 0);
+ try{
+  localStorage.setItem(OWNER_KEY,'yes');
+ }catch(e){
+  alert('Не удалось сохранить доступ в этом браузере.');
+ }
 
-  return profile;
+ ownerMode=true;
+ showOwnerPanel();
 }
 
-let profile = readStore();
+/* СЕКРЕТНЫЙ ВХОД: 7 нажатий на логотип */
+var gameLogo=$('gameLogo');
 
-// Эти флаги существуют только до перезагрузки страницы.
-let ownerMode = false;
-let testerMode = false;
+gameLogo.style.userSelect='none';
+gameLogo.style.webkitUserSelect='none';
+gameLogo.style.webkitTouchCallout='none';
+gameLogo.style.touchAction='manipulation';
 
-let selectedLevel = 0;
-let selectedSkin = Number(profile.selectedSkin) || 0;
-let gameRunning = false;
-let paused = false;
-let gameState = null;
-let animationId = 0;
-let musicContext = null;
-let musicTimer = null;
-
-function saveProfile() {
-  localStorage.setItem("kyoDashProfile", JSON.stringify(profile));
-  updateUI();
-}
-
-function updateUI() {
-  $("nickname").textContent =
-    ownerMode ? "[DEV] Kyosuke" : profile.nick;
-
-  $("nickname").classList.toggle("rainbow", ownerMode);
-  $("coinCount").textContent = profile.coins;
-  $("xpCount").textContent = profile.xp;
-  $("gameCoins").textContent = "🪙 " + profile.coins;
-
-  $("ownerStatus").classList.toggle("hidden", !ownerMode);
-  $("testerStatus").classList.toggle("hidden", !testerMode);
-
-  $("ownerLoginBtn").classList.toggle("hidden", ownerMode);
-  $("testerLoginBtn").classList.toggle("hidden", testerMode);
-  $("musicBtn").textContent =
-    profile.music ? "🎵 Музыка: ВКЛ" : "🔇 Музыка: ВЫКЛ";
-}
-
-function toast(message) {
-  const el = $("toast");
-  el.textContent = message;
-  el.style.display = "block";
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => {
-    el.style.display = "none";
-  }, 2300);
-}
-
-function showModal(title, html) {
-  $("modalTitle").textContent = title;
-  $("modalContent").innerHTML = html;
-  $("modal").classList.remove("hidden");
-}
-
-function closeModal() {
-  $("modal").classList.add("hidden");
-}
-
-$("modalCloseBtn").addEventListener("click", closeModal);
-
-function askPIN(title, callback) {
-  showModal(title, `
-    <p>Введите PIN-код:</p>
-    <input id="pinInput" type="password" autocomplete="off"
-      placeholder="PIN-код" style="width:100%">
-    <p id="pinError" class="small"></p>
-    <button id="pinSubmit" class="primary" style="width:100%;margin-top:10px">
-      Подтвердить
-    </button>
-  `);
-
-  const input = $("pinInput");
-  input.focus();
-
-  function submit() {
-    const value = input.value;
-    closeModal();
-    callback(value);
-  }
-
-  $("pinSubmit").addEventListener("click", submit);
-  input.addEventListener("keydown", event => {
-    if (event.key === "Enter") submit();
-  });
-}
-
-$("ownerLoginBtn").addEventListener("click", () => {
-  askPIN("🔐 Вход владельца", pin => {
-    if (pin !== OWNER_PIN) {
-      toast("❌ Неверный PIN владельца");
-      return;
-    }
-
-    ownerMode = true;
-    testerMode = false;
-    updateUI();
-    toast("✅ Owner Mode включён");
-  });
+gameLogo.addEventListener('contextmenu',function(e){
+ e.preventDefault();
 });
 
-$("testerLoginBtn").addEventListener("click", () => {
-  askPIN("🧪 TESTER MODE", pin => {
-    if (pin !== TESTER_PIN) {
-      toast("❌ Неверный PIN тестера");
-      return;
-    }
+gameLogo.addEventListener('pointerdown',function(e){
+ e.preventDefault();
 
-    testerMode = true;
-    ownerMode = false;
-    updateUI();
-    toast("🧪 TESTER MODE включён");
-  });
+ logoClicks++;
+
+ if(logoClickTimer)clearTimeout(logoClickTimer);
+
+ logoClickTimer=setTimeout(function(){
+  logoClicks=0;
+ },2000);
+
+ if(logoClicks>=7){
+  logoClicks=0;
+  clearTimeout(logoClickTimer);
+  requestOwnerAccess();
+ }
 });
 
-$("ownerOffBtn").addEventListener("click", () => {
-  ownerMode = false;
-  updateUI();
-  toast("Owner Mode выключен");
-});
-
-$("testerOffBtn").addEventListener("click", () => {
-  testerMode = false;
-  updateUI();
-  toast("TESTER MODE выключен");
-});
-
-$("ownerPanelBtn").addEventListener("click", () => {
-  if (!ownerMode) {
-    toast("Доступ запрещён");
-    return;
-  }
-
-  showModal("⚙️ Панель владельца", `
-    <p>Владелец: <strong class="rainbow">[DEV] Kyosuke</strong></p>
-    <button id="ownerCoins" class="gold" style="width:100%;margin:5px 0">
-      +500 монет
-    </button>
-    <button id="ownerXP" class="primary" style="width:100%;margin:5px 0">
-      +250 XP
-    </button>
-    <button id="ownerSkins" class="purple" style="width:100%;margin:5px 0">
-      Открыть все скины
-    </button>
-    <button id="ownerReset" class="red" style="width:100%;margin:5px 0">
-      Сбросить статистику
-    </button>
-    <button id="ownerDisable" style="width:100%;margin:5px 0">
-      Выключить Owner Mode
-    </button>
-  `);
-
-  $("ownerCoins").onclick = () => {
-    if (!ownerMode) return;
-    profile.coins += 500;
-    saveProfile();
-    toast("+500 монет");
-  };
-
-  $("ownerXP").onclick = () => {
-    if (!ownerMode) return;
-    profile.xp += 250;
-    saveProfile();
-    toast("+250 XP");
-  };
-
-  $("ownerSkins").onclick = () => {
-    if (!ownerMode) return;
-    profile.skins = SKINS.map((_, index) => index);
-    saveProfile();
-    toast("Все скины открыты");
-  };
-
-  $("ownerReset").onclick = () => {
-    if (!ownerMode) return;
-    profile.games = 0;
-    profile.wins = 0;
-    profile.deaths = 0;
-    profile.bestProgress = 0;
-    profile.xp = 0;
-    profile.achievements = [];
-    saveProfile();
-    toast("Статистика сброшена");
-  };
-
-  $("ownerDisable").onclick = () => {
-    closeModal();
-    ownerMode = false;
-    updateUI();
-    toast("Owner Mode выключен");
-  };
-});
-
-$("testerCoinsBtn").addEventListener("click", () => {
-  if (!testerMode) {
-    toast("TESTER MODE не активен");
-    return;
-  }
-
-  profile.coins += 500;
-  saveProfile();
-  toast("🪙 +500 монет — XP не изменён");
-});
-
-$("saveNickBtn").addEventListener("click", () => {
-  if (ownerMode) {
-    toast("Сначала выключите Owner Mode");
-    return;
-  }
-
-  const nick = $("nicknameInput").value.trim();
-
-  if (!nick) {
-    toast("Введи ник");
-    return;
-  }
-
-  if (nick === "[DEV] Kyosuke") {
-    toast("Этот ник зарезервирован");
-    return;
-  }
-
-  profile.nick = nick.slice(0, 18);
-  saveProfile();
-  toast("Ник сохранён");
-});
-
-const SKINS = [
-  { name: "Classic", color: "#38eaff", price: 0 },
-  { name: "Lime", color: "#75ff67", price: 100 },
-  { name: "Fire", color: "#ff554f", price: 250 },
-  { name: "Gold", color: "#ffd84d", price: 500 },
-  { name: "Purple", color: "#bb76ff", price: 750 },
-  { name: "Pink", color: "#ff75c8", price: 1000 },
-  { name: "Ice", color: "#a8f6ff", price: 1500 },
-  { name: "Dark", color: "#888bba", price: 2000 }
+var levels=[
+ {name:'EASY',speed:285,jump:-555,gravity:1550,length:5700,gap:390},
+ {name:'MEDIUM',speed:295,jump:-565,gravity:1600,length:6500,gap:350},
+ {name:'HARD',speed:310,jump:-575,gravity:1650,length:7200,gap:330}
 ];
 
-function hasSkin(index) {
-  return profile.skins.includes(index);
-}
+var profile={nickname:'Player',xp:0,coins:0};
+var selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
+var held=false,obstacles=[],particles=[],custom=[];
+var best=[0,0,0],wins=[false,false,false],achieved={};
+var unlocked=['cyan'],skin='cyan',dailyClaim='',editorTool='spike';
+var gravityFlip=false,portalCooldown=0;
+var p={x:150,y:G-CUBE,vy:0,angle:0,onGround:true};
+var musicEnabled=true,audioCtx=null,musicTimer=null,musicStep=0,musicGeneration=0;
 
-$("shopBtn").addEventListener("click", renderShop);
-
-function renderShop() {
-  let html = `<p>Твои монеты: <strong class="coins">${profile.coins}</strong></p>
-    <div class="card-grid">`;
-
-  SKINS.forEach((skin, index) => {
-    const unlocked = hasSkin(index);
-    const selected = selectedSkin === index;
-
-    html += `
-      <div class="card">
-        <div class="skin-preview ${unlocked ? "" : "locked"}"
-          style="background:${skin.color}"></div>
-        <strong>${skin.name}</strong>
-        <p class="small">${unlocked ? "Открыт" : skin.price + " монет"}</p>
-        <button data-skin="${index}" style="width:100%">
-          ${selected ? "Выбран" : unlocked ? "Выбрать" : "Купить"}
-        </button>
-      </div>
-    `;
-  });
-
-  html += "</div>";
-  showModal("🛒 Магазин скинов", html);
-
-  document.querySelectorAll("[data-skin]").forEach(button => {
-    button.addEventListener("click", () => {
-      const index = Number(button.dataset.skin);
-      const skin = SKINS[index];
-
-      if (!hasSkin(index)) {
-        if (profile.coins < skin.price) {
-          toast("Недостаточно монет");
-          return;
-        }
-
-        profile.coins -= skin.price;
-        profile.skins.push(index);
-      }
-
-      selectedSkin = index;
-      profile.selectedSkin = index;
-      saveProfile();
-      renderShop();
-    });
-  });
-}
-
-const ACHIEVEMENTS = [
-  { id: "first", name: "Первый запуск", desc: "Сыграй один раз", reward: 50 },
-  { id: "win1", name: "Победа!", desc: "Пройди уровень", reward: 100 },
-  { id: "games10", name: "Практика", desc: "Сыграй 10 раз", reward: 150 },
-  { id: "coins1000", name: "Копилка", desc: "Накопи 1000 монет", reward: 200 },
-  { id: "allskins", name: "Коллекционер", desc: "Открой все скины", reward: 300 }
+var songData=[
+ {tempo:190,notes:[523,659,784,659,523,392,440,523,659,523,440,392,440,523,659,784,659,523,392,440,523,659,784,880,784,659,523,440,392,440,523,392],bass:[131,0,165,0,196,0,165,0],wave:'square'},
+ {tempo:145,notes:[392,523,659,784,659,523,392,523,440,587,698,880,698,587,440,587,392,523,659,784,880,784,659,523,440,587,698,880,784,698,587,440],bass:[98,98,131,131,110,110,147,147],wave:'sawtooth'},
+ {tempo:105,notes:[330,440,659,523,330,440,784,659,349,466,698,587,349,466,880,698,330,523,659,880,784,659,523,440,349,523,698,932,880,698,523,392],bass:[82,82,110,110,73,73,98,98],wave:'square'}
 ];
 
-function checkAchievements() {
-  const conditions = {
-    first: profile.games >= 1,
-    win1: profile.wins >= 1,
-    games10: profile.games >= 10,
-    coins1000: profile.coins >= 1000,
-    allskins: SKINS.every((_, i) => hasSkin(i))
-  };
-
-  ACHIEVEMENTS.forEach(item => {
-    if (conditions[item.id] && !profile.achievements.includes(item.id)) {
-      profile.achievements.push(item.id);
-      profile.coins += item.reward;
-      toast("🏆 " + item.name + "  +" + item.reward + " монет");
-    }
-  });
-
-  saveProfile();
-}
-
-$("achievementsBtn").addEventListener("click", () => {
-  const html = ACHIEVEMENTS.map(item => {
-    const done = profile.achievements.includes(item.id);
-
-    return `
-      <div class="panel">
-        <strong>${done ? "✅" : "🔒"} ${item.name}</strong>
-        <p>${item.desc}</p>
-        <p class="coins">Награда: ${item.reward} монет</p>
-      </div>
-    `;
-  }).join("");
-
-  showModal("🏆 Достижения", html);
-});
-
-$("statsBtn").addEventListener("click", () => {
-  showModal("📊 Статистика", `
-    <div class="panel">🎮 Игр сыграно: <strong>${profile.games}</strong></div>
-    <div class="panel">🏆 Побед: <strong>${profile.wins}</strong></div>
-    <div class="panel">💥 Поражений: <strong>${profile.deaths}</strong></div>
-    <div class="panel">📈 Лучший прогресс: <strong>${profile.bestProgress}%</strong></div>
-    <div class="panel">⭐ Опыт: <strong>${profile.xp}</strong></div>
-    <div class="panel">🪙 Монеты: <strong>${profile.coins}</strong></div>
-  `);
-});
-
-$("dailyBtn").addEventListener("click", () => {
-  const today = new Date().toISOString().slice(0, 10);
-
-  if (profile.lastDaily === today) {
-    toast("Ты уже забрал награду сегодня");
-    return;
-  }
-
-  profile.lastDaily = today;
-  profile.coins += 100;
-  profile.xp += 25;
-  saveProfile();
-  toast("🎁 +100 монет и +25 XP");
-});
-
-$("musicBtn").addEventListener("click", () => {
-  profile.music = !profile.music;
-  saveProfile();
-
-  if (!profile.music) stopMusic();
-  else if (gameRunning && !paused) startMusic();
-
-  toast(profile.music ? "Музыка включена" : "Музыка выключена");
-});
-
-function stopMusic() {
-  if (musicTimer) {
-    clearInterval(musicTimer);
-    musicTimer = null;
-  }
-
-  if (musicContext) {
-    try { musicContext.close(); } catch {}
-    musicContext = null;
-  }
-}
-
-function startMusic() {
-  if (!profile.music || musicContext) return;
-
-  try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (!AudioCtx) return;
-
-    musicContext = new AudioCtx();
-
-    // Простая оригинальная электронная мелодия.
-    // Музыка Stereo Madness не используется.
-    const notes = [392, 494, 587, 494, 440, 523, 659, 523];
-    let index = 0;
-
-    function beep() {
-      if (!musicContext || !profile.music || paused) return;
-
-      const osc = musicContext.createOscillator();
-      const gain = musicContext.createGain();
-
-      osc.type = "square";
-      osc.frequency.value = notes[index++ % notes.length];
-      gain.gain.setValueAtTime(0.025, musicContext.currentTime);
-      gain.gain.exponentialRampToValueAtTime(
-        0.001, musicContext.currentTime + 0.12
-      );
-
-      osc.connect(gain);
-      gain.connect(musicContext.destination);
-      osc.start();
-      osc.stop(musicContext.currentTime + 0.13);
-    }
-
-    beep();
-    musicTimer = setInterval(beep, 180);
-  } catch {
-    stopMusic();
-  }
-}
-
-updateUI();
- 
-/* ===== ИГРОВОЙ ДВИЖОК KYO DASH ===== */
-
-const canvas = $("gameCanvas");
-const ctx = canvas.getContext("2d");
-
-const LEVELS = [
-  {
-    name: "Stereo Style",
-    difficulty: "Easy",
-    speed: 4.0,
-    length: 2600,
-    obstacles: [
-      [430, "spike"], [650, "spike"], [850, "double"],
-      [1120, "spike"], [1370, "double"], [1660, "spike"],
-      [1850, "double"], [2130, "spike"], [2350, "double"]
-    ]
-  },
-  {
-    name: "Neon Rush",
-    difficulty: "Medium",
-    speed: 4.4,
-    length: 3000,
-    obstacles: [
-      [360, "spike"], [540, "double"], [770, "spike"],
-      [960, "double"], [1190, "spike"], [1370, "double"],
-      [1620, "double"], [1870, "spike"], [2070, "double"],
-      [2320, "spike"], [2520, "double"], [2750, "spike"]
-    ]
-  },
-  {
-    name: "Nightmare",
-    difficulty: "Hard",
-    speed: 4.7,
-    length: 3300,
-    obstacles: [
-      [320, "spike"], [470, "double"], [660, "spike"],
-      [810, "double"], [1000, "double"], [1220, "spike"],
-      [1380, "double"], [1580, "double"], [1800, "spike"],
-      [1960, "double"], [2160, "double"], [2370, "spike"],
-      [2540, "double"], [2750, "double"], [2970, "spike"]
-    ]
-  }
+var skinsData=[
+ {id:'cyan',name:'Neon Cyan',price:0,color:'#35eaff',glow:'#00cfff'},
+ {id:'fire',name:'Fire Cube',price:100,color:'#ff6748',glow:'#ff2d54'},
+ {id:'lime',name:'Toxic Lime',price:150,color:'#a3ff3c',glow:'#64ff21'},
+ {id:'purple',name:'Void Purple',price:200,color:'#bd79ff',glow:'#8d38ff'},
+ {id:'gold',name:'Golden Star',price:350,color:'#ffd95a',glow:'#ffad20'},
+ {id:'pink',name:'Pink Pulse',price:400,color:'#ff67cb',glow:'#ff30a4'}
 ];
 
-let customObstacles = [];
-
-function resizeCanvas() {
-  const rect = canvas.getBoundingClientRect();
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-  canvas.width = Math.max(1, Math.floor(rect.width * dpr));
-  canvas.height = Math.max(1, Math.floor(rect.height * dpr));
-
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+function isReservedNick(name){
+ var n=String(name||'').trim().toUpperCase().replace(/[\s_\-\[\].]/g,'');
+ return /^(DEV|MOD|MODER|OWNER|ADMIN|STAFF|DEVELOPER|HELPER|ВЛАДЕЛЕЦ|АДМИН|МОДЕРАТОР)/.test(n);
 }
 
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-
-function currentLevel() {
-  return LEVELS[selectedLevel] || LEVELS[0];
+function currentSkin(){
+ return skinsData.find(function(s){return s.id===skin})||skinsData[0];
 }
 
-document.querySelectorAll(".levelBtn").forEach(button => {
-  button.addEventListener("click", () => {
-    selectedLevel = Number(button.dataset.level);
-
-    document.querySelectorAll(".levelBtn").forEach(b => {
-      b.style.filter = "brightness(.7)";
-    });
-
-    button.style.filter = "brightness(1.4)";
-    $("selectedLevelText").textContent =
-      "Выбран уровень: " + currentLevel().difficulty;
-  });
-});
-
-function makeGameState() {
-  const level = currentLevel();
-
-  return {
-    x: 80,
-    y: 0,
-    vy: 0,
-    size: 28,
-    ground: 0,
-    camera: 0,
-    distance: 0,
-    progress: 0,
-    rotation: 0,
-    jumping: false,
-    holding: false,
-    alive: true,
-    finished: false,
-    jumpQueued: false,
-    time: 0,
-    speed: level.speed
-  };
+function notify(msg){
+ $('message').innerHTML='<span class="toast"></span>';
+ $('message').firstChild.textContent=msg;
+ setTimeout(function(){$('message').innerHTML=''},2300);
 }
 
-function startGame() {
-  stopMusic();
-
-  $("menuScreen").classList.add("hidden");
-  $("gameScreen").classList.remove("hidden");
-
-  resizeCanvas();
-
-  gameState = makeGameState();
-  gameRunning = true;
-  paused = false;
-
-  profile.games++;
-  saveProfile();
-
-  $("gameLevelName").textContent = currentLevel().difficulty;
-  $("gameMessage").textContent = "";
-  $("progressBar").style.width = "0%";
-  $("pauseBtn").textContent = "Ⅱ Пауза";
-
-  cancelAnimationFrame(animationId);
-  startMusic();
-  animationId = requestAnimationFrame(gameLoop);
-}
-
-function backToMenu() {
-  gameRunning = false;
-  paused = false;
-  cancelAnimationFrame(animationId);
-  stopMusic();
-
-  $("gameScreen").classList.add("hidden");
-  $("menuScreen").classList.remove("hidden");
-
-  updateUI();
-}
-
-$("playBtn").addEventListener("click", startGame);
-$("backBtn").addEventListener("click", backToMenu);
-
-$("restartBtn").addEventListener("click", () => {
-  if (!gameRunning) return;
-
-  gameState = makeGameState();
-  paused = false;
-
-  $("pauseBtn").textContent = "Ⅱ Пауза";
-  $("gameMessage").textContent = "";
-  $("progressBar").style.width = "0%";
-
-  stopMusic();
-  startMusic();
-
-  cancelAnimationFrame(animationId);
-  animationId = requestAnimationFrame(gameLoop);
-});
-
-$("pauseBtn").addEventListener("click", () => {
-  if (!gameRunning || !gameState || !gameState.alive ||
-      gameState.finished) return;
-
-  paused = !paused;
-  $("pauseBtn").textContent = paused ? "▶ Продолжить" : "Ⅱ Пауза";
-
-  if (paused) stopMusic();
-  else startMusic();
-});
-
-function jump() {
-  if (!gameRunning || paused || !gameState) return;
-  if (!gameState.alive || gameState.finished) return;
-
-  if (gameState.ground > 0 && gameState.y >= gameState.ground - 1) {
-    gameState.vy = -10.2;
-    gameState.jumping = true;
-    gameState.rotation += Math.PI / 2;
-  } else {
-    gameState.jumpQueued = true;
+function readStore(){
+ try{
+  var d=JSON.parse(localStorage.getItem(STORE)||'{}');
+  if(d.profile&&typeof d.profile==='object'){
+   var storedNick=String(d.profile.nickname||'Player').trim().slice(0,16);
+   profile.nickname=isReservedNick(storedNick)&&!hasOwnerAccess()?'Player':storedNick;
+   profile.xp=Math.max(0,Number(d.profile.xp)||0);
+   profile.coins=Math.max(0,Number(d.profile.coins)||0);
   }
+  if(Array.isArray(d.best)&&d.best.length===3)best=d.best.map(function(v){return Math.max(0,Number(v)||0)});
+  if(Array.isArray(d.wins)&&d.wins.length===3)wins=d.wins;
+  if(d.achieved&&typeof d.achieved==='object')achieved=d.achieved;
+  if(Array.isArray(d.unlocked))unlocked=Array.from(new Set(['cyan'].concat(d.unlocked)));
+  if(skinsData.some(function(s){return s.id===d.skin})&&unlocked.indexOf(d.skin)>=0)skin=d.skin;
+  if(typeof d.dailyClaim==='string')dailyClaim=d.dailyClaim;
+  if(Array.isArray(d.custom))custom=d.custom.filter(function(o){
+   return o&&Number.isFinite(o.x)&&['spike','block','portal'].includes(o.type);
+  }).slice(0,100);
+ }catch(e){}
 }
 
-canvas.addEventListener("pointerdown", event => {
-  event.preventDefault();
-
-  if (!gameRunning || paused) return;
-
-  if (!gameState.alive || gameState.finished) return;
-
-  gameState.holding = true;
-  jump();
-});
-
-function releaseJump() {
-  if (gameState) gameState.holding = false;
-}
-
-window.addEventListener("pointerup", releaseJump);
-window.addEventListener("pointercancel", releaseJump);
-window.addEventListener("blur", releaseJump);
-
-function drawBackground(w, h) {
-  const gradient = ctx.createLinearGradient(0, 0, 0, h);
-  gradient.addColorStop(0, "#182b5d");
-  gradient.addColorStop(1, "#090f27");
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, w, h);
-
-  ctx.strokeStyle = "#3b63a055";
-  ctx.lineWidth = 1;
-
-  const grid = 40;
-  const offset = gameState ? gameState.camera % grid : 0;
-
-  for (let x = -offset; x < w; x += grid) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, h);
-    ctx.stroke();
-  }
-
-  for (let y = 0; y < h; y += grid) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(w, y);
-    ctx.stroke();
-  }
-}
-
-function drawGround(w, ground) {
-  ctx.fillStyle = "#101a38";
-  ctx.fillRect(0, ground, w, 100);
-
-  ctx.fillStyle = "#58f4ff";
-  ctx.fillRect(0, ground, w, 3);
-
-  ctx.strokeStyle = "#23466f";
-  ctx.lineWidth = 2;
-
-  for (let x = -(gameState.camera % 35); x < w; x += 35) {
-    ctx.beginPath();
-    ctx.moveTo(x, ground + 3);
-    ctx.lineTo(x - 20, ground + 32);
-    ctx.stroke();
-  }
-}
-
-function drawSpike(x, ground, width, height) {
-  ctx.beginPath();
-  ctx.moveTo(x, ground);
-  ctx.lineTo(x + width / 2, ground - height);
-  ctx.lineTo(x + width, ground);
-  ctx.closePath();
-
-  ctx.fillStyle = "#ff4f73";
-  ctx.fill();
-
-  ctx.strokeStyle = "#ffd0dc";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-}
-
-function drawCube(x, y, size, rotation) {
-  const skin = SKINS[selectedSkin] || SKINS[0];
-
-  ctx.save();
-  ctx.translate(x + size / 2, y + size / 2);
-  ctx.rotate(rotation);
-
-  ctx.shadowColor = skin.color;
-  ctx.shadowBlur = 14;
-
-  ctx.fillStyle = skin.color;
-  ctx.fillRect(-size / 2, -size / 2, size, size);
-
-  ctx.shadowBlur = 0;
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(-size / 2, -size / 2, size, size);
-
-  ctx.fillStyle = "#10152b";
-  ctx.fillRect(-size / 4, -size / 6, 4, 5);
-  ctx.fillRect(size / 8, -size / 6, 4, 5);
-
-  ctx.fillRect(-size / 5, size / 6, size * .4, 3);
-
-  ctx.restore();
-}
-
-function getObstacles() {
-  const level = currentLevel();
-  const result = level.obstacles.map(item => ({
-    x: item[0],
-    type: item[1]
+function save(){
+ try{
+  localStorage.setItem(STORE,JSON.stringify({
+   profile:profile,best:best,wins:wins,achieved:achieved,
+   unlocked:unlocked,skin:skin,dailyClaim:dailyClaim,custom:custom
   }));
-
-  customObstacles.forEach(item => result.push(item));
-
-  return result;
+ }catch(e){notify('Не удалось сохранить: проверь память браузера')}
 }
 
-function hitSpike(cube, spikeX, ground, double) {
-  const size = cube.size;
-  const screenX = spikeX - cube.camera;
-  const width = double ? 64 : 32;
-  const height = 30;
+function levelNum(){return Math.floor(profile.xp/250)+1}
+function xpNext(){return profile.xp%250}
 
-  // Проверка приблизительно повторяет треугольную форму шипа.
-  const cx = cube.x + size / 2;
-  const cy = cube.y + size / 2;
-
-  const left = screenX;
-  const right = screenX + width;
-  const tipX = screenX + width / 2;
-  const tipY = ground - height;
-
-  if (cx + size * .25 < left || cx - size * .25 > right) {
-    return false;
-  }
-
-  if (cube.y + size < tipY || cube.y > ground) {
-    return false;
-  }
-
-  const horizontal = Math.abs(cx - tipX) / (width / 2);
-  const topAtCube = tipY + horizontal * height;
-
-  return cy + size * .25 > topAtCube &&
-         cube.y + size * .8 > ground - height;
+function profileHTML(){
+ return '<div class="profile">'+
+ '<div class="row"><b>Игрок: <span id="nickDisplay"></span></b><b>💰 <span id="coinDisplay"></span></b></div>'+
+ '<p class="muted">Уровень аккаунта <b id="accountLevel"></b> · XP <span id="xpDisplay"></span>/250</p>'+
+ '<div class="xpbar"><div id="xpFill"></div></div>'+
+ '<input id="nickInput" maxlength="16" placeholder="Новый ник">'+
+ '<button class="btn secondary" data-action="nick">СОХРАНИТЬ НИК</button></div>';
 }
 
-function gameLoop() {
-  if (!gameRunning) return;
-
-  animationId = requestAnimationFrame(gameLoop);
-
-  const w = canvas.clientWidth;
-  const h = canvas.clientHeight;
-
-  if (!gameState || w < 1 || h < 1) return;
-
-  const g = gameState;
-
-  drawBackground(w, h);
-
-  const ground = h * .79;
-  g.ground = ground - g.size;
-
-  if (!paused && g.alive && !g.finished) {
-    g.time++;
-
-    g.distance += g.speed;
-    g.camera = g.distance;
-
-    g.vy += 0.48;
-    g.y += g.vy;
-
-    if (g.y >= g.ground) {
-      g.y = g.ground;
-      g.vy = 0;
-      g.jumping = false;
-      g.rotation = Math.round(g.rotation / (Math.PI / 2)) *
-                   (Math.PI / 2);
-
-      if (g.jumpQueued || g.holding) {
-        g.jumpQueued = false;
-        jump();
-      }
-    }
-
-    g.progress = Math.min(
-      100,
-      Math.floor(g.distance / currentLevel().length * 100)
-    );
-
-    $("progressBar").style.width = g.progress + "%";
-
-    if (g.progress >= 100) {
-      finishLevel();
-    }
-
-    for (const obstacle of getObstacles()) {
-      const double = obstacle.type === "double";
-
-      if (hitSpike(g, obstacle.x, ground, double)) {
-        die();
-        break;
-      }
-    }
-  }
-
-  drawGround(w, ground);
-
-  for (const obstacle of getObstacles()) {
-    const x = obstacle.x - g.camera;
-    if (x < -100 || x > w + 100) continue;
-
-    drawSpike(x, ground, 32, 30);
-
-    if (obstacle.type === "double") {
-      drawSpike(x + 32, ground, 32, 30);
-    }
-  }
-
-  if (!g.finished) {
-    drawCube(g.x, g.y, g.size, g.rotation);
-  } else {
-    drawCube(g.x, g.y, g.size, g.rotation);
-  }
-
-  if (paused && g.alive) {
-    $("gameMessage").textContent = "ПАУЗА";
-  } else if (g.alive && !g.finished) {
-    $("gameMessage").textContent = "";
-  }
+function updateProfile(){
+ var nick=$('nickDisplay'),coins=$('coinDisplay'),lev=$('accountLevel'),xp=$('xpDisplay'),fill=$('xpFill');
+ if(nick){
+  nick.textContent=profile.nickname;
+  nick.classList.toggle('rainbow',ownerMode&&profile.nickname==='[DEV] Kyosuke');
+ }
+ if(coins)coins.textContent=profile.coins;
+ if(lev)lev.textContent=levelNum();
+ if(xp)xp.textContent=xpNext();
+ if(fill)fill.style.width=(xpNext()/250*100)+'%';
 }
 
-function die() {
-  if (!gameState || !gameState.alive) return;
-
-  gameState.alive = false;
-  gameRunning = false;
-
-  stopMusic();
-
-  profile.deaths++;
-  profile.bestProgress = Math.max(
-    profile.bestProgress,
-    gameState.progress
-  );
-
-  saveProfile();
-
-  $("gameMessage").innerHTML =
-    "💥 ПОПЫТКА ОКОНЧЕНА<br>" +
-    `<span style="font-size:16px">${gameState.progress}%</span><br>` +
-    `<button onclick="restartAfterDeath()">↻ ПОВТОРИТЬ</button>`;
-
-  toast("Столкновение! Попробуй ещё раз.");
+function shell(title,subtitle,html){
+ $('panelTitle').textContent=title;
+ $('panelSubtitle').textContent=subtitle||'';
+ content.innerHTML=html||'';
+ overlay.classList.remove('hidden');
+ updateProfile();
 }
 
-window.restartAfterDeath = function() {
-  gameState = makeGameState();
-  gameRunning = true;
-  paused = false;
+function menu(){
+ stopMusic();
+ mode='menu';held=false;
+ $('hint').textContent='Тапни по экрану, чтобы прыгнуть · Удерживай для автопрыжка';
+ var lv=levels.map(function(l,i){
+  return '<button class="level '+(i===selected?'active':'')+'" data-action="level" data-level="'+i+'">'+l.name+'<small>Рекорд '+best[i]+'%</small></button>';
+ }).join('');
 
-  $("gameMessage").textContent = "";
-  $("progressBar").style.width = "0%";
-  $("pauseBtn").textContent = "Ⅱ Пауза";
+ shell('Kyo Dash','BIG UPDATE · Новые скины, достижения и редактор уровней',
+ profileHTML()+
+ '<div class="levels">'+lv+'</div>'+
+ '<button class="btn" data-action="start">▶ ИГРАТЬ</button>'+
+ '<div class="grid">'+
+ '<button class="btn secondary" data-action="shop">🎨 СКИНЫ</button>'+
+ '<button class="btn secondary" data-action="achievements">🏆 ДОСТИЖЕНИЯ</button>'+
+ '<button class="btn secondary" data-action="editor">🛠 РЕДАКТОР</button>'+
+ '<button class="btn secondary" data-action="daily">🎁 НАГРАДА ДНЯ</button>'+
+ '<button class="btn secondary" data-action="stats">📊 СТАТИСТИКА</button>'+
+ '</div>'+
+ '<p class="muted">Прогресс хранится локально в этом браузере.</p>');
+ refreshHud();draw();
+}
 
-  stopMusic();
-  startMusic();
+function backButton(){return '<button class="btn secondary" data-action="menu">← В МЕНЮ</button>'}
 
-  cancelAnimationFrame(animationId);
-  animationId = requestAnimationFrame(gameLoop);
-};
+function showShop(){
+ mode='menu';
+ var html='<div class="grid">';
+ skinsData.forEach(function(s){
+  var own=unlocked.indexOf(s.id)>=0,active=skin===s.id;
+  html+='<div class="card"><div style="height:65px;display:grid;place-items:center"><div style="width:38px;height:38px;background:'+s.color+';box-shadow:0 0 20px '+s.glow+';border:3px solid #fff8;border-radius:4px"></div></div>'+
+   '<h3>'+s.name+'</h3><p>'+(active?'Выбран':own?'Открыт':'Цена: '+s.price+' монет')+'</p>'+
+   '<button class="btn '+(active?'secondary':'')+'" data-action="'+(active?'noop':own?'equip':'buy')+'" data-skin="'+s.id+'">'+(active?'ВЫБРАН':own?'НАДЕТЬ':'КУПИТЬ')+'</button></div>';
+ });
+ html+='</div>'+backButton();
+ shell('Магазин скинов','Покупай кубики за монеты',html);
+}
 
-function finishLevel() {
-  if (!gameState || gameState.finished) return;
+var achievementList=[
+ {id:'first',name:'Первый прыжок',desc:'Начни играть в Kyo Dash',reward:25,check:function(){return profile.xp>0||wins.some(Boolean)}},
+ {id:'win1',name:'Победитель',desc:'Пройди любой уровень',reward:50,check:function(){return wins.some(Boolean)}},
+ {id:'allwins',name:'Мастер уровней',desc:'Пройди все 3 уровня',reward:150,check:function(){return wins.every(Boolean)}},
+ {id:'coins100',name:'Копилка',desc:'Накопи 100 монет',reward:30,check:function(){return profile.coins>=100}},
+ {id:'level5',name:'Ветеран',desc:'Достигни 5 уровня аккаунта',reward:100,check:function(){return levelNum()>=5}},
+ {id:'editor',name:'Создатель',desc:'Сохрани собственный уровень',reward:50,check:function(){return custom.length>0}},
+ {id:'skin',name:'Новый стиль',desc:'Открой дополнительный скин',reward:50,check:function(){return unlocked.length>=2}}
+];
 
-  gameState.finished = true;
-  gameRunning = false;
-  paused = false;
+function checkAchievements(){
+ achievementList.forEach(function(a){
+  if(!achieved[a.id]&&a.check()){
+   achieved[a.id]=true;profile.coins+=a.reward;
+   notify('🏆 '+a.name+' · +'+a.reward+' монет');save();
+  }
+ });
+}
 
-  stopMusic();
+function showAchievements(){
+ checkAchievements();
+ var html='<div class="grid">';
+ achievementList.forEach(function(a){
+  var done=!!achieved[a.id];
+  html+='<div class="card"><h3>'+(done?'🏆 ':'🔒 ')+a.name+'</h3><p>'+a.desc+'</p><p class="muted">Награда: '+a.reward+' монет</p><p style="color:'+(done?'#68ffbd':'#9ab1dc')+'">'+(done?'ВЫПОЛНЕНО':'НЕ ВЫПОЛНЕНО')+'</p></div>';
+ });
+ html+='</div>'+backButton();
+ shell('Достижения','Выполняй задания и получай монеты',html);
+}
 
-  profile.wins++;
-  profile.xp += 100;
-  profile.coins += 150;
-  profile.bestProgress = 100;
+function dayKey(){
+ var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
 
-  saveProfile();
+function daily(){
+ mode='menu';var claimed=dailyClaim===dayKey();
+ shell('Ежедневная награда','Заходи каждый день за бонусом',
+ '<div class="card" style="text-align:center"><h3 style="font-size:27px">🎁 +75 монет</h3><p>Бонус можно забрать один раз в день на этом устройстве.</p><button class="btn" data-action="claim" '+(claimed?'disabled':'')+'>'+(claimed?'УЖЕ ПОЛУЧЕНО':'ЗАБРАТЬ НАГРАДУ')+'</button></div>'+backButton());
+}
+
+function claimDaily(){
+ if(dailyClaim===dayKey()){notify('Награда уже получена сегодня');return}
+ dailyClaim=dayKey();profile.coins+=75;save();checkAchievements();daily();updateProfile();notify('+75 монет!');
+}
+
+function showStats(){
+ shell('Статистика','Твои результаты',
+ '<div class="card"><h3>Прогресс</h3>'+
+ levels.map(function(l,i){return '<p>'+l.name+': рекорд '+best[i]+'% · '+(wins[i]?'пройден':'не пройден')+'</p>'}).join('')+
+ '<p>Победы: '+wins.filter(Boolean).length+'/3</p><p>Скинов открыто: '+unlocked.length+'/'+skinsData.length+'</p><p>Созданных объектов: '+custom.length+'</p></div>'+backButton());
+}
+
+/* Окно владельца открывается только после проверки доступа. */
+function showOwnerPanel(){
+ if(!hasOwnerAccess()){ownerMode=false;return}
+ ownerMode=true;
+ profile.nickname='[DEV] Kyosuke';
+ save();
+ shell('OWNER PANEL','Добро пожаловать, [DEV] Kyosuke',
+ '<div class="card"><h3>Управление тестовой игрой</h3>'+
+ '<p>Владелец: <span class="rainbow">[DEV] Kyosuke</span></p>'+
+ '<p>Доступ сохранён в этом браузере.</p>'+
+ '<button class="btn" data-action="grant">+500 монет и +250 XP</button>'+
+ '<button class="btn secondary" data-action="unlockall">Открыть все скины</button>'+
+ '<button class="btn secondary" data-action="resetstats">Сбросить рекорды и победы</button>'+
+ '<button class="btn secondary" data-action="owneroff">Выключить Owner Mode</button>'+
+ '<button class="btn danger" data-action="revokeowner">Удалить доступ владельца на этом устройстве</button></div>'+backButton());
+ updateProfile();
+}
+
+function showEditor(){
+ mode='editor';held=false;stopMusic();editorTool='spike';
+ shell('Редактор уровней','Выбери объект и нажимай на поле, чтобы расставлять элементы',
+ '<div class="levels"><button class="level active" data-action="tool" data-tool="spike">🔺 Шип</button><button class="level" data-action="tool" data-tool="block">🟦 Блок</button><button class="level" data-action="tool" data-tool="portal">🌀 Портал</button></div>'+
+ '<p class="muted">Нажимай на игровое поле ниже, чтобы добавить объект. Прокручивай мир кнопками.</p>'+
+ '<div class="grid"><button class="btn secondary" data-action="editorleft">← СДВИГ</button><button class="btn secondary" data-action="editorright">СДВИГ →</button></div>'+
+ '<div class="grid"><button class="btn" data-action="savelevel">💾 СОХРАНИТЬ</button><button class="btn secondary" data-action="testlevel">▶ ТЕСТ</button></div>'+
+ '<button class="btn danger" data-action="clearlevel">ОЧИСТИТЬ ОБЪЕКТЫ</button>'+backButton());
+ world=0;
+ obstacles=custom.map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type}});
+ $('hint').textContent='Редактор: нажми на поле, чтобы поставить выбранный объект';draw();
+}
+
+function startEditorTest(){
+ if(raf)cancelAnimationFrame(raf);
+ obstacles=custom.map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type}});
+ obstacles.push({x:Math.max(1600,...obstacles.map(function(o){return o.x+100})),w:12,h:80,type:'finish'});
+ selected=0;world=0;progress=0;gravityFlip=false;resetPlayer();
+ mode='playing';overlay.classList.add('hidden');last=performance.now();raf=requestAnimationFrame(loop);
+}
+
+function resetPlayer(){p.y=G-CUBE;p.vy=0;p.angle=0;p.onGround=true}
+
+function makeLevel(){
+ obstacles=[];
+ var cfg=levels[selected],x=510,i=0;
+ var pattern=[
+  ['1','.','.','1','.','2','.','.','1','.','1','.','.','2','.','1','.','.','2','.'],
+  ['1','.','2','.','1','.','C','.','2','.','1','.','.','2','.','C','1','.','2','.'],
+  ['2','.','1','.','C','.','2','.','1','.','3','.','C','.','2','.','1','.','C','.','2','.']
+ ][selected];
+
+ while(x<cfg.length-250){
+  var symbol=pattern[i%pattern.length];
+  if(symbol==='1'||symbol==='2'||symbol==='3'){
+   for(var j=0;j<Number(symbol);j++)obstacles.push({x:x+j*34,w:34,h:selected===2?42:38,type:'spike'});
+  }
+  x+=Math.max(cfg.gap,selected===0?370:selected===1?340:330)+[0,25,45,15,35][i%5];
+  i++;
+ }
+ if(selected>0)for(i=0;i<2;i++)obstacles.push({x:1800+i*2050,w:35,h:110,type:'portal'});
+ obstacles.push({x:cfg.length-110,w:12,h:80,type:'finish'});
+}
+
+function reset(){
+ world=0;progress=0;held=false;gravityFlip=false;portalCooldow world=0;
+ progress=0;
+ held=false;
+ gravityFlip=false;
+ portalCooldown=0;
+ particles=[];
+ resetPlayer();
+ makeLevel();
+ refreshHud();
+}
+
+function refreshHud(){
+ $('levelLabel').textContent=levels[selected].name;
+ $('progressText').textContent=progress+'%';
+ $('progressFill').style.width=progress+'%';
+}
+
+function initAudio(){
+ if(audioCtx)return true;
+ var AC=window.AudioContext||window.webkitAudioContext;
+ if(!AC)return false;
+ try{
+  audioCtx=new AC();
+  return true;
+ }catch(e){
+  return false;
+ }
+}
+
+function tone(freq,duration,wave,volume){
+ if(!audioCtx||!freq||!musicEnabled)return;
+ try{
+  var osc=audioCtx.createOscillator();
+  var gain=audioCtx.createGain();
+  var now=audioCtx.currentTime;
+  osc.type=wave||'square';
+  osc.frequency.setValueAtTime(freq,now);
+  gain.gain.setValueAtTime(.0001,now);
+  gain.gain.exponentialRampToValueAtTime(volume||.04,now+.012);
+  gain.gain.setTargetAtTime(.0001,now+duration*.6,Math.max(.015,duration*.15));
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(now);
+  osc.stop(now+duration+.05);
+  osc.onended=function(){
+   try{
+    osc.disconnect();
+    gain.disconnect();
+   }catch(e){}
+  };
+ }catch(e){}
+}
+
+function stopMusic(){
+ musicGeneration++;
+ if(musicTimer!==null){
+  clearInterval(musicTimer);
+  musicTimer=null;
+ }
+}
+
+function musicTick(){
+ if(!musicEnabled||mode!=='playing'||!audioCtx)return;
+ var s=songData[selected];
+ var beat=s.tempo/1000;
+ var note=s.notes[musicStep%s.notes.length];
+ if(note)tone(note,beat*.9,s.wave,.035);
+
+ if(musicStep%4===0){
+  var bass=s.bass[Math.floor(musicStep/4)%s.bass.length];
+  if(bass)tone(bass,beat*1.8,'triangle',.05);
+ }
+ musicStep++;
+}
+
+function startMusic(){
+ stopMusic();
+ if(!musicEnabled||mode!=='playing'||!initAudio())return;
+ var gen=musicGeneration;
+ musicStep=0;
+
+ try{
+  var r=audioCtx.resume();
+  if(r&&r.catch)r.catch(function(){});
+ }catch(e){}
+
+ musicTick();
+ musicTimer=setInterval(function(){
+  if(gen===musicGeneration)musicTick();
+ },songData[selected].tempo);
+}
+
+function updateMusicButton(){
+ $('musicBtn').textContent=musicEnabled?'♫ MUSIC ON':'♫ MUSIC OFF';
+}
+
+function start(){
+ if(raf)cancelAnimationFrame(raf);
+ reset();
+ mode='playing';
+ overlay.classList.add('hidden');
+ $('hint').textContent='ТАП — ПРЫЖОК · УДЕРЖИВАЙ — АВТОПРЫЖОК';
+ last=performance.now();
+ startMusic();
+ raf=requestAnimationFrame(loop);
+}
+
+function addParticle(x,y,color){
+ for(var i=0;i<3;i++){
+  particles.push({
+   x:x,
+   y:y,
+   vx:(Math.random()-.5)*160,
+   vy:(Math.random()-.7)*140,
+   life:.4,
+   color:color
+  });
+ }
+}
+
+function jump(){
+ if(mode!=='playing'||!p.onGround)return;
+ var cfg=levels[selected];
+ p.vy=gravityFlip?-cfg.jump:cfg.jump;
+ p.onGround=false;
+ addParticle(p.x+CUBE/2,p.y+CUBE,currentSkin().color);
+}
+
+function die(){
+ if(mode!=='playing')return;
+ mode='dead';
+ held=false;
+ stopMusic();
+ if(raf)cancelAnimationFrame(raf);
+ raf=0;
+ checkAchievements();
+
+ shell('СТОЛКНОВЕНИЕ','Прогресс: '+progress+'%. Попробуй ещё раз!',
+  '<button class="btn" data-action="start">↻ ПОПРОБОВАТЬ ЕЩЁ</button>'+
+  '<button class="btn secondary" data-action="menu">В МЕНЮ</button>');
+ draw();
+}
+
+function win(){
+ if(mode!=='playing')return;
+ mode='win';
+ held=false;
+ stopMusic();
+
+ if(raf)cancelAnimationFrame(raf);
+ raf=0;
+ progress=100;
+ best[selected]=100;
+
+ if(!wins[selected]){
+  wins[selected]=true;
+  profile.xp+=[100,150,200][selected];
+  profile.coins+=[30,50,75][selected];
+ }
+
+ save();
+ checkAchievements();
+ refreshHud();
+
+ shell('УРОВЕНЬ ПРОЙДЕН!','Ты завершил '+levels[selected].name+'!',
+  '<div class="card"><h3>🏆 Отличная работа!</h3><p>Награда за победу начислена.</p></div>'+
+  '<button class="btn" data-action="start">ИГРАТЬ СНОВА</button>'+
+  '<button class="btn secondary" data-action="menu">В МЕНЮ</button>');
+ draw();
+  }function update(dt){
+ if(mode!=='playing')return;
+
+ var cfg=levels[selected];
+ world+=cfg.speed*dt;
+ p.vy+=cfg.gravity*(gravityFlip?-1:1)*dt;
+ p.y+=p.vy*dt;
+
+ if(!gravityFlip&&p.y>=G-CUBE){
+  p.y=G-CUBE;
+  p.vy=0;
+  p.onGround=true;
+  p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
+  if(held)jump();
+ }else if(gravityFlip&&p.y<=20){
+  p.y=20;
+  p.vy=0;
+  p.onGround=true;
+  p.angle=Math.round(p.angle/(Math.PI/2))*(Math.PI/2);
+  if(held)jump();
+ }else{
+  p.onGround=false;
+  p.angle+=cfg.speed*dt/CUBE*(Math.PI/2);
+ }
+
+ if(portalCooldown>0)portalCooldown-=dt;
+
+ progress=Math.min(100,Math.floor(world/(cfg.length-110)*100));
+ refreshHud();
+
+ if(progress>best[selected]){
+  best[selected]=progress;
+  save();
+ }
+
+ for(var i=0;i<obstacles.length;i++){
+  var o=obstacles[i],ox=o.x-world;
+
+  if(ox>p.x+100||ox+o.w<p.x-80)continue;
+
+  if(o.type==='finish'){
+   if(ox<p.x+CUBE*.6){
+    win();
+    return;
+   }
+   continue;
+  }
+
+  if(o.type==='portal'){
+   if(portalCooldown<=0&&ox<p.x+CUBE&&ox+o.w>p.x){
+    gravityFlip=!gravityFlip;
+    portalCooldown=.7;
+    p.vy=0;
+    p.onGround=false;
+    addParticle(p.x+CUBE/2,p.y,'#bd79ff');
+   }
+   continue;
+  }
+
+  var px1=p.x+5,px2=p.x+CUBE-5;
+  var py1=p.y+5,py2=p.y+CUBE-3;
+
+  if(o.type==='block'){
+   if(px2>ox&&px1<ox+o.w&&py2>G-o.h&&py1<G){
+    die();
+    return;
+   }
+   continue;
+  }
+
+  var left=Math.max(px1,ox);
+  var right=Math.min(px2,ox+o.w);
+  if(left>=right)continue;
+
+  var center=ox+o.w/2;
+  var sx=Math.max(ox,Math.min(center,(left+right)/2));
+  var surfaceY=G-o.h*(1-Math.abs(sx-center)/(o.w/2));
+
+  if(py2>surfaceY+2&&py1<G){
+   die();
+   return;
+  }
+ }
+
+ for(i=particles.length-1;i>=0;i--){
+  var part=particles[i];
+  part.x+=part.vx*dt;
+  part.y+=part.vy*dt;
+  part.life-=dt;
+  if(part.life<=0)particles.splice(i,1);
+ }
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,H);
+
+ var grad=ctx.createLinearGradient(0,0,0,H);
+ grad.addColorStop(0,'#101d43');
+ grad.addColorStop(1,'#080e24');
+ ctx.fillStyle=grad;
+ ctx.fillRect(0,0,W,H);
+
+ ctx.strokeStyle='#20355f';
+ ctx.lineWidth=1;
+
+ var off=-(world*.3%45);
+
+ for(var x=off;x<W;x+=45){
+  ctx.beginPath();
+  ctx.moveTo(x,0);
+  ctx.lineTo(x,G);
+  ctx.stroke();
+ }
+
+ for(var y=22;y<G;y+=45){
+  ctx.beginPath();
+  ctx.moveTo(0,y);
+  ctx.lineTo(W,y);
+  ctx.stroke();
+ }
+
+ ctx.fillStyle='#14264c';
+ ctx.fillRect(0,G,W,H-G);
+ ctx.fillStyle='#35eaff';
+ ctx.fillRect(0,G,W,4);
+
+ for(x=-(world%50);x<W;x+=50){
+  ctx.fillStyle='#2b4779';
+  ctx.fillRect(x,G+16,25,4);
+ }
+
+ if(gravityFlip){
+  ctx.fillStyle='#bd79ff';
+  ctx.fillRect(0,0,W,4);
+ }
+
+ obstacles.forEach(function(o){
+  var ox=o.x-world;
+  if(ox<-100||ox>W+100)return;
+
+  if(o.type==='spike'){
+   ctx.fillStyle=selected===2?'#ff3d8c':
+     selected===1?'#ff7868':'#ff4d83';
+
+   ctx.beginPath();
+   ctx.moveTo(ox,G);
+   ctx.lineTo(ox+o.w/2,G-o.h);
+   ctx.lineTo(ox+o.w,G);
+   ctx.closePath();
+   ctx.fill();
+
+   ctx.strokeStyle='#ffd0e0';
+   ctx.lineWidth=2;
+   ctx.stroke();
+
+  }else if(o.type==='block'){
+   ctx.fillStyle='#42dfff';
+   ctx.fillRect(ox,G-o.h,o.w,o.h);
+   ctx.strokeStyle='#d4fbff';
+   ctx.strokeRect(ox,G-o.h,o.w,o.h);
+
+  }else if(o.type==='portal'){
+   ctx.strokeStyle='#c18aff';
+   ctx.lineWidth=7;
+   ctx.beginPath();
+   ctx.ellipse(
+    ox+o.w/2,
+    G-o.h/2,
+    o.w/2,
+    o.h/2,
+    0,0,Math.PI*2
+   );
+   ctx.stroke();
+
+  }else if(o.type==='finish'){
+   ctx.fillStyle='#4dffb4';
+   ctx.fillRect(ox,G-o.h,8,o.h);
+   ctx.fillStyle='#e6fff5';
+   ctx.font='bold 18px Arial';
+   ctx.fillText('FINISH',ox-26,G-o.h-12);
+  }
+ });
+
+ particles.forEach(function(q){
+  ctx.globalAlpha=Math.max(0,q.life/.4);
+  ctx.fillStyle=q.color;
+  ctx.fillRect(q.x,q.y,5,5);
+ });
+ ctx.globalAlpha=1;
+
+ var s=currentSkin();
+
+ ctx.save();
+ ctx.translate(p.x+CUBE/2,p.y+CUBE/2);
+ ctx.rotate(p.angle);
+ ctx.shadowColor=s.glow;
+ ctx.shadowBlur=17;
+ ctx.fillStyle=s.color;
+ ctx.fillRect(-CUBE/2,-CUBE/2,CUBE,CUBE);
+ ctx.shadowBlur=0;
+ ctx.strokeStyle='#ffffffd9';
+ ctx.lineWidth=3;
+ ctx.strokeRect(-CUBE/2+2,-CUBE/2+2,CUBE-4,CUBE-4);
+ ctx.fillStyle='#0a2041';
+ ctx.fillRect(-9,-7,5,7);
+ ctx.fillRect(4,-7,5,7);
+ ctx.restore();
+}
+
+function loop(now){
+ var dt=Math.min((now-last)/1000,.025);
+ last=now;
+ update(dt);
+ draw();
+
+ if(mode==='playing')raf=requestAnimationFrame(loop);
+ else raf=0;
+}
+
+function action(name,b){
+ if(name==='nick'){
+  var input=$('nickInput');
+  var v=input?input.value.trim():'';
+
+  if(ownerMode){
+   profile.nickname='[DEV] Kyosuke';
+   save();
+   updateProfile();
+   notify('Радужный ник владельца установлен');
+   return;
+  }
+
+  if(v.length<2){
+   notify('Ник должен содержать хотя бы 2 символа');
+   return;
+  }
+
+  if(isReservedNick(v)){
+   notify('Этот ник зарезервирован для администрации');
+   return;
+  }
+
+  profile.nickname=v.slice(0,16);
+  save();
+  updateProfile();
+  notify('Ник сохранён');
+  return;
+ }
+
+ if(name==='menu'){
+  if(raf)cancelAnimationFrame(raf);
+  raf=0;
+  menu();
+  return;
+ }
+
+ if(name==='start'){start();return}
+
+ if(name==='music'){
+  musicEnabled=!musicEnabled;
+  updateMusicButton();
+
+  if(musicEnabled&&mode==='playing')startMusic();
+  else stopMusic();
+
+  return;
+ }
+
+ if(name==='level'){
+  var n=Number(b.dataset.level);
+  if(n<0||n>2||!Number.isInteger(n))return;
+  selected=n;
+  menu();
+  return;
+ }
+
+ if(name==='shop'){showShop();return}
+ if(name==='achievements'){showAchievements();return}
+ if(name==='stats'){showStats();return}
+ if(name==='daily'){daily();return}
+ if(name==='claim'){claimDaily();return}
+
+ if(name==='buy'||name==='equip'){
+  var id=b.dataset.skin;
+  var s=skinsData.find(function(q){return q.id===id});
+  if(!s)return;
+
+  if(name==='buy'){
+   if(unlocked.indexOf(id)>=0){
+    skin=id;
+   }else if(profile.coins>=s.price){
+    profile.coins-=s.price;
+    unlocked.push(id);
+    skin=id;
+    notify('Скин открыт!');
+   }else{
+    notify('Не хватает монет');
+    return;
+   }
+  }else{
+   skin=id;
+  }
+
+  save();
+  showShop();
   checkAchievements();
+  return;
+ }
 
-  $("gameMessage").innerHTML =
-    "🏆 УРОВЕНЬ ПРОЙДЕН!<br>" +
-    `<span style="font-size:16px">+150 монет • +100 XP</span><br>` +
-    `<button onclick="restartAfterDeath()">↻ ЕЩЁ РАЗ</button>`;
+ if(name==='noop')return;
+ if(name==='editor'){showEditor();return}
 
-  toast("Победа! Награды получены.");
+ if(name==='tool'){
+  editorTool=b.dataset.tool;
+  document.querySelectorAll('[data-action="tool"]').forEach(function(el){
+   el.classList.toggle('active',el===b);
+  });
+  return;
+ }
+
+ if(name==='editorleft'){
+  world=Math.max(0,world-300);
+  draw();
+  return;
+ }
+
+ if(name==='editorright'){
+  world+=300;
+  draw();
+  return;
+ }
+
+ if(name==='savelevel'){
+  custom=obstacles.filter(function(o){
+   return ['spike','block','portal'].includes(o.type);
+  }).map(function(o){
+   return {x:o.x,w:o.w,h:o.h,type:o.type};
+  });
+
+  save();
+  checkAchievements();
+  notify('Уровень сохранён!');
+  return;
+ }
+
+ if(name==='testlevel'){startEditorTest();return}
+
+ if(name==='clearlevel'){
+  obstacles=[];
+  custom=[];
+  world=0;
+  save();
+  draw();
+  notify('Объекты удалены');
+  return;
+ }
+
+ if(name==='owner'){requestOwnerAccess();return}
+
+ if(['grant','unlockall','resetstats','owneroff','revokeowner'].includes(name)&&!hasOwnerAccess()){
+  ownerMode=false;
+  notify('Нет доступа владельца');
+  menu();
+  return;
+ }
+
+ if(name==='grant'){
+  if(!ownerMode)return;
+  profile.coins+=500;
+  profile.xp+=250;
+  save();
+  updateProfile();
+  notify('Добавлено!');
+  return;
+ }
+
+ if(name==='unlockall'){
+  if(!ownerMode)return;
+  unlocked=skinsData.map(function(s){return s.id});
+  save();
+  updateProfile();
+  notify('Все скины открыты');
+  return;
+ }
+
+ if(name==='resetstats'){
+  if(!ownerMode)return;
+  best=[0,0,0];
+  wins=[false,false,false];
+  save();
+  notify('Рекорды сброшены');
+  return;
+ }
+
+ if(name==='owneroff'){
+  ownerMode=false;
+  menu();
+  return;
+ }
+
+ if(name==='revokeowner'){
+  try{localStorage.removeItem(OWNER_KEY)}catch(e){}
+  ownerMode=false;
+  profile.nickname='Player';
+  save();
+  menu();
+  notify('Доступ владельца удалён');
+  return;
+ }
 }
 
-/* ===== РЕДАКТОР УРОВНЕЙ ===== */
+function clickHandler(e){
+ var b=e.target.closest&&e.target.closest('[data-action]');
+ if(!b||b.disabled)return;
 
-$("editorBtn").addEventListener("click", renderEditor);
+ e.preventDefault();
 
-function renderEditor() {
-  showModal("🧱 Редактор уровней", `
-    <p>Добавляй шипы в свой тестовый уровень.</p>
-    <canvas id="editorCanvas" width="600" height="220"></canvas>
-    <div class="row" style="margin-top:10px">
-      <button id="addSpikeBtn">+ Шип</button>
-      <button id="addDoubleBtn">+ Двойной шип</button>
-    </div>
-    <p id="editorCount">Шипов: ${customObstacles.length}</p>
-    <button id="clearEditorBtn" class="red" style="width:100%">
-      Очистить редактор
-    </button>
-    <button id="saveEditorBtn" class="green" style="width:100%;margin-top:8px">
-      Сохранить уровень
-    </button>
-  `);
+ try{
+  action(b.dataset.action,b);
+ }catch(err){
+  showError(err);
+ }
+}
 
-  const editor = $("editorCanvas");
-  const ectx = editor.getContext("2d");
+document.addEventListener('click',clickHandler,true);
 
-  function drawEditor() {
-    ectx.clearRect(0, 0, editor.width, editor.height);
-    ectx.fillStyle = "#0a1027";
-    ectx.fillRect(0, 0, editor.width, editor.height);
+function press(e){
+ if(mode==='editor'){
+  var rect=canvas.getBoundingClientRect();
+  var cx=(e.clientX-rect.left)*W/rect.width;
+  var wx=world+cx;
 
-    ectx.fillStyle = "#4deaff";
-    ectx.fillRect(0, 175, editor.width, 3);
-
-    customObstacles.forEach(item => {
-      const x = item.x % 580;
-
-      ectx.beginPath();
-      ectx.moveTo(x, 175);
-      ectx.lineTo(x + 16, 145);
-      ectx.lineTo(x + 32, 175);
-      ectx.closePath();
-
-      ectx.fillStyle = "#ff4f73";
-      ectx.fill();
-
-      if (item.type === "double") {
-        ectx.beginPath();
-        ectx.moveTo(x + 32, 175);
-        ectx.lineTo(x + 48, 145);
-        ectx.lineTo(x + 64, 175);
-        ectx.closePath();
-        ectx.fill();
-      }
-    });
-
-    $("editorCount").textContent =
-      "Объектов: " + customObstacles.length;
+  if(editorTool==='spike'){
+   obstacles.push({
+    x:Math.round(wx/34)*34,
+    w:34,h:40,type:'spike'
+   });
+  }else if(editorTool==='block'){
+   obstacles.push({
+    x:Math.round(wx/34)*34,
+    w:40,h:65,type:'block'
+   });
+  }else{
+   obstacles.push({
+    x:Math.round(wx/34)*34,
+    w:35,h:110,type:'portal'
+   });
   }
 
-  $("addSpikeBtn").onclick = () => {
-    customObstacles.push({
-      x: 400 + customObstacles.length * 100,
-      type: "spike"
-    });
-    drawEditor();
-  };
+  draw();
+  return;
+ }
 
-  $("addDoubleBtn").onclick = () => {
-    customObstacles.push({
-      x: 400 + customObstacles.length * 100,
-      type: "double"
-    });
-    drawEditor();
-  };
+ if(mode!=='playing')return;
+ if(e.cancelable)e.preventDefault();
 
-  $("clearEditorBtn").onclick = () => {
-    customObstacles = [];
-    drawEditor();
-  };
-
-  $("saveEditorBtn").onclick = () => {
-    profile.customLevels = customObstacles;
-    saveProfile();
-    toast("Уровень сохранён на устройстве");
-  };
-
-  customObstacles = Array.isArray(profile.customLevels)
-    ? profile.customLevels.map(item => ({ ...item }))
-    : [];
-
-  drawEditor();
+ if(!held){
+  held=true;
+  jump();
+ }
 }
 
-/* ===== ВОССТАНОВЛЕНИЕ И ЗАВЕРШЕНИЕ ===== */
-
-if (profile.selectedSkin >= 0 && profile.selectedSkin < SKINS.length) {
-  selectedSkin = profile.selectedSkin;
-} else {
-  selectedSkin = 0;
+function release(e){
+ held=false;
+ if(e&&e.cancelable)e.preventDefault();
 }
 
-$("nicknameInput").value = profile.nick;
-updateUI();
+canvas.addEventListener('pointerdown',press,{passive:false});
+window.addEventListener('pointerup',release);
+window.addEventListener('pointercancel',release);
+window.addEventListener('blur',release);
 
-window.addEventListener("pagehide", () => {
-  // Режимы доступа намеренно не сохраняются.
-  ownerMode = false;
-  testerMode = false;
-  stopMusic();
+window.addEventListener('keydown',function(e){
+ if(e.code==='Space'||e.code==='ArrowUp'){
+  e.preventDefault();
+
+  if(mode==='playing'){
+   if(!held){
+    held=true;
+    jump();
+   }
+  }else if(mode==='menu'){
+   start();
+  }
+ }
 });
 
-/* Конец JavaScript */
+window.addEventListener('keyup',function(e){
+ if(e.code==='Space'||e.code==='ArrowUp')held=false;
+});
+
+function showError(err){
+ var box=$('errorBox');
+ box.style.display='block';
+ box.textContent='Ошибка игры: '+
+  (err&&err.message?err.message:String(err));
+}
+
+window.addEventListener('error',function(e){
+ showError(e.error||e.message||'Неизвестная ошибка');
+});
+
+window.addEventListener('unhandledrejection',function(e){
+ showError(e.reason||'Ошибка Promise');
+});
+
+readStore();
+updateMusicButton();
+reset();
+menu();
+
+})();
 </script>
 </body>
 </html>
- 
