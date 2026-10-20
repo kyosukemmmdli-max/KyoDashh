@@ -4,17 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#080d22">
-<title>Kyo Dash — Big Update</title>
+<title>Kyo Dash — Owner, Daily Quests & Effects</title>
 <style>
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#070b1c;color:#fff;font-family:Arial,sans-serif}
 body{touch-action:manipulation}
 button,input,select{font:inherit}
-button{cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+button{cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 button:active{transform:scale(.97)}
 .app{width:min(100%,1050px);margin:auto;padding:9px;display:flex;flex-direction:column;gap:8px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:7px;flex-wrap:wrap}
-.logoSmall{font-weight:1000;letter-spacing:1.5px;color:#42eaff;font-size:18px;cursor:default;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
+.logoSmall{
+ font-weight:1000;letter-spacing:1.5px;color:#42eaff;font-size:18px;
+ cursor:pointer;user-select:none;-webkit-user-select:none;
+ -webkit-touch-callout:none;-webkit-user-drag:none;
+ touch-action:manipulation;
+}
 .stat{font-size:12px;color:#bad3ff;font-weight:bold}
 .meter{height:7px;background:#192344;border-radius:20px;overflow:hidden}
 #progressFill{height:100%;width:0;background:linear-gradient(90deg,#31dfff,#6dffb6)}
@@ -22,14 +27,15 @@ canvas{width:100%;height:auto;aspect-ratio:900/420;display:block;border:1px soli
 .hint{text-align:center;color:#91a8d4;font-size:11px;min-height:14px}
 .smallbtn{padding:8px 10px;border:1px solid #304a77;background:#121e3c;color:#cce9ff;border-radius:9px;font-size:11px;font-weight:bold}
 .overlay{position:fixed;inset:0;z-index:5;background:#030614ed;display:flex;align-items:center;justify-content:center;padding:10px}
-.panel{width:min(96vw,500px);max-height:95dvh;overflow:auto;background:linear-gradient(145deg,#172750,#090f25);border:1px solid #315a91;border-radius:20px;padding:18px;text-align:center;box-shadow:0 0 45px #12295b66}
-.title{font-size:clamp(30px,9vw,47px);margin:0;color:#41e9ff;letter-spacing:1px;text-shadow:0 0 20px #1bcfff55}
-.subtitle{font-size:13px;color:#b4c8ed;line-height:1.5}
-.profile{padding:12px;margin:12px 0;background:#0b1530;border:1px solid #2b4776;border-radius:13px}
+.panel{width:min(94vw,460px);max-height:88dvh;overflow:auto;overscroll-behavior:contain;background:linear-gradient(145deg,#172750,#090f25);border:1px solid #315a91;border-radius:17px;padding:12px;text-align:center;box-shadow:0 0 35px #12295b55}
+.title{font-size:clamp(26px,7vw,36px);margin:0 0 4px;color:#41e9ff;letter-spacing:1px;text-shadow:0 0 16px #1bcfff44}
+.subtitle{font-size:11px;color:#b4c8ed;line-height:1.35;margin:3px 0 8px}
+.profile-summary{display:flex;align-items:center;gap:9px;text-align:left;padding:10px;margin:7px 0;background:#0b1530;border:1px solid #2b4776;border-radius:11px;min-width:0}.summary-avatar{font-size:30px;flex:0 0 auto}.summary-info{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1;overflow-wrap:anywhere}.profile-summary .smallbtn{max-width:145px;flex:0 0 auto;white-space:normal;line-height:1.2}@media(max-width:440px){.profile-summary{padding:8px;gap:7px}.summary-avatar{font-size:25px}.profile-summary .smallbtn{max-width:115px;padding:7px;font-size:10px}}
+.profile{padding:8px;margin:7px 0;background:#0b1530;border:1px solid #2b4776;border-radius:11px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
-.levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:12px 0}
-.btn{width:100%;padding:12px 8px;background:linear-gradient(90deg,#25dfff,#67ffc5);color:#061327;border:0;border-radius:10px;font-weight:900;margin:3px 0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:7px 0}
+.levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
+.btn{width:100%;padding:9px 7px;background:linear-gradient(90deg,#25dfff,#67ffc5);color:#061327;border:0;border-radius:9px;font-weight:900;margin:2px 0;font-size:13px}
 .secondary{background:#142343;border:1px solid #34517f;color:#d9e9ff}
 .danger{background:#48203b;color:#ffcbde;border:1px solid #8d416c}
 .level{background:#111c38;border:1px solid #30466f;color:#e1edff;border-radius:9px;padding:10px 3px;font-weight:900}
@@ -44,18 +50,24 @@ input,select{width:100%;padding:10px;background:#080f23;border:1px solid #34527f
 #xpFill{height:100%;width:0;background:linear-gradient(90deg,#34dfff,#63ffb3)}
 .hidden{display:none!important}
 .rainbow{font-weight:1000;background:linear-gradient(90deg,#ff5478,#ffd94e,#56ffac,#42dfff,#c274ff,#ff5478);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rainbow 3s linear infinite}
+.nick-blue{color:#43a5ff}.nick-red{color:#ff5c68}.nick-green{color:#55ef9a}.nick-yellow{color:#ffe45c}
+.avatar-choice{font-size:21px;padding:6px;border:1px solid #34517f;background:#111c38;border-radius:9px;cursor:pointer}.avatar-choice.active{border-color:#41e9ff;background:#12314c;box-shadow:0 0 12px #26dfff33}.avatar-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:6px 0}.owner-name{color:#ffe28a!important;text-shadow:0 0 7px #ffc83d,0 0 18px #ff9d22;animation:ownerPulse 2.2s ease-in-out infinite}.owner-badge{display:inline-flex;gap:4px;padding:3px 7px;border:1px solid #ffd66b;border-radius:999px;background:linear-gradient(120deg,#49340c,#1b2342);color:#ffe28a;font-size:10px;font-weight:900}.quest-card{background:linear-gradient(135deg,#102544,#10182f);border:1px solid #3b6a91;border-radius:12px;padding:10px;margin:7px 0;text-align:left}.quest-row{display:flex;gap:8px;align-items:flex-start;margin:8px 0}.quest-icon{font-size:22px}.quest-copy{flex:1;font-size:12px;color:#c6d8f5}.quest-copy b{display:block;color:#fff;margin-bottom:3px}.quest-progress{height:5px;background:#263958;border-radius:10px;overflow:hidden;margin-top:5px}.quest-progress span{display:block;height:100%;background:linear-gradient(90deg,#36dfff,#72ffb8)}.owner-tag{font-size:10px;color:#ffe28a;margin-left:5px}@keyframes ownerPulse{50%{text-shadow:0 0 12px #ffc83d,0 0 24px #ff9d22}}.overlay:not(.hidden) .panel{animation:panelIn .22s ease-out}.btn,.smallbtn,.level,.avatar-choice{transition:transform .15s ease,filter .2s ease,box-shadow .2s ease}.btn:hover,.smallbtn:hover,.level:hover,.avatar-choice:hover{filter:brightness(1.12);box-shadow:0 0 13px #36dfff22}@keyframes panelIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}.title-chip{display:inline-block;padding:3px 7px;border:1px solid #42618f;border-radius:999px;color:#b8dcff;font-size:10px;margin-left:4px}.notice{padding:10px;background:#111d39;border:1px solid #2d4774;border-radius:10px;margin:7px 0;text-align:left}.notice.unread{border-color:#42eaff;background:#102543}.notice small{display:block;color:#91a8d4;margin-top:4px}
 @keyframes rainbow{to{background-position:300% 50%}}
 #message{position:fixed;z-index:20;top:12px;left:10px;right:10px;text-align:center;pointer-events:none}
 .toast{display:inline-block;padding:10px 14px;border-radius:10px;background:#17294c;border:1px solid #42eaff;color:white;font-size:13px;box-shadow:0 6px 30px #0008}
 #errorBox{display:none;position:fixed;z-index:30;bottom:5px;left:5px;right:5px;padding:12px;border-radius:10px;background:#681e32;color:#fff;font-size:12px;overflow-wrap:anywhere}
-@media(max-width:440px){.app{padding:5px;gap:5px}.logoSmall{font-size:15px}.smallbtn{padding:7px;font-size:10px}.panel{padding:13px}.card{padding:8px}}
+#editorBar{position:fixed;z-index:8;left:5px;right:5px;bottom:7px;display:flex;flex-wrap:wrap;justify-content:center;gap:5px;padding:7px;background:rgba(15,25,43,.96);border:1px solid #61748b;border-radius:12px;box-shadow:0 5px 22px #0006}
+#editorBar .smallbtn{padding:9px 10px;color:#e5edf4;background:#29364a;border-color:#53657a}
+#editorBar .smallbtn.active{background:#dce7ef;color:#1b2939;border-color:#fff}
+@media(max-width:440px){#editorBar{gap:4px;padding:5px}#editorBar .smallbtn{padding:8px 7px;font-size:10px}}
+@media(max-width:440px){.app{padding:5px;gap:5px}.logoSmall{font-size:15px}.smallbtn{padding:7px;font-size:10px}.panel{width:94vw;padding:10px;border-radius:15px;max-height:86dvh}.card{padding:8px}.profile{padding:7px;margin:6px 0}input,select{padding:8px;margin:3px 0}.level{padding:8px 2px}.avatar-choice{font-size:20px;padding:5px}.muted{font-size:10px}}
 @media(max-height:560px){.app{gap:4px;padding:4px}.panel{padding:10px;max-height:98dvh}.profile{padding:7px;margin:7px 0}.grid,.levels{gap:5px;margin:7px 0}.title{font-size:29px}}
 </style>
 </head>
 <body>
 <main class="app">
  <header class="top">
-  <span class="logoSmall" id="gameLogo">KYO DASH</span>
+  <span class="logoSmall" id="gameLogo" oncontextmenu="return false" onselectstart="return false" draggable="false">Kyo Dash</span>
   <span class="stat" id="levelLabel">EASY</span>
   <span class="stat" id="progressText">0%</span>
   <button class="smallbtn" data-action="music" id="musicBtn">♫ MUSIC ON</button>
@@ -75,6 +87,17 @@ input,select{width:100%;padding:10px;background:#080f23;border:1px solid #34527f
 </div>
 <div id="message"></div>
 <div id="errorBox"></div>
+<div id="editorBar" class="hidden" aria-label="Панель редактора">
+ <button class="smallbtn active" data-action="tool" data-tool="spike">🔺 Шип</button>
+ <button class="smallbtn" data-action="tool" data-tool="block">🟦 Блок</button>
+ <button class="smallbtn" data-action="tool" data-tool="portal">🌀 Портал</button>
+ <button class="smallbtn" data-action="editorleft">←</button>
+ <button class="smallbtn" data-action="editorright">→</button>
+ <button class="smallbtn" data-action="savelevel">💾</button>
+ <button class="smallbtn" data-action="testlevel">▶ Тест</button>
+ <button class="smallbtn" data-action="clearlevel">Очистить</button>
+ <button class="smallbtn" data-action="menu">В меню</button>
+</div>
 
 <script>
 (function(){
@@ -85,167 +108,186 @@ var canvas=$('game'),ctx=canvas.getContext('2d');
 var overlay=$('overlay'),content=$('panelContent');
 var W=900,H=420,G=330,CUBE=34;
 var STORE='kyoDashBigUpdateV1';
+var ACCOUNT_STORE='kyoDashAccountsV1';
+var CURRENT_ACCOUNT_STORE='kyoDashCurrentAccountV1';
+// Автоматическое восстановление последнего аккаунта при повторном открытии игры.
+var accounts=[],currentAccount=null;
 
-/* OWNER ACCESS */
-var OWNER_PIN='OwnerKD-ADS5H-D6E9F037F7';
-var OWNER_KEY='kyoDashOwnerAuthorizedV1';
-var ownerMode=false;
-var logoClicks=0;
-var logoClickTimer=null;
-
-function hasOwnerAccess(){
- try{return localStorage.getItem(OWNER_KEY)==='yes'}catch(e){return false}
-}
-
-function requestOwnerAccess(){
- if(hasOwnerAccess()){
-  ownerMode=true;
-  showOwnerPanel();
-  return;
- }
-
- var pin=prompt('👑 Kyo Dash Owner Panel\nВведите PIN владельца:');
- if(pin===null)return;
-
- if(pin.trim()!==OWNER_PIN){
-  alert('🚫 Неверный PIN');
-  return;
- }
-
- try{
-  localStorage.setItem(OWNER_KEY,'yes');
- }catch(e){
-  alert('Не удалось сохранить доступ в этом браузере.');
- }
-
- ownerMode=true;
- showOwnerPanel();
-}
-
-/* СЕКРЕТНЫЙ ВХОД: 7 нажатий на логотип */
-var gameLogo=$('gameLogo');
-
-gameLogo.style.userSelect='none';
-gameLogo.style.webkitUserSelect='none';
-gameLogo.style.webkitTouchCallout='none';
-gameLogo.style.touchAction='manipulation';
-
-gameLogo.addEventListener('contextmenu',function(e){
- e.preventDefault();
-});
-
-gameLogo.addEventListener('pointerdown',function(e){
- e.preventDefault();
-
- logoClicks++;
-
- if(logoClickTimer)clearTimeout(logoClickTimer);
-
- logoClickTimer=setTimeout(function(){
-  logoClicks=0;
- },2000);
-
- if(logoClicks>=7){
-  logoClicks=0;
-  clearTimeout(logoClickTimer);
-  requestOwnerAccess();
- }
-});
-
+/* Уровни */
 var levels=[
  {name:'EASY',speed:285,jump:-555,gravity:1550,length:5700,gap:390},
  {name:'MEDIUM',speed:295,jump:-565,gravity:1600,length:6500,gap:350},
  {name:'HARD',speed:310,jump:-575,gravity:1650,length:7200,gap:330}
 ];
 
-var profile={nickname:'Player',xp:0,coins:0};
+var profile={nickname:'Player',nicknameColor:'blue',avatarId:'fox',customAvatarData:'',title:'Новичок',xp:0,coins:0};
+var notifications=[];
+var dailyQuestDate='',dailyQuestState={plays:0,wins:0,xp:0,claimed:{}};
+var dailyQuestDefs=[{id:'plays',icon:'🎮',name:'Сыграй 3 раунда',desc:'Запусти игру три раза за сегодня',goal:3,reward:40},{id:'wins',icon:'🏁',name:'Пройди уровень',desc:'Заверши любой уровень',goal:1,reward:75},{id:'xp',icon:'⚡',name:'Набери 100 XP',desc:'Заработай опыт за прохождение',goal:100,reward:60}];
+var avatarCatalog=[{id:'fox',emoji:'🦊',name:'Лис'},{id:'cat',emoji:'🐱',name:'Кот'},{id:'robot',emoji:'🤖',name:'Робот'},{id:'ninja',emoji:'🥷',name:'Ниндзя'},{id:'dragon',emoji:'🐉',name:'Дракон'},{id:'ghost',emoji:'👻',name:'Призрак'},{id:'star',emoji:'🌟',name:'Звезда'},{id:'alien',emoji:'👽',name:'Пришелец'},{id:'crown',emoji:'👑',name:'Корона'},{id:'panda',emoji:'🐼',name:'Панда'},{id:'rocket',emoji:'🚀',name:'Ракета'},{id:'gem',emoji:'💎',name:'Кристалл'}];
 var selected=0,mode='menu',world=0,progress=0,last=0,raf=0;
 var held=false,obstacles=[],particles=[],custom=[];
 var best=[0,0,0],wins=[false,false,false],achieved={};
 var unlocked=['cyan'],skin='cyan',dailyClaim='',editorTool='spike';
 var gravityFlip=false,portalCooldown=0;
+var testerMode=false,customTesting=false;
+var levelBackgrounds=[
+ {top:'#30394d',mid:'#293449',bottom:'#1c2638',far:'#354057',near:'#2b374b',ground:'#222d40',line:'#9aaec0'},
+ {top:'#293c3b',mid:'#263635',bottom:'#1b292b',far:'#304543',near:'#293b39',ground:'#202f2f',line:'#91b5a8'},
+ {top:'#393342',mid:'#302b3c',bottom:'#211f30',far:'#42394b',near:'#342d40',ground:'#292537',line:'#b1a0b9'}
+];
 var p={x:150,y:G-CUBE,vy:0,angle:0,onGround:true};
-var musicEnabled=true,audioCtx=null,musicTimer=null,musicStep=0,musicGeneration=0;
-
-var songData=[
- {tempo:190,notes:[523,659,784,659,523,392,440,523,659,523,440,392,440,523,659,784,659,523,392,440,523,659,784,880,784,659,523,440,392,440,523,392],bass:[131,0,165,0,196,0,165,0],wave:'square'},
- {tempo:145,notes:[392,523,659,784,659,523,392,523,440,587,698,880,698,587,440,587,392,523,659,784,880,784,659,523,440,587,698,880,784,698,587,440],bass:[98,98,131,131,110,110,147,147],wave:'sawtooth'},
- {tempo:105,notes:[330,440,659,523,330,440,784,659,349,466,698,587,349,466,880,698,330,523,659,880,784,659,523,440,349,523,698,932,880,698,523,392],bass:[82,82,110,110,73,73,98,98],wave:'square'}
-];
-
-var skinsData=[
- {id:'cyan',name:'Neon Cyan',price:0,color:'#35eaff',glow:'#00cfff'},
- {id:'fire',name:'Fire Cube',price:100,color:'#ff6748',glow:'#ff2d54'},
- {id:'lime',name:'Toxic Lime',price:150,color:'#a3ff3c',glow:'#64ff21'},
- {id:'purple',name:'Void Purple',price:200,color:'#bd79ff',glow:'#8d38ff'},
- {id:'gold',name:'Golden Star',price:350,color:'#ffd95a',glow:'#ffad20'},
- {id:'pink',name:'Pink Pulse',price:400,color:'#ff67cb',glow:'#ff30a4'}
-];
-
-function isReservedNick(name){
- var n=String(name||'').trim().toUpperCase().replace(/[\s_\-\[\].]/g,'');
- return /^(DEV|MOD|MODER|OWNER|ADMIN|STAFF|DEVELOPER|HELPER|ВЛАДЕЛЕЦ|АДМИН|МОДЕРАТОР)/.test(n);
+var musicEnabled=true,audioCtx=null,musicTimer=null,musicStep=0,musicGeneration=0; if(levelNum()>=5)opts.push('Ветеран');
+ if(wins.every(Boolean))opts.push('Легенда');
+ if(isOwnerAccount())opts.push('Владелец');
+ return opts;
 }
-
-function currentSkin(){
- return skinsData.find(function(s){return s.id===skin})||skinsData[0];
+function applyGameData(d){
+ if(!d||typeof d!=='object')return;
+ if(d.profile&&typeof d.profile==='object'){
+  profile.nickname=String(d.profile.nickname||'Player').trim().slice(0,16);
+  profile.nicknameColor=['blue','red','rainbow','green','yellow'].includes(d.profile.nicknameColor)?d.profile.nicknameColor:'blue';
+  profile.avatarId=avatarCatalog.some(function(a){return a.id===d.profile.avatarId})?d.profile.avatarId:'fox';
+  profile.customAvatarData=(currentAccount&&String(currentAccount.username).toLowerCase()==='kyosuke'&&typeof d.profile.customAvatarData==='string'&&d.profile.customAvatarData.startsWith('data:image/')&&d.profile.customAvatarData.length<2500000)?d.profile.customAvatarData:'';
+  profile.title=['Новичок','Ветеран','Легенда','Владелец'].includes(d.profile.title)?d.profile.title:'Новичок';
+  if(profile.title==='Владелец'&&(!currentAccount||currentAccount.username.toLowerCase()!=='kyosuke'))profile.title='Новичок';
+  profile.xp=Math.max(0,Number(d.profile.xp)||0);
+  profile.coins=Math.max(0,Number(d.profile.coins)||0);
+ }
+ if(Array.isArray(d.best)&&d.best.length===3)best=d.best.map(function(v){return Math.max(0,Number(v)||0)});
+ if(Array.isArray(d.wins)&&d.wins.length===3)wins=d.wins;
+ if(d.achieved&&typeof d.achieved==='object')achieved=d.achieved;
+ if(Array.isArray(d.unlocked))unlocked=Array.from(new Set(['cyan'].concat(d.unlocked)));
+ if(skinsData.some(function(s){return s.id===d.skin})&&unlocked.indexOf(d.skin)>=0)skin=d.skin;
+ if(typeof d.dailyClaim==='string')dailyClaim=d.dailyClaim;
+ if(typeof d.dailyQuestDate==='string')dailyQuestDate=d.dailyQuestDate;
+ if(d.dailyQuestState&&typeof d.dailyQuestState==='object')dailyQuestState={plays:Math.max(0,Number(d.dailyQuestState.plays)||0),wins:Math.max(0,Number(d.dailyQuestState.wins)||0),xp:Math.max(0,Number(d.dailyQuestState.xp)||0),claimed:d.dailyQuestState.claimed&&typeof d.dailyQuestState.claimed==='object'?d.dailyQuestState.claimed:{}};
+ ensureDailyQuests();
+ if(Array.isArray(d.custom))custom=d.custom.filter(function(o){return o&&Number.isFinite(o.x)&&['spike','block','portal'].includes(o.type)}).slice(0,100);
+ if(typeof d.testerMode==='boolean')testerMode=d.testerMode;
+ if(Array.isArray(d.notifications))notifications=d.notifications.filter(function(n){return n&&typeof n.message==='string'}).slice(0,50);
 }
-
-function notify(msg){
- $('message').innerHTML='<span class="toast"></span>';
- $('message').firstChild.textContent=msg;
- setTimeout(function(){$('message').innerHTML=''},2300);
+function readAccounts(){
+ try{
+  var raw=JSON.parse(localStorage.getItem(ACCOUNT_STORE)||'{"accounts":[]}');
+  accounts=Array.isArray(raw.accounts)?raw.accounts.filter(function(a){return a&&Number.isInteger(a.id)&&a.id>0&&typeof a.username==='string'&&typeof a.password==='string'}):[];
+ }catch(e){accounts=[]}
 }
-
+function persistAccounts(){
+ try{localStorage.setItem(ACCOUNT_STORE,JSON.stringify({accounts:accounts}))}catch(e){notify('Не удалось сохранить аккаунты в браузере')}
+}
 function readStore(){
- try{
-  var d=JSON.parse(localStorage.getItem(STORE)||'{}');
-  if(d.profile&&typeof d.profile==='object'){
-   var storedNick=String(d.profile.nickname||'Player').trim().slice(0,16);
-   profile.nickname=isReservedNick(storedNick)&&!hasOwnerAccess()?'Player':storedNick;
-   profile.xp=Math.max(0,Number(d.profile.xp)||0);
-   profile.coins=Math.max(0,Number(d.profile.coins)||0);
-  }
-  if(Array.isArray(d.best)&&d.best.length===3)best=d.best.map(function(v){return Math.max(0,Number(v)||0)});
-  if(Array.isArray(d.wins)&&d.wins.length===3)wins=d.wins;
-  if(d.achieved&&typeof d.achieved==='object')achieved=d.achieved;
-  if(Array.isArray(d.unlocked))unlocked=Array.from(new Set(['cyan'].concat(d.unlocked)));
-  if(skinsData.some(function(s){return s.id===d.skin})&&unlocked.indexOf(d.skin)>=0)skin=d.skin;
-  if(typeof d.dailyClaim==='string')dailyClaim=d.dailyClaim;
-  if(Array.isArray(d.custom))custom=d.custom.filter(function(o){
-   return o&&Number.isFinite(o.x)&&['spike','block','portal'].includes(o.type);
-  }).slice(0,100);
- }catch(e){}
+ try{applyGameData(JSON.parse(localStorage.getItem(STORE)||'{}'))}catch(e){}
+ readAccounts();
+ try{var savedId=Number(localStorage.getItem(CURRENT_ACCOUNT_STORE));if(savedId>0){currentAccount=accountById(savedId);if(currentAccount){if(currentAccount.data)applyGameData(currentAccount.data);localStorage.setItem(CURRENT_ACCOUNT_STORE,String(currentAccount.id))}else{localStorage.removeItem(CURRENT_ACCOUNT_STORE)}}}catch(e){}
 }
-
+function gameData(){
+ return {profile:profile,best:best,wins:wins,achieved:achieved,unlocked:unlocked,skin:skin,dailyClaim:dailyClaim,dailyQuestDate:dailyQuestDate,dailyQuestState:dailyQuestState,custom:custom,testerMode:testerMode,notifications:notifications};
+}
 function save(){
- try{
-  localStorage.setItem(STORE,JSON.stringify({
-   profile:profile,best:best,wins:wins,achieved:achieved,
-   unlocked:unlocked,skin:skin,dailyClaim:dailyClaim,custom:custom
-  }));
- }catch(e){notify('Не удалось сохранить: проверь память браузера')}
+ var d=gameData();
+ try{localStorage.setItem(STORE,JSON.stringify(d))}catch(e){notify('Не удалось сохранить: проверь память браузера')}
+ if(currentAccount){currentAccount.data=d;persistAccounts();try{localStorage.setItem(CURRENT_ACCOUNT_STORE,String(currentAccount.id))}catch(e){}}
+}
+function accountById(id){return accounts.find(function(a){return a.id===id})||null}
+function nicknameTaken(nickname){
+ var wanted=String(nickname||'').trim().toLocaleLowerCase();
+ if(!wanted)return false;
+ return accounts.some(function(a){
+  if(currentAccount&&a.id===currentAccount.id)return false;
+  var saved=a&&a.data&&a.data.profile&&a.data.profile.nickname;
+  return typeof saved==='string'&&saved.trim().toLocaleLowerCase()===wanted;
+ });
+}
+function showAccountGate(){
+ mode='auth';
+ stopMusic();
+ held=false;
+ $('editorBar').classList.add('hidden');
+ shell('Вход в Kyo Dash','Чтобы играть, сначала войди или создай аккаунт',
+  '<div class="card"><h3>Вход / регистрация обязательны</h3>'+
+  '<p>Введи логин и пароль, чтобы продолжить в игру.</p>'+
+  '<input id="accountLoginInput" maxlength="20" autocomplete="username" placeholder="Логин (от 3 символов)">'+
+  '<input id="accountPasswordInput" type="password" maxlength="64" autocomplete="current-password" placeholder="Пароль (от 4 символов)">'+
+  '<div class="grid"><button class="btn" data-action="accountRegister">СОЗДАТЬ АККАУНТ</button>'+
+  '<button class="btn secondary" data-action="accountLogin">ВОЙТИ</button></div>'+
+  '<p class="muted">Вход обязателен. Аккаунт хранится локально в этом браузере.</p></div>');
+}
+function showAccount(){
+ mode='menu';
+ var logged=currentAccount?('<div class="card"><h3>Аккаунт подключён</h3><p>Логин: <b>'+escapeHTML(currentAccount.username)+'</b></p><p>Твой ID: <b>'+currentAccount.id+'</b></p><p class="muted">ID сохранится в этом браузере.</p><button class="btn danger" data-action="logout">ВЫЙТИ ИЗ АККАУНТА</button></div>'):
+ '<div class="card"><h3>Вход / регистрация</h3><p>Создай аккаунт, чтобы получить постоянный ID.</p><input id="accountLoginInput" maxlength="20" autocomplete="username" placeholder="Логин (от 3 символов)"><input id="accountPasswordInput" type="password" maxlength="64" autocomplete="current-password" placeholder="Пароль (от 4 символов)"><div class="grid"><button class="btn" data-action="accountRegister">СОЗДАТЬ АККАУНТ</button><button class="btn secondary" data-action="accountLogin">ВОЙТИ</button></div><p class="muted">Важно: это локальная система — аккаунты хранятся только в этом браузере и не синхронизируются между устройствами.</p></div>';
+ shell('Аккаунт игрока','Логин, пароль и постоянный ID',logged+backButton());
+}
+function escapeHTML(v){return String(v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function accountRegister(){
+ var u=($('accountLoginInput')||{}).value||'',pw=($('accountPasswordInput')||{}).value||'';
+ u=u.trim();
+ if(!/^[a-zA-Z0-9_-]{3,20}$/.test(u)){notify('Логин: 3–20 символов, латиница, цифры, _ или -');return}
+ if(pw.length<4){notify('Пароль должен быть не короче 4 символов');return}
+ if(accounts.some(function(a){return a.username.toLowerCase()===u.toLowerCase()})){notify('Ошибка: такой логин уже существует');return}
+ var next=accounts.reduce(function(m,a){return Math.max(m,a.id)},0)+1;
+ var a={id:next,username:u,password:pw,data:gameData()};
+ accounts.push(a);currentAccount=a; a.data=gameData();try{localStorage.setItem(CURRENT_ACCOUNT_STORE,String(a.id))}catch(e){}persistAccounts();addNotification('Добро пожаловать в Kyo Dash','Аккаунт успешно создан','👋');save();
+ if(mode==='auth'){menu()}else{showAccount();updateProfile()}notify('Аккаунт создан! Твой ID: '+next);
+}
+function accountLogin(){
+ var u=(($('accountLoginInput')||{}).value||'').trim(),pw=($('accountPasswordInput')||{}).value||'';
+ var a=accounts.find(function(q){return q.username.toLowerCase()===u.toLowerCase()&&q.password===pw});
+ if(!a){notify('Неверный логин или пароль');return}
+ if(currentAccount) {currentAccount.data=gameData();persistAccounts()}
+ currentAccount=a;
+ try{localStorage.setItem(CURRENT_ACCOUNT_STORE,String(a.id))}catch(e){}
+ if(a.data)applyGameData(a.data);else profile.nickname=a.username;
+ if(!isOwnerAccount()&&profile.title==='Владелец')profile.title='Новичок';
+ save();menu();notify('Вход выполнен · ID '+a.id);
 }
 
 function levelNum(){return Math.floor(profile.xp/250)+1}
 function xpNext(){return profile.xp%250}
 
 function profileHTML(){
+ var avatar=avatarCatalog.find(function(a){return a.id===profile.avatarId})||avatarCatalog[0];
+ var titleOptions=getTitleOptions();
+ if(titleOptions.indexOf(profile.title)<0)profile.title='Новичок';
+ var titleHtml=titleOptions.map(function(t){return '<option value="'+t+'" '+(profile.title===t?'selected':'')+'>'+({'Новичок':'🌱 Новичок','Ветеран':'🛡️ Ветеран','Легенда':'⭐ Легенда','Владелец':'👑 Владелец'}[t]||t)+'</option>'}).join('');
+ var avatarHtml=avatarCatalog.map(function(a){return '<button type="button" class="avatar-choice '+(!profile.customAvatarData&&profile.avatarId===a.id?'active':'')+'" title="'+a.name+'" data-action="avatar" data-avatar="'+a.id+'">'+a.emoji+'</button>'}).join('');
+ var avatarVisual=profile.customAvatarData?'<img src="'+profile.customAvatarData+'" alt="Аватар владельца" style="width:64px;height:64px;object-fit:cover;border-radius:50%;border:2px solid #ffd95a;box-shadow:0 0 14px #ffc83d66">':avatar.emoji;
+ var ownerAvatarTools=isOwnerAccount()?'<div class="card" style="margin-top:8px;text-align:left;border-color:#b38a32"><label class="muted" for="ownerAvatarFile">👑 Свой аватар из галереи (только Kyosuke)</label><input id="ownerAvatarFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="width:100%;margin:6px 0"><button type="button" class="smallbtn" data-action="removeOwnerAvatar">Убрать свой аватар</button><p class="muted">Изображение хранится в этом браузере. Выбирай обычную картинку, без личных данных.</p></div>':'';
  return '<div class="profile">'+
- '<div class="row"><b>Игрок: <span id="nickDisplay"></span></b><b>💰 <span id="coinDisplay"></span></b></div>'+
- '<p class="muted">Уровень аккаунта <b id="accountLevel"></b> · XP <span id="xpDisplay"></span>/250</p>'+
- '<div class="xpbar"><div id="xpFill"></div></div>'+
- '<input id="nickInput" maxlength="16" placeholder="Новый ник">'+
- '<button class="btn secondary" data-action="nick">СОХРАНИТЬ НИК</button></div>';
+ '<div class="row"><b>Игрок: <span id="nickDisplay"></span></b><b>💰 <span id="coinDisplay"></span></b></div>'+ 
+ '<div style="font-size:34px;margin:7px 0;display:flex;justify-content:center;align-items:center;min-height:68px" id="avatarPreview">'+avatarVisual+'</div>'+ 
+ '<div><span id="titlePreview" class="title-chip">'+escapeHTML(profile.title)+'</span></div>'+ 
+ '<p class="muted">ID игрока: <b id="accountIdDisplay"></b></p>'+ 
+ '<p class="muted">Уровень аккаунта <b id="accountLevel"></b> · XP <span id="xpDisplay"></span>/250</p>'+ 
+ '<div class="xpbar"><div id="xpFill"></div></div>'+ 
+ '<input id="nickInput" maxlength="16" placeholder="Новый ник" value="'+escapeHTML(profile.nickname)+'">'+
+ '<label for="nickColorInput" class="muted" style="display:block;text-align:left;margin:5px 0 2px">🎨 Цвет ника</label>'+ 
+ '<select id="nickColorInput">'+
+ '<option value="blue" '+(profile.nicknameColor==='blue'?'selected':'')+'>🔵 Синий</option>'+ 
+ '<option value="red" '+(profile.nicknameColor==='red'?'selected':'')+'>🔴 Красный</option>'+ 
+ '<option value="rainbow" '+(profile.nicknameColor==='rainbow'?'selected':'')+'>🌈 Разноцветный</option>'+ 
+ '<option value="green" '+(profile.nicknameColor==='green'?'selected':'')+'>🟢 Зелёный</option>'+ 
+ '<option value="yellow" '+(profile.nicknameColor==='yellow'?'selected':'')+'>🟡 Жёлтый</option>'+ 
+ '</select>'+ 
+ '<label class="muted" style="display:block;text-align:left;margin:7px 0 2px">🖼️ Выбери аватар</label><div class="avatar-grid">'+avatarHtml+'</div>'+ownerAvatarTools+ 
+ '<label for="titleInput" class="muted" style="display:block;text-align:left;margin:7px 0 2px">🏷️ Титул игрока</label>'+ 
+ '<select id="titleInput">'+titleHtml+'</select>'+ 
+ (isOwnerAccount()?'<p style="color:#ffd95a;font-size:11px;text-align:left">👑 Титул «Владелец» доступен аккаунту Kyosuke.</p>':'<p class="muted" style="text-align:left">«Ветеран» открывается на 5 уровне, «Легенда» — после победы на всех уровнях.</p>')+ 
+ '<button class="btn secondary" data-action="nick">СОХРАНИТЬ ПРОФИЛЬ</button></div>';
 }
-
 function updateProfile(){
- var nick=$('nickDisplay'),coins=$('coinDisplay'),lev=$('accountLevel'),xp=$('xpDisplay'),fill=$('xpFill');
+ var nick=$('nickDisplay'),coins=$('coinDisplay'),lev=$('accountLevel'),xp=$('xpDisplay'),fill=$('xpFill'),idEl=$('accountIdDisplay'),avatarEl=$('avatarPreview'),titleEl=$('titlePreview');
  if(nick){
   nick.textContent=profile.nickname;
-  nick.classList.toggle('rainbow',ownerMode&&profile.nickname==='[DEV] Kyosuke');
+  nick.classList.remove('rainbow','nick-blue','nick-red','nick-green','nick-yellow');
+  if(profile.nicknameColor==='rainbow')nick.classList.add('rainbow');
+  else nick.classList.add('nick-'+profile.nicknameColor);
  }
  if(coins)coins.textContent=profile.coins;
+ if(avatarEl){var av=avatarCatalog.find(function(a){return a.id===profile.avatarId})||avatarCatalog[0];avatarEl.innerHTML=profile.customAvatarData?'<img src="'+profile.customAvatarData+'" alt="Аватар владельца" style="width:64px;height:64px;object-fit:cover;border-radius:50%;border:2px solid #ffd95a">':av.emoji}
+ if(titleEl)titleEl.textContent=profile.title;
+ if(idEl)idEl.textContent=currentAccount?String(currentAccount.id):'не привязан';
  if(lev)lev.textContent=levelNum();
  if(xp)xp.textContent=xpNext();
  if(fill)fill.style.width=(xpNext()/250*100)+'%';
@@ -259,24 +301,41 @@ function shell(title,subtitle,html){
  updateProfile();
 }
 
+function showProfileSettings(){
+ mode='menu';
+ shell('Настройки аккаунта','Измени ник, цвет, аватар и титул',profileHTML()+backButton());
+}
+
+function profileSummaryHTML(){
+ var avatar=avatarCatalog.find(function(a){return a.id===profile.avatarId})||avatarCatalog[0];
+ var owner=isOwnerAccount();var colorClass=owner?'owner-name':(profile.nicknameColor==='rainbow'?'rainbow':'nick-'+profile.nicknameColor);
+ return '<div class="profile-summary"><div class="summary-avatar">'+(profile.customAvatarData?'<img src="'+profile.customAvatarData+'" alt="Аватар владельца" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:2px solid #ffd95a">':avatar.emoji)+'</div><div class="summary-info"><b class="'+colorClass+'">'+escapeHTML(profile.nickname)+(owner?' <span class="owner-tag">👑 OWNER</span>':'')+'</b><div class="muted">'+escapeHTML(profile.title)+' · ID '+(currentAccount?currentAccount.id:'—')+'</div>'+(owner?'<span class="owner-badge">👑 ВЛАДЕЛЕЦ KYO DASH</span>':'')+'</div><button class="smallbtn" data-action="accountSettings">⚙️ Настройки аккаунта</button></div>';
+}
+
 function menu(){
- stopMusic();
- mode='menu';held=false;
- $('hint').textContent='Тапни по экрану, чтобы прыгнуть · Удерживай для автопрыжка';
+ if(!currentAccount){showAccountGate();return}
+ if(!isOwnerAccount()&&profile.title==='Владелец')profile.title='Новичок';
+ stopMusic();customTesting=false;$('editorBar').classList.add('hidden');
+ mode='menu';held=false; $('hint').textContent='Тапни по экрану, чтобы прыгнуть · Удерживай для автопрыжка';
  var lv=levels.map(function(l,i){
   return '<button class="level '+(i===selected?'active':'')+'" data-action="level" data-level="'+i+'">'+l.name+'<small>Рекорд '+best[i]+'%</small></button>';
  }).join('');
 
- shell('Kyo Dash','BIG UPDATE · Новые скины, достижения и редактор уровней',
- profileHTML()+
+ shell('Kyo Dash','Выбери уровень и играй'+(testerMode?' · 🧪 ТЕСТЕР АКТИВЕН':''),
+ profileSummaryHTML()+
  '<div class="levels">'+lv+'</div>'+
  '<button class="btn" data-action="start">▶ ИГРАТЬ</button>'+
  '<div class="grid">'+
  '<button class="btn secondary" data-action="shop">🎨 СКИНЫ</button>'+
  '<button class="btn secondary" data-action="achievements">🏆 ДОСТИЖЕНИЯ</button>'+
  '<button class="btn secondary" data-action="editor">🛠 РЕДАКТОР</button>'+
+ '<button class="btn secondary" data-action="quests">🎯 ЕЖЕДНЕВНЫЕ ЗАДАНИЯ</button>'+
  '<button class="btn secondary" data-action="daily">🎁 НАГРАДА ДНЯ</button>'+
  '<button class="btn secondary" data-action="stats">📊 СТАТИСТИКА</button>'+
+ '<button class="btn secondary" data-action="notifications">🔔 УВЕДОМЛЕНИЯ ('+notifications.length+')</button>'+
+ '<button class="btn secondary" data-action="tester">🧪 РЕЖИМ ТЕСТЕРА</button>'+
+ '<button class="btn secondary" data-action="account">👤 АККАУНТ / ID</button>'+
+ (testerMode?'<button class="btn secondary" data-action="testerMoney">💰 ВЫДАТЬ СЕБЕ МОНЕТЫ</button>':'')+
  '</div>'+
  '<p class="muted">Прогресс хранится локально в этом браузере.</p>');
  refreshHud();draw();
@@ -311,6 +370,7 @@ function checkAchievements(){
  achievementList.forEach(function(a){
   if(!achieved[a.id]&&a.check()){
    achieved[a.id]=true;profile.coins+=a.reward;
+   addNotification('Достижение получено',a.name+' · +'+a.reward+' монет','🏆');
    notify('🏆 '+a.name+' · +'+a.reward+' монет');save();
   }
  });
@@ -327,8 +387,26 @@ function showAchievements(){
  shell('Достижения','Выполняй задания и получай монеты',html);
 }
 
+function showNotifications(){
+ var html='';
+ if(!notifications.length)html='<div class="card"><h3>Пока тихо</h3><p>Здесь появятся сообщения о наградах, достижениях и прогрессе.</p></div>';
+ else notifications.forEach(function(n){html+='<div class="notice"><b>'+escapeHTML(n.icon||'🔔')+' '+escapeHTML(n.title||'Уведомление')+'</b><p>'+escapeHTML(n.message||'')+'</p><small>'+escapeHTML(n.time||'')+'</small></div>'});
+ html+='<button class="btn secondary" data-action="clearNotifications">🧹 ОЧИСТИТЬ УВЕДОМЛЕНИЯ</button>'+backButton();
+ shell('Центр уведомлений','Награды и события твоего аккаунта',html);
+}
+
 function dayKey(){
  var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+
+function showDailyQuests(){
+ mode='menu';ensureDailyQuests();
+ var html='<div class="quest-card"><h3>🎯 Ежедневные задания</h3><p>Выполняй задания, чтобы получать дополнительные монеты. Прогресс обновляется в этом браузере.</p>';
+ for(var i=0;i<dailyQuestDefs.length;i++){
+  var q=dailyQuestDefs[i],pr=questProgress(q),done=pr>=q.goal,claimed=!!dailyQuestState.claimed[q.id];
+  html+='<div class="quest-row"><div class="quest-icon">'+q.icon+'</div><div class="quest-copy"><b>'+q.name+'</b>'+q.desc+'<div class="quest-progress"><span style="width:'+Math.min(100,pr/q.goal*100)+'%"></span></div><p>'+Math.min(pr,q.goal)+' / '+q.goal+' · Награда: '+q.reward+' монет</p><button class="smallbtn" data-action="claimQuest" data-quest="'+q.id+'" '+(!done||claimed?'disabled':'')+'>'+(claimed?'ПОЛУЧЕНО':done?'ЗАБРАТЬ НАГРАДУ':'ВЫПОЛНЯЙ ЗАДАНИЕ')+'</button></div></div>';
+ }
+ html+='</div>'+backButton();shell('Ежедневные задания','Новые цели каждый день',html);
 }
 
 function daily(){
@@ -339,7 +417,7 @@ function daily(){
 
 function claimDaily(){
  if(dailyClaim===dayKey()){notify('Награда уже получена сегодня');return}
- dailyClaim=dayKey();profile.coins+=75;save();checkAchievements();daily();updateProfile();notify('+75 монет!');
+ dailyClaim=dayKey();profile.coins+=75;addNotification('Ежедневная награда','Ты получил +75 монет','🎁');save();checkAchievements();daily();updateProfile();notify('+75 монет!');
 }
 
 function showStats(){
@@ -349,46 +427,40 @@ function showStats(){
  '<p>Победы: '+wins.filter(Boolean).length+'/3</p><p>Скинов открыто: '+unlocked.length+'/'+skinsData.length+'</p><p>Созданных объектов: '+custom.length+'</p></div>'+backButton());
 }
 
-/* Окно владельца открывается только после проверки доступа. */
-function showOwnerPanel(){
- if(!hasOwnerAccess()){ownerMode=false;return}
- ownerMode=true;
- profile.nickname='[DEV] Kyosuke';
- save();
- shell('OWNER PANEL','Добро пожаловать, [DEV] Kyosuke',
- '<div class="card"><h3>Управление тестовой игрой</h3>'+
- '<p>Владелец: <span class="rainbow">[DEV] Kyosuke</span></p>'+
- '<p>Доступ сохранён в этом браузере.</p>'+
- '<button class="btn" data-action="grant">+500 монет и +250 XP</button>'+
- '<button class="btn secondary" data-action="unlockall">Открыть все скины</button>'+
- '<button class="btn secondary" data-action="resetstats">Сбросить рекорды и победы</button>'+
- '<button class="btn secondary" data-action="owneroff">Выключить Owner Mode</button>'+
- '<button class="btn danger" data-action="revokeowner">Удалить доступ владельца на этом устройстве</button></div>'+backButton());
- updateProfile();
-}
+
 
 function showEditor(){
- mode='editor';held=false;stopMusic();editorTool='spike';
- shell('Редактор уровней','Выбери объект и нажимай на поле, чтобы расставлять элементы',
- '<div class="levels"><button class="level active" data-action="tool" data-tool="spike">🔺 Шип</button><button class="level" data-action="tool" data-tool="block">🟦 Блок</button><button class="level" data-action="tool" data-tool="portal">🌀 Портал</button></div>'+
- '<p class="muted">Нажимай на игровое поле ниже, чтобы добавить объект. Прокручивай мир кнопками.</p>'+
- '<div class="grid"><button class="btn secondary" data-action="editorleft">← СДВИГ</button><button class="btn secondary" data-action="editorright">СДВИГ →</button></div>'+
- '<div class="grid"><button class="btn" data-action="savelevel">💾 СОХРАНИТЬ</button><button class="btn secondary" data-action="testlevel">▶ ТЕСТ</button></div>'+
- '<button class="btn danger" data-action="clearlevel">ОЧИСТИТЬ ОБЪЕКТЫ</button>'+backButton());
+ mode='editor';held=false;stopMusic();editorTool='spike';customTesting=false;
+ shell('Редактор уровней','Выбирай объект в панели снизу и нажимай на поле, чтобы поставить его',
+ '<p class="muted">Поле редактора открыто. Снизу: шип, блок, портал, прокрутка, сохранение и тест карты.</p>'+
+ '<button class="btn secondary" data-action="menu">← В МЕНЮ</button>');
+ overlay.classList.add('hidden');
+ $('editorBar').classList.remove('hidden');
  world=0;
  obstacles=custom.map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type}});
- $('hint').textContent='Редактор: нажми на поле, чтобы поставить выбранный объект';draw();
+ $('hint').textContent='Редактор: выбери объект снизу и нажми на игровое поле';
+ draw();
 }
-
 function startEditorTest(){
  if(raf)cancelAnimationFrame(raf);
- obstacles=custom.map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type}});
- obstacles.push({x:Math.max(1600,...obstacles.map(function(o){return o.x+100})),w:12,h:80,type:'finish'});
- selected=0;world=0;progress=0;gravityFlip=false;resetPlayer();
- mode='playing';overlay.classList.add('hidden');last=performance.now();raf=requestAnimationFrame(loop);
+ custom=obstacles.filter(function(o){return ['spike','block','portal'].includes(o.type)})
+  .map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type};});
+ save();
+ obstacles=custom.map(function(o){return {x:o.x,w:o.w||34,h:o.h||40,type:o.type};});
+ var finishX=Math.max(1800,...obstacles.map(function(o){return o.x+300}));
+ obstacles.push({x:finishX,w:12,h:80,type:'finish'});
+ customTesting=true;
+ selected=0;world=0;progress=0;gravityFlip=false;portalCooldown=0;resetPlayer();
+ mode='playing';overlay.classList.add('hidden');$('editorBar').classList.add('hidden');
+ $('hint').textContent='ТЕСТ КАРТЫ · Тапни, чтобы прыгнуть';
+ last=performance.now();
+ startMusic();
+ raf=requestAnimationFrame(loop);
 }
 
-function resetPlayer(){p.y=G-CUBE;p.vy=0;p.angle=0;p.onGround=true}
+function resetPlayer(){
+ p.y=G-CUBE;p.vy=0;p.angle=0;p.onGround=true;
+}
 
 function makeLevel(){
  obstacles=[];
@@ -402,22 +474,28 @@ function makeLevel(){
  while(x<cfg.length-250){
   var symbol=pattern[i%pattern.length];
   if(symbol==='1'||symbol==='2'||symbol==='3'){
-   for(var j=0;j<Number(symbol);j++)obstacles.push({x:x+j*34,w:34,h:selected===2?42:38,type:'spike'});
+   for(var j=0;j<Number(symbol);j++){
+    obstacles.push({x:x+j*34,w:34,h:selected===2?42:38,type:'spike'});
+   }
   }
   x+=Math.max(cfg.gap,selected===0?370:selected===1?340:330)+[0,25,45,15,35][i%5];
   i++;
  }
- if(selected>0)for(i=0;i<2;i++)obstacles.push({x:1800+i*2050,w:35,h:110,type:'portal'});
+
+ if(selected>0){
+  for(i=0;i<2;i++){
+   obstacles.push({x:1800+i*2050,w:35,h:110,type:'portal'});
+  }
+ }
  obstacles.push({x:cfg.length-110,w:12,h:80,type:'finish'});
 }
 
 function reset(){
- world=0;progress=0;held=false;gravityFlip=false;portalCooldow world=0;
+ world=0;
  progress=0;
  held=false;
  gravityFlip=false;
- portalCooldown=0;
- particles=[];
+ portalCooldown=0; particles=[];
  resetPlayer();
  makeLevel();
  refreshHud();
@@ -457,10 +535,7 @@ function tone(freq,duration,wave,volume){
   osc.start(now);
   osc.stop(now+duration+.05);
   osc.onended=function(){
-   try{
-    osc.disconnect();
-    gain.disconnect();
-   }catch(e){}
+   try{osc.disconnect();gain.disconnect()}catch(e){}
   };
  }catch(e){}
 }
@@ -492,12 +567,10 @@ function startMusic(){
  if(!musicEnabled||mode!=='playing'||!initAudio())return;
  var gen=musicGeneration;
  musicStep=0;
-
  try{
   var r=audioCtx.resume();
   if(r&&r.catch)r.catch(function(){});
  }catch(e){}
-
  musicTick();
  musicTimer=setInterval(function(){
   if(gen===musicGeneration)musicTick();
@@ -509,7 +582,10 @@ function updateMusicButton(){
 }
 
 function start(){
+ customTesting=false;$('editorBar').classList.add('hidden');
+ ensureDailyQuests();addQuestProgress('plays',1);
  if(raf)cancelAnimationFrame(raf);
+ raf=0;
  reset();
  mode='playing';
  overlay.classList.add('hidden');
@@ -522,12 +598,10 @@ function start(){
 function addParticle(x,y,color){
  for(var i=0;i<3;i++){
   particles.push({
-   x:x,
-   y:y,
+   x:x,y:y,
    vx:(Math.random()-.5)*160,
    vy:(Math.random()-.7)*140,
-   life:.4,
-   color:color
+   life:.4,color:color
   });
  }
 }
@@ -548,7 +622,6 @@ function die(){
  if(raf)cancelAnimationFrame(raf);
  raf=0;
  checkAchievements();
-
  shell('СТОЛКНОВЕНИЕ','Прогресс: '+progress+'%. Попробуй ещё раз!',
   '<button class="btn" data-action="start">↻ ПОПРОБОВАТЬ ЕЩЁ</button>'+
   '<button class="btn secondary" data-action="menu">В МЕНЮ</button>');
@@ -560,28 +633,32 @@ function win(){
  mode='win';
  held=false;
  stopMusic();
-
  if(raf)cancelAnimationFrame(raf);
  raf=0;
  progress=100;
- best[selected]=100;
-
- if(!wins[selected]){
-  wins[selected]=true;
-  profile.xp+=[100,150,200][selected];
-  profile.coins+=[30,50,75][selected];
+ if(!customTesting){
+  best[selected]=100;
+  if(!wins[selected]){
+   wins[selected]=true;
+   addQuestProgress('wins',1);addQuestProgress('xp',[100,150,200][selected]);
+   profile.xp+=[100,150,200][selected];
+   profile.coins+=[30,50,75][selected];
+   addNotification('Уровень пройден',levels[selected].name+' · +'+[100,150,200][selected]+' XP и +'+[30,50,75][selected]+' монет','🏆');
+  }
  }
-
  save();
- checkAchievements();
+ if(!customTesting)checkAchievements();
  refreshHud();
-
- shell('УРОВЕНЬ ПРОЙДЕН!','Ты завершил '+levels[selected].name+'!',
-  '<div class="card"><h3>🏆 Отличная работа!</h3><p>Награда за победу начислена.</p></div>'+
-  '<button class="btn" data-action="start">ИГРАТЬ СНОВА</button>'+
+ shell(customTesting?'ТЕСТ КАРТЫ ПРОЙДЕНА!':'УРОВЕНЬ ПРОЙДЕН!',
+  customTesting?'Отлично! Твоя карта работает.':'Ты завершил '+levels[selected].name+'!',
+  '<div class="card"><h3>🏆 '+(customTesting?'Тест завершён':'Отличная работа!')+'</h3><p>'+(customTesting?'Можешь вернуться в редактор и продолжить настройку карты.':'Награда за победу начислена.')+'</p></div>'+
+  (customTesting?'<button class="btn" data-action="retrycustom">↻ ТЕСТИРОВАТЬ ЕЩЁ</button>':'<button class="btn" data-action="start">ИГРАТЬ СНОВА</button>')+
+  '<button class="btn secondary" data-action="editor">В РЕДАКТОР</button>'+
   '<button class="btn secondary" data-action="menu">В МЕНЮ</button>');
  draw();
- }function update(dt){
+}
+
+function update(dt){
  if(mode!=='playing')return;
 
  var cfg=levels[selected];
@@ -608,7 +685,12 @@ function win(){
 
  if(portalCooldown>0)portalCooldown-=dt;
 
- progress=Math.min(100,Math.floor(world/(cfg.length-110)*100));
+ var runLength=cfg.length-110;
+  if(customTesting){
+   var finishObj=obstacles.find(function(o){return o.type==='finish'});
+   if(finishObj)runLength=Math.max(1,finishObj.x);
+  }
+  progress=Math.min(100,Math.floor(world/runLength*100));
  refreshHud();
 
  if(progress>best[selected]){
@@ -662,8 +744,7 @@ function win(){
   if(py2>surfaceY+2&&py1<G){
    die();
    return;
-  }
- }
+   } }
 
  for(i=particles.length-1;i>=0;i--){
   var part=particles[i];
@@ -677,39 +758,45 @@ function win(){
 function draw(){
  ctx.clearRect(0,0,W,H);
 
+ var bg=levelBackgrounds[selected]||levelBackgrounds[0];
  var grad=ctx.createLinearGradient(0,0,0,H);
- grad.addColorStop(0,'#101d43');
- grad.addColorStop(1,'#080e24');
+ grad.addColorStop(0,bg.top);
+ grad.addColorStop(.58,bg.mid);
+ grad.addColorStop(1,bg.bottom);
  ctx.fillStyle=grad;
  ctx.fillRect(0,0,W,H);
 
- ctx.strokeStyle='#20355f';
- ctx.lineWidth=1;
+ /* Свой спокойный фон для каждого уровня */
+ for(var si=0;si<34;si++){
+  var sx=(si*137+35)%W, sy=22+(si*47)%175;
+  ctx.fillStyle='rgba(225,230,238,'+(0.14+(si%3)*0.06)+')';
+  ctx.fillRect(sx,sy,2,2);
+ }
+ ctx.fillStyle=bg.far;
+ ctx.beginPath();ctx.moveTo(0,285);
+ for(var mx=0;mx<=W;mx+=90)ctx.lineTo(mx,245+((mx*7)%55));
+ ctx.lineTo(W,G);ctx.lineTo(0,G);ctx.closePath();ctx.fill();
+ ctx.fillStyle=bg.near;
+ ctx.beginPath();ctx.moveTo(0,310);
+ for(var hx=0;hx<=W;hx+=100)ctx.lineTo(hx,275+((hx*11)%38));
+ ctx.lineTo(W,G);ctx.lineTo(0,G);ctx.closePath();ctx.fill();
 
+ /* Тонкая сетка без яркого свечения */
  var off=-(world*.3%45);
-
+ ctx.strokeStyle='rgba(190,205,218,.09)';
  for(var x=off;x<W;x+=45){
-  ctx.beginPath();
-  ctx.moveTo(x,0);
-  ctx.lineTo(x,G);
-  ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,G);ctx.stroke();
  }
-
- for(var y=22;y<G;y+=45){
-  ctx.beginPath();
-  ctx.moveTo(0,y);
-  ctx.lineTo(W,y);
-  ctx.stroke();
+ for(var y=42;y<G;y+=45){
+  ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
  }
-
- ctx.fillStyle='#14264c';
+ ctx.fillStyle=bg.ground;
  ctx.fillRect(0,G,W,H-G);
- ctx.fillStyle='#35eaff';
- ctx.fillRect(0,G,W,4);
-
+ ctx.fillStyle=bg.line;
+ ctx.fillRect(0,G,W,3);
  for(x=-(world%50);x<W;x+=50){
-  ctx.fillStyle='#2b4779';
-  ctx.fillRect(x,G+16,25,4);
+  ctx.fillStyle='rgba(151,174,194,.28)';
+  ctx.fillRect(x,G+17,25,3);
  }
 
  if(gravityFlip){
@@ -717,21 +804,153 @@ function draw(){
   ctx.fillRect(0,0,W,4);
  }
 
- obstacles.forEach(function(o){
+ for(var i=0;i<obstacles.length;i++){
+  var o=obstacles[i],ox=o.x-world;
+  if(ox>W+100||ox+o.w<-100)continue;
+
+  if(o.type==='finish'){
+   ctx.fillStyle='#68ffbd';
+   ctx.fillRect(ox,G-o.h,o.w,o.h);
+   ctx.fillStyle='#ffffff';
+   for(var fy=G-o.h;fy<G;fy+=12){
+    for(var fx=ox;fx<ox+o.w;fx+=12){
+     if(((fy+fx)/12|0)%2===0)ctx.fillRect(fx,fy,6,6);
+    }
+   }
+   continue;
+  }
+
+  if(o.type==='portal'){
+   ctx.save();
+   ctx.shadowBlur=12;
+   ctx.shadowColor='#bd79ff';
+   ctx.strokeStyle='#bd79ff';
+   ctx.lineWidth=4;
+   ctx.beginPath();
+   ctx.ellipse(ox+o.w/2,G-o.h/2,o.w/2,o.h/2,0,0,Math.PI*2);
+   ctx.stroke();
+   ctx.restore();
+   continue;
+  }
+
+  if(o.type==='block'){
+   ctx.fillStyle='#f06b88';
+   ctx.fillRect(ox,G-o.h,o.w,o.h);
+   ctx.fillStyle='rgba(255,255,255,.22)';
+   ctx.fillRect(ox+4,G-o.h+4,o.w-8,4);
+   continue;
+  }
+
+  ctx.fillStyle='#ff617c';
+  ctx.beginPath();
+  ctx.moveTo(ox,G);
+  ctx.lineTo(ox+o.w/2,G-o.h);
+  ctx.lineTo(ox+o.w,G);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle='#ffb3c2';
+  ctx.lineWidth=2;
+  ctx.stroke();
+ }
+
+ for(i=0;i<particles.length;i++){
+  var pt=particles[i];
+  ctx.globalAlpha=Math.max(0,pt.life/.4);
+  ctx.fillStyle=pt.color;
+  ctx.fillRect(pt.x,pt.y,4,4);
+ }
+ ctx.globalAlpha=1;
+
+ var cs=currentSkin();
+ ctx.save();
+ ctx.translate(p.x+CUBE/2,p.y+CUBE/2);
+ ctx.rotate(p.angle);
+ ctx.fillStyle=cs.color;
+ ctx.fillRect(-CUBE/2,-CUBE/2,CUBE,CUBE);
+ ctx.strokeStyle='#ffffff';
+ ctx.lineWidth=2;
+ ctx.strokeRect(-CUBE/2,-CUBE/2,CUBE,CUBE);
+ ctx.fillStyle='rgba(255,255,255,.24)';
+ ctx.fillRect(-CUBE/2+5,-CUBE/2+5,CUBE-10,4);
+ ctx.restore();
+
+ if(mode==='dead'||mode==='win'){
+  ctx.fillStyle='rgba(0,0,0,.18)';
+  ctx.fillRect(0,0,W,H);
+ }
+}
+
+function loop(now){
+ if(mode!=='playing'){raf=0;return}
+ var dt=Math.min((now-last)/1000,.035);
+ last=now;
+ update(dt);
+ draw();
+ if(mode==='playing')raf=requestAnimationFrame(loop);
+ else raf=0;
+}
+
+function toggleMusic(){
+ musicEnabled=!musicEnabled;
+ updateMusicButton();
+ if(musicEnabled)startMusic();
+ else stopMusic();
+ notify(musicEnabled?'Музыка включена':'Музыка выключена');
+}
+
+function chooseLevel(i){
+ if(!Number.isInteger(i)||i<0||i>=levels.length)return;
+ selected=i;
+ reset();
+ refreshHud();
+ draw();
+ menu();
+}
+
+function selectSkin(id){
+ var s=skinsData.find(function(v){return v.id===id});
+ if(!s)return;
+ if(unlocked.indexOf(id)>=0){
+  skin=id;save();showShop();draw();updateProfile();return;
+ }
+ if(profile.coins<s.price){notify('Недостаточно монет');return}
+ profile.coins-=s.price;
+ unlocked.push(id);
+ skin=id;
+ save();checkAchievements();showShop();draw();updateProfile();
+ notify('Скин открыт: '+s.name);
+}
+
+function saveNickname(){
+ var input=$('nickInput');
+ var color=$('nickColorInput');
+ var title=$('titleInput');
+ if(!input)return;
+ var n=input.value.trim();
+ if(n.length<2||n.length>16){notify('Ник должен содержать 2–16 символов');return}
+ if(nicknameTaken(n)){notify('Этот ник уже занят');return}
+ profile.nickname=n;
+ if(color&&['blue','red','rainbow','green','yellow'].includes(color.value))profile.nicknameColor=color.value;
+ if(title){
+  var allowed=getTitleOptions();
+  if(allowed.indexOf(title.value)>=0)profile.title=title.value;
+  else profile.title='Новичок';
+ }
+ save();updateProfile();showProfileSettings();
+ notify('Профиль сохранён');
+  } obstacles.forEach(function(o){
   var ox=o.x-world;
   if(ox<-100||ox>W+100)return;
 
   if(o.type==='spike'){
    ctx.fillStyle=selected===2?'#ff3d8c':
      selected===1?'#ff7868':'#ff4d83';
-
    ctx.beginPath();
    ctx.moveTo(ox,G);
    ctx.lineTo(ox+o.w/2,G-o.h);
    ctx.lineTo(ox+o.w,G);
    ctx.closePath();
    ctx.fill();
-
    ctx.strokeStyle='#ffd0e0';
    ctx.lineWidth=2;
    ctx.stroke();
@@ -746,13 +965,7 @@ function draw(){
    ctx.strokeStyle='#c18aff';
    ctx.lineWidth=7;
    ctx.beginPath();
-   ctx.ellipse(
-    ox+o.w/2,
-    G-o.h/2,
-    o.w/2,
-    o.h/2,
-    0,0,Math.PI*2
-   );
+   ctx.ellipse(ox+o.w/2,G-o.h/2,o.w/2,o.h/2,0,0,Math.PI*2);
    ctx.stroke();
 
   }else if(o.type==='finish'){
@@ -772,7 +985,6 @@ function draw(){
  ctx.globalAlpha=1;
 
  var s=currentSkin();
-
  ctx.save();
  ctx.translate(p.x+CUBE/2,p.y+CUBE/2);
  ctx.rotate(p.angle);
@@ -795,44 +1007,49 @@ function loop(now){
  last=now;
  update(dt);
  draw();
-
  if(mode==='playing')raf=requestAnimationFrame(loop);
  else raf=0;
-}
-
-function action(name,b){
+}function action(name,b){
+ if(name==='accountSettings'){showProfileSettings();return}
  if(name==='nick'){
   var input=$('nickInput');
   var v=input?input.value.trim():'';
 
-  if(ownerMode){
-   profile.nickname='[DEV] Kyosuke';
-   save();
-   updateProfile();
-   notify('Радужный ник владельца установлен');
-   return;
-  }
 
   if(v.length<2){
    notify('Ник должен содержать хотя бы 2 символа');
    return;
   }
 
-  if(isReservedNick(v)){
-   notify('Этот ник зарезервирован для администрации');
+
+  v=v.slice(0,16);
+  if(nicknameTaken(v)){
+   notify('Ошибка: этот ник уже занят');
    return;
   }
-
-  profile.nickname=v.slice(0,16);
+  var colorInput=$('nickColorInput');
+  var chosenColor=colorInput?colorInput.value:'blue';
+  if(!['blue','red','rainbow','green','yellow'].includes(chosenColor))chosenColor='blue';
+  var titleInput=$('titleInput');
+  var chosenTitle=titleInput?titleInput.value:'Новичок';
+  if(!getTitleOptions().includes(chosenTitle)){notify('Этот титул ещё не открыт');return}
+  if(chosenTitle==='Владелец'&&!isOwnerAccount()){notify('Этот титул доступен только владельцу');return}
+  var avatarButton=document.querySelector('[data-action="avatar"].active');
+  profile.nickname=v;
+  profile.nicknameColor=chosenColor;
+  profile.title=chosenTitle;
   save();
   updateProfile();
-  notify('Ник сохранён');
+  addNotification('Профиль обновлён','Ник, цвет или титул сохранены','👤');
+  notify('Профиль сохранён');
+  menu();
   return;
  }
 
  if(name==='menu'){
   if(raf)cancelAnimationFrame(raf);
   raf=0;
+  held=false;
   menu();
   return;
  }
@@ -842,10 +1059,8 @@ function action(name,b){
  if(name==='music'){
   musicEnabled=!musicEnabled;
   updateMusicButton();
-
   if(musicEnabled&&mode==='playing')startMusic();
   else stopMusic();
-
   return;
  }
 
@@ -858,9 +1073,25 @@ function action(name,b){
  }
 
  if(name==='shop'){showShop();return}
+ if(name==='notifications'){showNotifications();return}
+ if(name==='clearNotifications'){notifications=[];save();showNotifications();notify('Уведомления очищены');return}
+ if(name==='removeOwnerAvatar'){if(!isOwnerAccount()){notify('Недоступно');return}profile.customAvatarData='';save();showProfileSettings();notify('Возвращён стандартный аватар');return}
+ if(name==='avatar'){
+  if(profile.customAvatarData&&isOwnerAccount())profile.customAvatarData='';
+  var avatarId=b.dataset.avatar;
+  if(!avatarCatalog.some(function(a){return a.id===avatarId}))return;
+  profile.avatarId=avatarId;
+  document.querySelectorAll('[data-action="avatar"]').forEach(function(el){el.classList.toggle('active',el.dataset.avatar===avatarId)});
+  var av=avatarCatalog.find(function(a){return a.id===avatarId});
+  if($('avatarPreview'))$('avatarPreview').textContent=av.emoji;
+  save();
+  return;
+ }
  if(name==='achievements'){showAchievements();return}
  if(name==='stats'){showStats();return}
  if(name==='daily'){daily();return}
+ if(name==='quests'){showDailyQuests();return}
+ if(name==='claimQuest'){claimQuest(b.dataset.quest);return}
  if(name==='claim'){claimDaily();return}
 
  if(name==='buy'||name==='equip'){
@@ -876,125 +1107,7 @@ function action(name,b){
     unlocked.push(id);
     skin=id;
     notify('Скин открыт!');
-   }else{
-    notify('Не хватает монет');
-    return;
-   }
-  }else{
-   skin=id;
-  }
-
-  save();
-  showShop();
-  checkAchievements();
-  return;
- }
-
- if(name==='noop')return;
- if(name==='editor'){showEditor();return}
-
- if(name==='tool'){
-  editorTool=b.dataset.tool;
-  document.querySelectorAll('[data-action="tool"]').forEach(function(el){
-   el.classList.toggle('active',el===b);
-  });
-  return;
- }
-
- if(name==='editorleft'){
-  world=Math.max(0,world-300);
-  draw();
-  return;
- }
-
- if(name==='editorright'){
-  world+=300;
-  draw();
-  return;
- }
-
- if(name==='savelevel'){
-  custom=obstacles.filter(function(o){
-   return ['spike','block','portal'].includes(o.type);
-  }).map(function(o){
-   return {x:o.x,w:o.w,h:o.h,type:o.type};
-  });
-
-  save();
-  checkAchievements();
-  notify('Уровень сохранён!');
-  return;
- }
-
- if(name==='testlevel'){startEditorTest();return}
-
- if(name==='clearlevel'){
-  obstacles=[];
-  custom=[];
-  world=0;
-  save();
-  draw();
-  notify('Объекты удалены');
-  return;
- }
-
- if(name==='owner'){requestOwnerAccess();return}
-
- if(['grant','unlockall','resetstats','owneroff','revokeowner'].includes(name)&&!hasOwnerAccess()){
-  ownerMode=false;
-  notify('Нет доступа владельца');
-  menu();
-  return;
- }
-
- if(name==='grant'){
-  if(!ownerMode)return;
-  profile.coins+=500;
-  profile.xp+=250;
-  save();
-  updateProfile();
-  notify('Добавлено!');
-  return;
- }
-
- if(name==='unlockall'){
-  if(!ownerMode)return;
-  unlocked=skinsData.map(function(s){return s.id});
-  save();
-  updateProfile();
-  notify('Все скины открыты');
-  return;
- }
-
- if(name==='resetstats'){
-  if(!ownerMode)return;
-  best=[0,0,0];
-  wins=[false,false,false];
-  save();
-  notify('Рекорды сброшены');
-  return;
- }
-
- if(name==='owneroff'){
-  ownerMode=false;
-  menu();
-  return;
- }
-
- if(name==='revokeowner'){
-  try{localStorage.removeItem(OWNER_KEY)}catch(e){}
-  ownerMode=false;
-  profile.nickname='Player';
-  save();
-  menu();
-  notify('Доступ владельца удалён');
-  return;
- }
-}
-
-function clickHandler(e){
- var b=e.target.closest&&e.target.closest('[data-action]');
- if(!b||b.disabled)return;
+   }else{ if(!b||b.disabled)return;
 
  e.preventDefault();
 
@@ -1007,11 +1120,44 @@ function clickHandler(e){
 
 document.addEventListener('click',clickHandler,true);
 
+/* Загрузка пользовательского аватара владельца из галереи */
+document.addEventListener('change',function(e){
+ var input=e.target;
+ if(!input||input.id!=='ownerAvatarFile')return;
+ if(!isOwnerAccount()){notify('Загрузка аватара доступна только Kyosuke');input.value='';return;}
+ var file=input.files&&input.files[0];
+ if(!file)return;
+ if(!/^image\/(png|jpeg|webp|gif)$/.test(file.type)){notify('Выбери изображение PNG, JPG, WEBP или GIF');input.value='';return;}
+ if(file.size>12*1024*1024){notify('Картинка слишком большая — выбери файл до 12 МБ');input.value='';return;}
+ var reader=new FileReader();
+ reader.onload=function(){
+  var img=new Image();
+  img.onload=function(){
+   try{
+    var canvas=document.createElement('canvas');
+    var maxSide=512,scale=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));
+    canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));
+    canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+    var ctx=canvas.getContext('2d');ctx.drawImage(img,0,0,canvas.width,canvas.height);
+    var data=canvas.toDataURL('image/jpeg',0.88);
+    if(data.length>2400000){notify('Не получилось обработать картинку, выбери другую');return;}
+    profile.customAvatarData=data;save();showProfileSettings();updateProfile();notify('Аватар установлен и сохранён');
+   }catch(err){notify('Не удалось обработать картинку в предпросмотре MT Manager');}
+   input.value='';
+  };
+  img.onerror=function(){notify('Не удалось открыть изображение');input.value='';};
+  img.src=String(reader.result||'');
+ };
+ reader.onerror=function(){notify('Не удалось прочитать файл');input.value='';};
+ reader.readAsDataURL(file);
+},true);
+
+/* Управление полем игры и редактором */
 function press(e){
  if(mode==='editor'){
   var rect=canvas.getBoundingClientRect();
   var cx=(e.clientX-rect.left)*W/rect.width;
-  var wx=world+cx;
+  var wx=Math.max(0,world+cx);
 
   if(editorTool==='spike'){
    obstacles.push({
@@ -1053,6 +1199,7 @@ window.addEventListener('pointerup',release);
 window.addEventListener('pointercancel',release);
 window.addEventListener('blur',release);
 
+/* Управление с клавиатуры */
 window.addEventListener('keydown',function(e){
  if(e.code==='Space'||e.code==='ArrowUp'){
   e.preventDefault();
@@ -1072,6 +1219,7 @@ window.addEventListener('keyup',function(e){
  if(e.code==='Space'||e.code==='ArrowUp')held=false;
 });
 
+/* Вывод ошибок вместо пустого экрана */
 function showError(err){
  var box=$('errorBox');
  box.style.display='block';
@@ -1087,12 +1235,12 @@ window.addEventListener('unhandledrejection',function(e){
  showError(e.reason||'Ошибка Promise');
 });
 
+/* Запуск */
 readStore();
 updateMusicButton();
 reset();
-menu();
+if(currentAccount){menu()}else{showAccountGate()}
 
 })();
 </script>
 </body>
-</html>
