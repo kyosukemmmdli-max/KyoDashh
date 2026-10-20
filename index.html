@@ -137,7 +137,48 @@ var levelBackgrounds=[
  {top:'#393342',mid:'#302b3c',bottom:'#211f30',far:'#42394b',near:'#342d40',ground:'#292537',line:'#b1a0b9'}
 ];
 var p={x:150,y:G-CUBE,vy:0,angle:0,onGround:true};
-var musicEnabled=true,audioCtx=null,musicTimer=null,musicStep=0,musicGeneration=0; if(levelNum()>=5)opts.push('Ветеран');
+var musicEnabled=true,audioCtx=null,musicTimer=null,musicStep=0,musicGeneration=0;
+
+var songData=[
+ {tempo:190,notes:[523,659,784,659,523,392,440,523,659,523,440,392,440,523,659,784,659,523,392,440,523,659,784,880,784,659,523,440,392,440,523,392],bass:[131,0,165,0,196,0,165,0],wave:'square'},
+ {tempo:145,notes:[392,523,659,784,659,523,392,523,440,587,698,880,698,587,440,587,392,523,659,784,880,784,659,523,440,587,698,880,784,698,587,440],bass:[98,98,131,131,110,110,147,147],wave:'sawtooth'},
+ {tempo:105,notes:[330,440,659,523,330,440,784,659,349,466,698,587,349,466,880,698,330,523,659,880,784,659,523,440,349,523,698,932,880,698,523,392],bass:[82,82,110,110,73,73,98,98],wave:'square'}
+];
+
+var skinsData=[
+ {id:'cyan',name:'Neon Cyan',price:0,color:'#35eaff',glow:'#00cfff'},
+ {id:'fire',name:'Fire Cube',price:100,color:'#ff6748',glow:'#ff2d54'},
+ {id:'lime',name:'Toxic Lime',price:150,color:'#a3ff3c',glow:'#64ff21'},
+ {id:'purple',name:'Void Purple',price:200,color:'#bd79ff',glow:'#8d38ff'},
+ {id:'gold',name:'Golden Star',price:350,color:'#ffd95a',glow:'#ffad20'},
+ {id:'pink',name:'Pink Pulse',price:400,color:'#ff67cb',glow:'#ff30a4'}
+];
+
+
+
+function currentSkin(){
+ return skinsData.find(function(s){return s.id===skin})||skinsData[0];
+}
+
+function notify(msg){
+ $('message').innerHTML='<span class="toast"></span>';
+ $('message').firstChild.textContent=msg;
+ setTimeout(function(){$('message').innerHTML=''},2300);
+}
+
+function addNotification(title,message,icon){
+ notifications.unshift({title:String(title||'Уведомление'),message:String(message||''),icon:icon||'🔔',time:new Date().toLocaleString()});
+ notifications=notifications.slice(0,50);
+ save();
+}
+function isOwnerAccount(){return !!(currentAccount&&String(currentAccount.username).toLowerCase()==='kyosuke')}
+function ensureDailyQuests(){if(dailyQuestDate!==dayKey()){dailyQuestDate=dayKey();dailyQuestState={plays:0,wins:0,xp:0,claimed:{}}}}
+function questProgress(q){ensureDailyQuests();return Math.max(0,Number(dailyQuestState[q.id])||0)}
+function addQuestProgress(id,amount){ensureDailyQuests();dailyQuestState[id]=(Number(dailyQuestState[id])||0)+amount;save()}
+function claimQuest(id){ensureDailyQuests();var q=dailyQuestDefs.find(function(x){return x.id===id});if(!q)return;if(dailyQuestState.claimed[id]){notify('Эта награда уже получена');return}if(questProgress(q)<q.goal){notify('Сначала выполни задание');return}dailyQuestState.claimed[id]=true;profile.coins+=q.reward;addNotification('Задание выполнено',q.name+' · +'+q.reward+' монет','🎯');save();showDailyQuests();updateProfile();notify('Награда получена: +'+q.reward+' монет')}
+function getTitleOptions(){
+ var opts=['Новичок'];
+ if(levelNum()>=5)opts.push('Ветеран');
  if(wins.every(Boolean))opts.push('Легенда');
  if(isOwnerAccount())opts.push('Владелец');
  return opts;
@@ -241,8 +282,7 @@ function accountLogin(){
  if(a.data)applyGameData(a.data);else profile.nickname=a.username;
  if(!isOwnerAccount()&&profile.title==='Владелец')profile.title='Новичок';
  save();menu();notify('Вход выполнен · ID '+a.id);
-}
-
+ }
 function levelNum(){return Math.floor(profile.xp/250)+1}
 function xpNext(){return profile.xp%250}
 
@@ -316,7 +356,8 @@ function menu(){
  if(!currentAccount){showAccountGate();return}
  if(!isOwnerAccount()&&profile.title==='Владелец')profile.title='Новичок';
  stopMusic();customTesting=false;$('editorBar').classList.add('hidden');
- mode='menu';held=false; $('hint').textContent='Тапни по экрану, чтобы прыгнуть · Удерживай для автопрыжка';
+ mode='menu';held=false;
+ $('hint').textContent='Тапни по экрану, чтобы прыгнуть · Удерживай для автопрыжка';
  var lv=levels.map(function(l,i){
   return '<button class="level '+(i===selected?'active':'')+'" data-action="level" data-level="'+i+'">'+l.name+'<small>Рекорд '+best[i]+'%</small></button>';
  }).join('');
@@ -495,11 +536,11 @@ function reset(){
  progress=0;
  held=false;
  gravityFlip=false;
- portalCooldown=0; particles=[];
+ portalCooldown=0;
+ particles=[];
  resetPlayer();
  makeLevel();
- refreshHud();
-}
+ refreshHud();}
 
 function refreshHud(){
  $('levelLabel').textContent=levels[selected].name;
@@ -539,7 +580,6 @@ function tone(freq,duration,wave,volume){
   };
  }catch(e){}
 }
-
 function stopMusic(){
  musicGeneration++;
  if(musicTimer!==null){
@@ -744,7 +784,8 @@ function update(dt){
   if(py2>surfaceY+2&&py1<G){
    die();
    return;
-   } }
+  }
+ }
 
  for(i=particles.length-1;i>=0;i--){
   var part=particles[i];
@@ -753,8 +794,7 @@ function update(dt){
   part.life-=dt;
   if(part.life<=0)particles.splice(i,1);
  }
-}
-
+ }
 function draw(){
  ctx.clearRect(0,0,W,H);
 
@@ -804,141 +844,7 @@ function draw(){
   ctx.fillRect(0,0,W,4);
  }
 
- for(var i=0;i<obstacles.length;i++){
-  var o=obstacles[i],ox=o.x-world;
-  if(ox>W+100||ox+o.w<-100)continue;
-
-  if(o.type==='finish'){
-   ctx.fillStyle='#68ffbd';
-   ctx.fillRect(ox,G-o.h,o.w,o.h);
-   ctx.fillStyle='#ffffff';
-   for(var fy=G-o.h;fy<G;fy+=12){
-    for(var fx=ox;fx<ox+o.w;fx+=12){
-     if(((fy+fx)/12|0)%2===0)ctx.fillRect(fx,fy,6,6);
-    }
-   }
-   continue;
-  }
-
-  if(o.type==='portal'){
-   ctx.save();
-   ctx.shadowBlur=12;
-   ctx.shadowColor='#bd79ff';
-   ctx.strokeStyle='#bd79ff';
-   ctx.lineWidth=4;
-   ctx.beginPath();
-   ctx.ellipse(ox+o.w/2,G-o.h/2,o.w/2,o.h/2,0,0,Math.PI*2);
-   ctx.stroke();
-   ctx.restore();
-   continue;
-  }
-
-  if(o.type==='block'){
-   ctx.fillStyle='#f06b88';
-   ctx.fillRect(ox,G-o.h,o.w,o.h);
-   ctx.fillStyle='rgba(255,255,255,.22)';
-   ctx.fillRect(ox+4,G-o.h+4,o.w-8,4);
-   continue;
-  }
-
-  ctx.fillStyle='#ff617c';
-  ctx.beginPath();
-  ctx.moveTo(ox,G);
-  ctx.lineTo(ox+o.w/2,G-o.h);
-  ctx.lineTo(ox+o.w,G);
-  ctx.closePath();
-  ctx.fill();
-  ctx.strokeStyle='#ffb3c2';
-  ctx.lineWidth=2;
-  ctx.stroke();
- }
-
- for(i=0;i<particles.length;i++){
-  var pt=particles[i];
-  ctx.globalAlpha=Math.max(0,pt.life/.4);
-  ctx.fillStyle=pt.color;
-  ctx.fillRect(pt.x,pt.y,4,4);
- }
- ctx.globalAlpha=1;
-
- var cs=currentSkin();
- ctx.save();
- ctx.translate(p.x+CUBE/2,p.y+CUBE/2);
- ctx.rotate(p.angle);
- ctx.fillStyle=cs.color;
- ctx.fillRect(-CUBE/2,-CUBE/2,CUBE,CUBE);
- ctx.strokeStyle='#ffffff';
- ctx.lineWidth=2;
- ctx.strokeRect(-CUBE/2,-CUBE/2,CUBE,CUBE);
- ctx.fillStyle='rgba(255,255,255,.24)';
- ctx.fillRect(-CUBE/2+5,-CUBE/2+5,CUBE-10,4);
- ctx.restore();
-
- if(mode==='dead'||mode==='win'){
-  ctx.fillStyle='rgba(0,0,0,.18)';
-  ctx.fillRect(0,0,W,H);
- }
-}
-
-function loop(now){
- if(mode!=='playing'){raf=0;return}
- var dt=Math.min((now-last)/1000,.035);
- last=now;
- update(dt);
- draw();
- if(mode==='playing')raf=requestAnimationFrame(loop);
- else raf=0;
-}
-
-function toggleMusic(){
- musicEnabled=!musicEnabled;
- updateMusicButton();
- if(musicEnabled)startMusic();
- else stopMusic();
- notify(musicEnabled?'Музыка включена':'Музыка выключена');
-}
-
-function chooseLevel(i){
- if(!Number.isInteger(i)||i<0||i>=levels.length)return;
- selected=i;
- reset();
- refreshHud();
- draw();
- menu();
-}
-
-function selectSkin(id){
- var s=skinsData.find(function(v){return v.id===id});
- if(!s)return;
- if(unlocked.indexOf(id)>=0){
-  skin=id;save();showShop();draw();updateProfile();return;
- }
- if(profile.coins<s.price){notify('Недостаточно монет');return}
- profile.coins-=s.price;
- unlocked.push(id);
- skin=id;
- save();checkAchievements();showShop();draw();updateProfile();
- notify('Скин открыт: '+s.name);
-}
-
-function saveNickname(){
- var input=$('nickInput');
- var color=$('nickColorInput');
- var title=$('titleInput');
- if(!input)return;
- var n=input.value.trim();
- if(n.length<2||n.length>16){notify('Ник должен содержать 2–16 символов');return}
- if(nicknameTaken(n)){notify('Этот ник уже занят');return}
- profile.nickname=n;
- if(color&&['blue','red','rainbow','green','yellow'].includes(color.value))profile.nicknameColor=color.value;
- if(title){
-  var allowed=getTitleOptions();
-  if(allowed.indexOf(title.value)>=0)profile.title=title.value;
-  else profile.title='Новичок';
- }
- save();updateProfile();showProfileSettings();
- notify('Профиль сохранён');
-  } obstacles.forEach(function(o){
+ obstacles.forEach(function(o){
   var ox=o.x-world;
   if(ox<-100||ox>W+100)return;
 
@@ -1063,7 +969,7 @@ function loop(now){
   else stopMusic();
   return;
  }
-
+ 
  if(name==='level'){
   var n=Number(b.dataset.level);
   if(n<0||n>2||!Number.isInteger(n))return;
@@ -1107,7 +1013,96 @@ function loop(now){
     unlocked.push(id);
     skin=id;
     notify('Скин открыт!');
-   }else{ if(!b||b.disabled)return;
+   }else{
+    notify('Не хватает монет');
+    return;
+   }
+  }else{
+   skin=id;
+  }
+
+  save();
+  showShop();
+  checkAchievements();
+  return;
+ }
+
+ if(name==='noop')return;
+ if(name==='account'){showAccount();return}
+ if(name==='accountRegister'){accountRegister();return}
+ if(name==='accountLogin'){accountLogin();return}
+ if(name==='logout'){if(currentAccount){currentAccount.data=gameData();persistAccounts()}currentAccount=null;try{localStorage.removeItem(CURRENT_ACCOUNT_STORE)}catch(e){}showAccountGate();notify('Ты вышел из аккаунта');return}
+ if(name==='testerMoney'){
+  if(!testerMode){notify('Сначала активируй режим тестера');return}
+  var amountRaw=prompt('🧪 Сколько монет выдать? (1–1000000)','500');
+  if(amountRaw===null)return;
+  var amount=Number(amountRaw);
+  if(!Number.isInteger(amount)||amount<1||amount>1000000){notify('Введи целое число от 1 до 1000000');return}
+  profile.coins+=amount;save();updateProfile();menu();notify('Тестер выдал '+amount+' монет');return;
+ }
+ if(name==='editor'){showEditor();return}
+ if(name==='tester'){
+  if(testerMode){testerMode=false;save();menu();notify('Режим тестера выключен');return}
+  var testerKey=prompt('🧪 Введи ключ режима тестера:');
+  if(testerKey===null)return;
+  if(testerKey.trim()!=='TESTER-AAA111'){notify('Неверный ключ тестера');return}
+  testerMode=true;save();menu();notify('Режим тестера активирован');return;
+ }
+
+ if(name==='tool'){
+  editorTool=b.dataset.tool;
+  document.querySelectorAll('[data-action="tool"]').forEach(function(el){
+   el.classList.toggle('active',el.dataset.tool===editorTool);
+  });
+  return;
+ }
+
+ if(name==='editorleft'){
+  world=Math.max(0,world-300);
+  draw();
+  return;
+ }
+ if(name==='editorright'){
+  world+=300;
+  draw();
+  return;
+ }
+
+ if(name==='savelevel'){
+  custom=obstacles.filter(function(o){
+   return ['spike','block','portal'].includes(o.type);
+  }).map(function(o){
+   return {x:o.x,w:o.w,h:o.h,type:o.type};
+  });
+
+  save();
+  checkAchievements();
+  notify('Уровень сохранён!');
+  return;
+ }
+
+ if(name==='testlevel'){startEditorTest();return}
+ if(name==='retrycustom'){startEditorTest();return}
+
+ if(name==='clearlevel'){
+  obstacles=[];
+  custom=[];
+  world=0;
+  save();
+  draw();
+  notify('Объекты удалены');
+  return;
+ }
+
+}
+
+/* Обработчик кнопок */
+function clickHandler(e){
+ var target=e.target;
+ if(!target||!target.closest)return;
+
+ var b=target.closest('[data-action]');
+ if(!b||b.disabled)return;
 
  e.preventDefault();
 
@@ -1225,8 +1220,7 @@ function showError(err){
  box.style.display='block';
  box.textContent='Ошибка игры: '+
   (err&&err.message?err.message:String(err));
-}
-
+ }
 window.addEventListener('error',function(e){
  showError(e.error||e.message||'Неизвестная ошибка');
 });
@@ -1244,3 +1238,4 @@ if(currentAccount){menu()}else{showAccountGate()}
 })();
 </script>
 </body>
+</html>
