@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Geometry Dash</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    font-family: 'Russo One', sans-serif;
+    background: #bd00bb;
+    color: white;
+}
+
+/* BACKGROUND */
+
+.background {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background:
+        linear-gradient(90deg, transparent 97%, #ed00dc 97%),
+        linear-gradient(transparent 97%, #ed00dc 97%),
+        linear-gradient(135deg, #b800b6, #d000c8, #a800ad);
+    background-size: 180px 180px;
+}
+
+.background::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(45deg,
+        transparent 0 90px,
+        #ec00dc 91px 96px,
+        transparent 97px 180px);
+    opacity: .22;
+}
+
+.blocks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.block {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 7px solid #ed00df;
+    background: #b000b4;
+    box-shadow: 7px 7px 0 #7d007d;
+    transform: rotate(45deg);
+    opacity: .55;
+}
+
+.block:nth-child(1) {left: 5%;top: 12%;}
+.block:nth-child(2) {right: 8%;top: 12%;width: 70px;height:70px;}
+.block:nth-child(3) {left: 15%;bottom: 30%;width: 55px;height:55px;}
+.block:nth-child(4) {right: 20%;bottom: 28%;width: 90px;height:90px;}
+.block:nth-child(5) {left: 48%;top: 27%;width: 45px;height:45px;}
+
+/* LOGO */
+
+.logo {
+    position: absolute;
+    top: 7%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    text-align: center;
+    font-size: clamp(27px, 7.2vw, 85px);
+    white-space: nowrap;
+    letter-spacing: -3px;
+    color: #aaff35;
+    -webkit-text-stroke: 2px #17200b;
+    paint-order: stroke fill;
+    text-shadow:
+        3px 4px 0 white,
+        5px 7px 0 #252525,
+        8px 10px 0 #222;
+    z-index: 2;
+}
+
+/* MAIN */
+
+.main {
+    position: absolute;
+    top: 43%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(18px, 5vw, 65px);
+    width: 95%;
+    z-index: 3;
+}
+
+.game-button {
+    width: clamp(82px, 12vw, 145px);
+    aspect-ratio: 1;
+    border: 5px solid white;
+    outline: 4px solid #171717;
+    border-radius: 17px;
+    background: linear-gradient(145deg, #c0ff45, #56c900);
+    box-shadow: 0 8px 0 #276000, 0 12px 0 #171717;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: .12s;
+}
+
+.game-button svg {
+    width: 76%;
+    height: 76%;
+    filter: drop-shadow(3px 4px 0 #222);
+}
+
+.game-button:hover {
+    filter: brightness(1.15);
+    transform: translateY(-4px);
+}
+
+.game-button:active {
+    transform: translateY(5px);
+    box-shadow: 0 3px 0 #276000, 0 6px 0 #171717;
+}
+
+.play {
+    width: clamp(125px, 18vw, 205px);
+    border-radius: 19px;
+}
+
+/* PROFILE */
+
+.profile {
+    position: absolute;
+    left: 4%;
+    top: 55%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.username {
+    color: #ffe500;
+    font-size: clamp(17px, 2vw, 28px);
+    -webkit-text-stroke: 1px #543000;
+    text-shadow: 3px 3px #222;
+}
+
+.avatar {
+    width: clamp(65px, 9vw, 105px);
+    aspect-ratio: 1;
+    border: 5px solid white;
+    outline: 4px solid #222;
+    border-radius: 50%;
+    background: linear-gradient(#28dfff, #0873d5);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 6px 0 #222;
+}
+
+.avatar svg {
+    width: 75%;
+}
+
+/* DAILY */
+
+.daily {
+    position: absolute;
+    right: 4%;
+    top: 49%;
+    text-align: center;
+    color: #ffe500;
+    font-size: clamp(17px, 2vw, 26px);
+    -webkit-text-stroke: 1px #4b2500;
+    text-shadow: 3px 3px #222;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.chest {
+    font-size: clamp(43px, 6vw, 65px);
+    display: block;
+    filter: drop-shadow(3px 5px #222);
+}
+
+/* BOTTOM */
+
+.bottom {
+    position: absolute;
+    left: 50%;
+    bottom: 8%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(12px, 2.7vw, 30px);
+    z-index: 4;
+}
+
+.circle {
+    width: clamp(61px, 8.5vw, 105px);
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    border: 5px solid white;
+    outline: 3px solid #222;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #c0ff43, #52c500);
+    box-shadow: 0 7px 0 #222;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: .15s;
+}
+
+.circle svg {
+    width: 67%;
+    height: 67%;
+    filter: drop-shadow(2px 3px #333);
+}
+
+.circle:hover {
+    transform: translateY(-4px);
+    filter: brightness(1.2);
+}
+
+/* FOOTER */
+
+.socials {
+    position: absolute;
+    bottom: 4%;
+    left: 3%;
+    display: flex;
+    gap: 8px;
+}
+
+.social {
+    width: 37px;
+    height: 37px;
+    border: 3px solid white;
+    outline: 2px solid #222;
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.fb {background:#2679dc;}
+.tw {background:#16bce9;}
+.yt {background:#e92727;}
+
+.robtop {
+    position: absolute;
+    bottom: 4%;
+    right: 3%;
+    color: #ffcb00;
+    font-size: clamp(20px, 3vw, 32px);
+    -webkit-text-stroke: 1px #321000;
+    text-shadow: 3px 3px #222;
+}
+
+/* GROUND */
+
+.ground {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 19%;
+    background: #87008744;
+    border-top: 6px solid #ed00dd;
+    box-shadow: 0 -5px 0 #750079;
+}
+
+.ground::after {
+    content: "";
+    position: absolute;
+    top: 15px;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent 0 60px,
+        #ee00db 61px 66px,
+        transparent 67px 120px
+    );
+    opacity: .35;
+}
+
+/* POPUP */
+
+.popup {
+    position: absolute;
+    inset: 0;
+    background: #000b;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    padding: 20px;
+}
+
+.popup.show {
+    display: flex;
+}
+
+.popup-box {
+    width: min(100%, 420px);
+    min-height: 200px;
+    padding: 30px 20px;
+    background: linear-gradient(#baff40, #50bd00);
+    border: 6px solid white;
+    outline: 4px solid #222;
+    border-radius: 20px;
+    box-shadow: 0 10px 0 #222;
+    text-align: center;
+}
+
+.popup-box h2 {
+    font-size: 27px;
+    margin-bottom: 25px;
+    text-shadow: 2px 3px #333;
+}
+
+.popup-box button {
+    padding: 12px 35px;
+    border: 4px solid white;
+    outline: 3px solid #222;
+    border-radius: 12px;
+    background: #ffc800;
+    color: white;
+    font-family: inherit;
+    font-size: 19px;
+    cursor: pointer;
+}
+
+/* MOBILE */
+
+@media(max-width: 600px) {
+    .logo {
+        top: 12%;
+        font-size: clamp(23px, 7.3vw, 43px);
+        letter-spacing: -2px;
+        -webkit-text-stroke: 1.5px #171717;
+    }
+
+    .main {
+        top: 39%;
+        gap: 17px;
+    }
+
+    .game-button {
+        width: 22vw;
+        max-width: 100px;
+        border-width: 4px;
+        outline-width: 3px;
+        border-radius: 13px;
+    }
+
+    .play {
+        width: 31vw;
+        max-width: 140px;
+    }
+
+    .profile {
+        top: 56%;
+        left: 5%;
+    }
+
+    .avatar {
+        width: 65px;
+        border-width: 4px;
+    }
+
+    .username {
+        font-size: 16px;
+    }
+
+    .daily {
+        top: 56%;
+        right: 5%;
+        font-size: 16px;
+    }
+
+    .chest {
+        font-size: 43px;
+    }
+
+    .bottom {
+        bottom: 13%;
+        width: 94%;
+        gap: clamp(9px, 3vw, 17px);
+    }
+
+    .circle {
+        width: 17vw;
+        max-width: 75px;
+        border-width: 4px;
+        outline-width: 2px;
+    }
+
+    .socials {
+        bottom: 3%;
+        left: 4%;
+        gap: 7px;
+    }
+
+    .social {
+        width: 31px;
+        height: 31px;
+        font-size: 16px;
+    }
+
+    .robtop {
+        bottom: 3%;
+        right: 4%;
+        font-size: 19px;
+    }
+
+    .ground {
+        height: 17%;
+    }
+}
+
+/* VERY SMALL SCREENS */
+
+@media(max-width: 360px) {
+    .main {
+        gap: 13px;
+    }
+
+    .game-button {
+        width: 21vw;
+    }
+
+    .play {
+        width: 29vw;
+    }
+
+    .bottom {
+        gap: 8px;
+    }
+
+    .circle {
+        width: 16.5vw;
+    }
+}
+
+@media(max-height: 520px) {
+    .logo {top: 3%;font-size: 40px;}
+    .main {top: 43%;}
+    .game-button {width: 75px;}
+    .play {width: 105px;}
+    .profile {top: 48%;}
+    .daily {top: 43%;}
+    .bottom {bottom: 3%;}
+    .ground {height: 13%;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="background">
+    <div class="blocks">
+        <div class="block"></div>
+        <div class="block"></div>
+        <div class="block"></div>
+        <div class="block"></div>
+        <div class="block"></div>
+    </div>
+</div>
+
+<div class="ground"></div>
+
+<div class="logo">GEOMETRY DASH</div>
+
+<!-- MAIN BUTTONS -->
+
+<div class="main">
+
+    <button class="game-button" onclick="openMenu('Иконки')">
+        <svg viewBox="0 0 100 100">
+            <rect x="8" y="8" width="84" height="84"
+                fill="#92f62c" stroke="#183c00" stroke-width="5"/>
+            <rect x="19" y="22" width="23" height="25"
+                fill="#fff000" stroke="#111" stroke-width="4"/>
+            <rect x="58" y="22" width="23" height="25"
+                fill="#fff000" stroke="#111" stroke-width="4"/>
+            <path d="M20 67 H80 V79 H20Z"
+                fill="#ffcf00" stroke="#111" stroke-width="4"/>
+        </svg>
+    </button>
+
+    <button class="game-button play" onclick="openMenu('Играть')">
+        <svg viewBox="0 0 100 100">
+            <path d="M24 10 Q17 7 17 20 V80 Q17 94 30 86 L85 55 Q96 49 85 42Z"
+                fill="#ffe500" stroke="#171717" stroke-width="6"
+                stroke-linejoin="round"/>
+        </svg>
+    </button>
+
+    <button class="game-button" onclick="openMenu('Редактор')">
+        <svg viewBox="0 0 100 100">
+            <path d="M18 80 L72 20 L84 31 L30 88 L10 91Z"
+                fill="#ffe000" stroke="#222" stroke-width="5"/>
+            <path d="M65 17 L78 5 L94 21 L82 34Z"
+                fill="#ffe000" stroke="#222" stroke-width="5"/>
+        </svg>
+    </button>
+
+</div>
+
+<!-- PROFILE -->
+
+<div class="profile" onclick="openMenu('Профиль')">
+    <div class="username">QXLF</div>
+    <div class="avatar">
+        <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="30" r="22"
+                fill="#ffce24" stroke="#744000" stroke-width="4"/>
+            <path d="M13 88 Q12 53 50 53 Q88 53 87 88Z"
+                fill="#ffce24" stroke="#744000" stroke-width="4"/>
+        </svg>
+    </div>
+</div>
+
+<!-- DAILY -->
+
+<div class="daily" onclick="openMenu('Daily Chest')">
+    <span class="chest">🎁</span>
+    DAILY
+</div>
+
+<!-- BOTTOM BUTTONS -->
+
+<div class="bottom">
+
+    <button class="circle" onclick="openMenu('Достижения')">
+        <svg viewBox="0 0 100 100">
+            <path d="M25 15 H75 V50 Q75 75 50 75 Q25 75 25 50Z"
+                fill="#ffcf00" stroke="#222" stroke-width="5"/>
+            <path d="M25 25 H10 V42 Q10 55 30 55 M75 25 H90 V42 Q90 55 70 55"
+                fill="none" stroke="#222" stroke-width="7"/>
+            <path d="M42 75 V88 H58 V75 M35 91 H65"
+                stroke="#222" stroke-width="7"/>
+        </svg>
+    </button>
+
+    <button class="circle" onclick="openMenu('Настройки')">
+        <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="34"
+                fill="#ffcd00" stroke="#222" stroke-width="6"/>
+            <circle cx="50" cy="50" r="16"
+                fill="#6adb12" stroke="#222" stroke-width="5"/>
+            <g stroke="#222" stroke-width="9">
+                <path d="M50 5 V18 M50 82 V95 M5 50 H18 M82 50 H95"/>
+                <path d="M18 18 L28 28 M72 72 L82 82 M18 82 L28 72 M72 28 L82 18"/>
+            </g>
+        </svg>
+    </button>
+
+    <button class="circle" onclick="openMenu('Статистика')">
+        <svg viewBox="0 0 100 100">
+            <path d="M12 45 H32 V85 H12Z"
+                fill="#ffcf00" stroke="#222" stroke-width="5"/>
+            <path d="M40 20 H60 V85 H40Z"
+                fill="#ffcf00" stroke="#222" stroke-width="5"/>
+            <path d="M68 5 H88 V85 H68Z"
+                fill="#ffcf00" stroke="#222" stroke-width="5"/>
+        </svg>
+    </button>
+
+    <button class="circle" onclick="openMenu('Музыка')">
+        <svg viewBox="0 0 100 100">
+            <path d="M55 20 L88 10 V65"
+                stroke="#222" stroke-width="9" fill="none"/>
+            <path d="M55 20 V70" stroke="#222" stroke-width="9"/>
+            <ellipse cx="43" cy="76" rx="18" ry="12"
+                fill="#ffcc00" stroke="#222" stroke-width="5"/>
+            <ellipse cx="76" cy="65" rx="18" ry="12"
+                fill="#ffcc00" stroke="#222" stroke-width="5"/>
+        </svg>
+    </button>
+
+</div>
+
+<!-- SOCIALS -->
+
+<div class="socials">
+    <div class="social fb">f</div>
+    <div class="social tw">♥</div>
+    <div class="social yt">▶</div>
+</div>
+
+<div class="robtop">RobTop</div>
+
+<!-- POPUP -->
+
+<div class="popup" id="popup" onclick="closeOutside(event)">
+    <div class="popup-box">
+        <h2 id="popupTitle">Меню</h2>
+        <button onclick="closeMenu()">OK</button>
+    </div>
+</div>
+
+<script>
+const popup = document.getElementById('popup');
+const popupTitle = document.getElementById('popupTitle');
+
+function openMenu(name) {
+    popupTitle.textContent = name;
+    popup.classList.add('show');
+}
+
+function closeMenu() {
+    popup.classList.remove('show');
+}
+
+function closeOutside(event) {
+    if (event.target === popup) {
+        closeMenu();
+    }
+}
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') closeMenu();
+});
+</script>
+
+</body>
+</html>
