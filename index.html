@@ -2,651 +2,1760 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Geometry Dash</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ac00b9">
+<title>Geometry Dash — Menu</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
+:root {
+  color-scheme: dark;
+  --accent: #ffde16;
+  --green: #94ee20;
+  --ink: #141615;
 }
-
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #23012d;
+}
 body {
-    width: 100%;
-    min-height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
-    font-family: 'Russo One', sans-serif;
-    background: #bd00bb;
-    color: white;
+  font-family: Arial, Helvetica, sans-serif;
+  user-select: none;
+  touch-action: manipulation;
 }
-
-/* BACKGROUND */
-
-.background {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    background:
-        linear-gradient(90deg, transparent 97%, #ed00dc 97%),
-        linear-gradient(transparent 97%, #ed00dc 97%),
-        linear-gradient(135deg, #b800b6, #d000c8, #a800ad);
-    background-size: 180px 180px;
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible {
+  outline: 4px solid #fff;
+  outline-offset: 5px;
 }
-
-.background::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-        repeating-linear-gradient(45deg,
-        transparent 0 90px,
-        #ec00dc 91px 96px,
-        transparent 97px 180px);
-    opacity: .22;
+button { touch-action: manipulation; }
+[hidden] { display: none !important; }
+svg { display: block; width: 100%; height: 100%; overflow: visible; }
+#viewport {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(ellipse, #a800bb, #260130);
 }
-
-.blocks {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
+#stage {
+  width: 1530px;
+  height: 860px;
+  position: absolute;
+  overflow: hidden;
+  flex-shrink: 0;
+  transform-origin: center;
+  background: linear-gradient(#96009e, #e100e7 69%, #bd00cc);
 }
-
-.block {
-    position: absolute;
-    width: 100px;
-    height: 100px;
-    border: 7px solid #ed00df;
-    background: #b000b4;
-    box-shadow: 7px 7px 0 #7d007d;
-    transform: rotate(45deg);
-    opacity: .55;
+.pattern {
+  position: absolute;
+  inset: -90px;
+  opacity: .37;
+  background-image:
+    linear-gradient(90deg, transparent 94%, #ff2cff 94%),
+    linear-gradient(transparent 94%, #ff2cff 94%);
+  background-size: 470px 330px;
+  animation: drift 28s ease-in-out infinite alternate;
 }
-
-.block:nth-child(1) {left: 5%;top: 12%;}
-.block:nth-child(2) {right: 8%;top: 12%;width: 70px;height:70px;}
-.block:nth-child(3) {left: 15%;bottom: 30%;width: 55px;height:55px;}
-.block:nth-child(4) {right: 20%;bottom: 28%;width: 90px;height:90px;}
-.block:nth-child(5) {left: 48%;top: 27%;width: 45px;height:45px;}
-
-/* LOGO */
-
+.pattern::before, .pattern::after {
+  content: "";
+  position: absolute;
+  inset: 35px;
+  background:
+    linear-gradient(#71007e, #71007e) 1% 1% / 300px 225px no-repeat,
+    linear-gradient(#780083, #780083) 34% 5% / 340px 365px no-repeat,
+    linear-gradient(#71007e, #71007e) 67% 2% / 365px 270px no-repeat,
+    linear-gradient(#740082, #740082) 99% 1% / 280px 240px no-repeat,
+    linear-gradient(#84008e, #84008e) 4% 60% / 305px 270px no-repeat,
+    linear-gradient(#8b009a, #8b009a) 47% 62% / 340px 190px no-repeat,
+    linear-gradient(#790084, #790084) 78% 62% / 350px 260px no-repeat,
+    linear-gradient(#84008e, #84008e) 100% 68% / 250px 260px no-repeat;
+  filter: drop-shadow(5px 5px 0 #64006a);
+}
+.pattern::after {
+  inset: 110px 180px;
+  opacity: .25;
+  transform: translate(140px, 175px);
+}
+.glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 60%, #ff54ff33, transparent 65%);
+  animation: breathe 5s ease-in-out infinite alternate;
+}
+.floor {
+  position: absolute;
+  inset: 620px 0 0;
+  border-top: 5px solid #ff78ff;
+  box-shadow: 0 -5px 0 #a900b6, inset 0 15px 40px #e200e633;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 380px, #d200dc 380px 395px),
+    linear-gradient(#a300ad, #580064);
+}
+.floor::after {
+  content: "";
+  position: absolute;
+  inset: 12px 0 0;
+  background: linear-gradient(transparent 92%, #93009d 92%);
+  opacity: .6;
+}
+.screen {
+  position: absolute;
+  inset: 0;
+  transition: opacity .24s, transform .24s;
+}
+.screen.off {
+  opacity: 0;
+  transform: scale(.96);
+  pointer-events: none;
+  visibility: hidden;
+}
 .logo {
-    position: absolute;
-    top: 7%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    text-align: center;
-    font-size: clamp(27px, 7.2vw, 85px);
-    white-space: nowrap;
-    letter-spacing: -3px;
-    color: #aaff35;
-    -webkit-text-stroke: 2px #17200b;
-    paint-order: stroke fill;
-    text-shadow:
-        3px 4px 0 white,
-        5px 7px 0 #252525,
-        8px 10px 0 #222;
-    z-index: 2;
+  position: absolute;
+  width: 1170px;
+  height: 160px;
+  left: 185px;
+  top: 53px;
+  filter: drop-shadow(9px 12px 0 #480047a8);
 }
-
-/* MAIN */
-
-.main {
-    position: absolute;
-    top: 43%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: clamp(18px, 5vw, 65px);
-    width: 95%;
-    z-index: 3;
+.logo text {
+  font-family: Impact, "Arial Black", monospace;
+  font-weight: 1000;
+  paint-order: stroke fill;
+  stroke-linejoin: miter;
 }
-
-.game-button {
-    width: clamp(82px, 12vw, 145px);
-    aspect-ratio: 1;
-    border: 5px solid white;
-    outline: 4px solid #171717;
-    border-radius: 17px;
-    background: linear-gradient(145deg, #c0ff45, #56c900);
-    box-shadow: 0 8px 0 #276000, 0 12px 0 #171717;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    transition: .12s;
+.icon-button {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: white;
+  filter: drop-shadow(6px 9px 0 #39003b99);
+  transition: transform .14s, filter .14s;
 }
-
-.game-button svg {
-    width: 76%;
-    height: 76%;
-    filter: drop-shadow(3px 4px 0 #222);
+.icon-button:hover {
+  transform: scale(1.065);
+  filter: drop-shadow(6px 10px 0 #39003b99) brightness(1.14);
 }
-
-.game-button:hover {
-    filter: brightness(1.15);
-    transform: translateY(-4px);
+.icon-button:active { transform: scale(.92); }
+.icon-button.selected { filter: drop-shadow(0 0 12px #ffea36); }
+.close-main { left: 8px; top: 7px; width: 84px; height: 84px; }
+.garage-main { left: 381px; top: 316px; width: 178px; height: 178px; }
+.play-main { left: 626px; top: 266px; width: 274px; height: 274px; }
+.editor-main { left: 971px; top: 317px; width: 178px; height: 178px; }
+.daily-main { left: 1358px; top: 326px; width: 129px; height: 115px; }
+.profile-main { left: 48px; top: 510px; width: 145px; height: 145px; }
+.profile-name {
+  position: absolute;
+  top: 470px;
+  left: 42px;
+  width: 160px;
+  text-align: center;
 }
-
-.game-button:active {
-    transform: translateY(5px);
-    box-shadow: 0 3px 0 #276000, 0 6px 0 #171717;
+.game-text {
+  font-weight: 1000;
+  color: #ffde28;
+  letter-spacing: 1px;
+  -webkit-text-stroke: 2px #241126;
+  paint-order: stroke fill;
+  text-shadow: 3px 4px 0 #300632;
 }
-
-.play {
-    width: clamp(125px, 18vw, 205px);
-    border-radius: 19px;
-}
-
-/* PROFILE */
-
-.profile {
-    position: absolute;
-    left: 4%;
-    top: 55%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    z-index: 3;
-}
-
-.username {
-    color: #ffe500;
-    font-size: clamp(17px, 2vw, 28px);
-    -webkit-text-stroke: 1px #543000;
-    text-shadow: 3px 3px #222;
-}
-
-.avatar {
-    width: clamp(65px, 9vw, 105px);
-    aspect-ratio: 1;
-    border: 5px solid white;
-    outline: 4px solid #222;
-    border-radius: 50%;
-    background: linear-gradient(#28dfff, #0873d5);
-    display: grid;
-    place-items: center;
-    box-shadow: 0 6px 0 #222;
-}
-
-.avatar svg {
-    width: 75%;
-}
-
-/* DAILY */
-
-.daily {
-    position: absolute;
-    right: 4%;
-    top: 49%;
-    text-align: center;
-    color: #ffe500;
-    font-size: clamp(17px, 2vw, 26px);
-    -webkit-text-stroke: 1px #4b2500;
-    text-shadow: 3px 3px #222;
-    cursor: pointer;
-    z-index: 3;
-}
-
-.chest {
-    font-size: clamp(43px, 6vw, 65px);
-    display: block;
-    filter: drop-shadow(3px 5px #222);
-}
-
-/* BOTTOM */
-
-.bottom {
-    position: absolute;
-    left: 50%;
-    bottom: 8%;
-    transform: translateX(-50%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: clamp(12px, 2.7vw, 30px);
-    z-index: 4;
-}
-
-.circle {
-    width: clamp(61px, 8.5vw, 105px);
-    aspect-ratio: 1;
-    flex-shrink: 0;
-    border: 5px solid white;
-    outline: 3px solid #222;
-    border-radius: 50%;
-    background: linear-gradient(145deg, #c0ff43, #52c500);
-    box-shadow: 0 7px 0 #222;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    transition: .15s;
-}
-
-.circle svg {
-    width: 67%;
-    height: 67%;
-    filter: drop-shadow(2px 3px #333);
-}
-
-.circle:hover {
-    transform: translateY(-4px);
-    filter: brightness(1.2);
-}
-
-/* FOOTER */
-
-.socials {
-    position: absolute;
-    bottom: 4%;
-    left: 3%;
-    display: flex;
-    gap: 8px;
-}
-
-.social {
-    width: 37px;
-    height: 37px;
-    border: 3px solid white;
-    outline: 2px solid #222;
-    border-radius: 9px;
-    display: grid;
-    place-items: center;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.fb {background:#2679dc;}
-.tw {background:#16bce9;}
-.yt {background:#e92727;}
-
+.profile-name { font-size: 33px; }
+.bottom { top: 673px; width: 132px; height: 132px; }
+.achievements-main { left: 468px; }
+.settings-main { left: 619px; }
+.stats-main { left: 770px; }
+.music-main { left: 920px; width: 143px; height: 143px; top: 668px; }
+.social { top: 681px; width: 64px; height: 64px; }
+.social.fb { left: 26px; }
+.social.tw { left: 107px; }
+.social.yt { left: 188px; }
 .robtop {
-    position: absolute;
-    bottom: 4%;
-    right: 3%;
-    color: #ffcb00;
-    font-size: clamp(20px, 3vw, 32px);
-    -webkit-text-stroke: 1px #321000;
-    text-shadow: 3px 3px #222;
+  position: absolute;
+  left: 28px;
+  top: 765px;
+  background: #ffbd09;
+  color: #080c0c;
+  border: 5px solid #ffdf22;
+  border-radius: 18px;
+  padding: 0 9px 4px;
+  font: 1000 47px "Arial Black", Arial, sans-serif;
+  letter-spacing: -4px;
+  transform: rotate(-2deg);
+  box-shadow: 3px 5px 0 #53114e;
 }
-
-/* GROUND */
-
-.ground {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 19%;
-    background: #87008744;
-    border-top: 6px solid #ed00dd;
-    box-shadow: 0 -5px 0 #750079;
+.robtop:hover { filter: brightness(1.2); }
+.more-main { left: 1310px; top: 665px; width: 195px; height: 150px; }
+.runner {
+  position: absolute;
+  left: -100px;
+  top: 565px;
+  width: 50px;
+  height: 50px;
+  pointer-events: none;
+  animation: run 13s linear infinite;
 }
-
-.ground::after {
-    content: "";
-    position: absolute;
-    top: 15px;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(
-        90deg,
-        transparent 0 60px,
-        #ee00db 61px 66px,
-        transparent 67px 120px
-    );
-    opacity: .35;
+.runner svg { animation: roll 2s linear infinite; }
+.runner::before {
+  content: "";
+  position: absolute;
+  right: 50px;
+  top: 34px;
+  width: 170px;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, #fff0 0 22px, #ffffffbb 22px 28px);
 }
-
-/* POPUP */
-
-.popup {
-    position: absolute;
-    inset: 0;
-    background: #000b;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 20;
-    padding: 20px;
+.spark {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #fff;
+  pointer-events: none;
+  animation: sparkle 2.6s ease-out infinite;
 }
-
-.popup.show {
-    display: flex;
+.back-button { left: 25px; top: 24px; width: 85px; height: 85px; }
+.screen-title {
+  position: absolute;
+  top: 30px;
+  left: 160px;
+  right: 160px;
+  text-align: center;
+  margin: 0;
+  font-size: 65px;
 }
-
-.popup-box {
-    width: min(100%, 420px);
-    min-height: 200px;
-    padding: 30px 20px;
-    background: linear-gradient(#baff40, #50bd00);
-    border: 6px solid white;
-    outline: 4px solid #222;
-    border-radius: 20px;
-    box-shadow: 0 10px 0 #222;
-    text-align: center;
+.panel {
+  position: absolute;
+  border: 5px solid #261328;
+  outline: 3px solid #fff;
+  border-radius: 22px;
+  background: linear-gradient(#844527, #57291b);
+  box-shadow: 0 10px 0 #330b38aa, inset 0 0 0 5px #b16b3a;
+  color: #fff;
 }
-
-.popup-box h2 {
-    font-size: 27px;
-    margin-bottom: 25px;
-    text-shadow: 2px 3px #333;
+.level-card {
+  left: 330px;
+  top: 200px;
+  width: 870px;
+  height: 380px;
+  background: linear-gradient(#258dce, #075b9f);
+  box-shadow: 0 10px 0 #330b38aa, inset 0 0 0 6px #65d7fc;
+  text-align: center;
+  padding: 30px;
 }
-
-.popup-box button {
-    padding: 12px 35px;
-    border: 4px solid white;
-    outline: 3px solid #222;
-    border-radius: 12px;
-    background: #ffc800;
-    color: white;
-    font-family: inherit;
-    font-size: 19px;
-    cursor: pointer;
+.level-card h2 { margin: 12px 0; font-size: 54px; }
+.level-description { font-size: 24px; line-height: 1.5; }
+.badge {
+  display: inline-block;
+  padding: 8px 20px;
+  border: 3px solid #082b4c;
+  background: #064c84;
+  border-radius: 15px;
+  color: #a9faff;
+  font-weight: bold;
+  font-size: 22px;
 }
-
-/* MOBILE */
-
-@media(max-width: 600px) {
-    .logo {
-        top: 12%;
-        font-size: clamp(23px, 7.3vw, 43px);
-        letter-spacing: -2px;
-        -webkit-text-stroke: 1.5px #171717;
-    }
-
-    .main {
-        top: 39%;
-        gap: 17px;
-    }
-
-    .game-button {
-        width: 22vw;
-        max-width: 100px;
-        border-width: 4px;
-        outline-width: 3px;
-        border-radius: 13px;
-    }
-
-    .play {
-        width: 31vw;
-        max-width: 140px;
-    }
-
-    .profile {
-        top: 56%;
-        left: 5%;
-    }
-
-    .avatar {
-        width: 65px;
-        border-width: 4px;
-    }
-
-    .username {
-        font-size: 16px;
-    }
-
-    .daily {
-        top: 56%;
-        right: 5%;
-        font-size: 16px;
-    }
-
-    .chest {
-        font-size: 43px;
-    }
-
-    .bottom {
-        bottom: 13%;
-        width: 94%;
-        gap: clamp(9px, 3vw, 17px);
-    }
-
-    .circle {
-        width: 17vw;
-        max-width: 75px;
-        border-width: 4px;
-        outline-width: 2px;
-    }
-
-    .socials {
-        bottom: 3%;
-        left: 4%;
-        gap: 7px;
-    }
-
-    .social {
-        width: 31px;
-        height: 31px;
-        font-size: 16px;
-    }
-
-    .robtop {
-        bottom: 3%;
-        right: 4%;
-        font-size: 19px;
-    }
-
-    .ground {
-        height: 17%;
-    }
+.flat-button {
+  border: 3px solid #20300d;
+  outline: 2px solid #fff;
+  border-radius: 12px;
+  background: linear-gradient(#d1ff55 0 45%, #8bdc1a 46% 80%, #5d9b13);
+  color: #183309;
+  box-shadow: 0 5px 0 #26350e;
+  padding: 14px 27px;
+  font-size: 25px;
+  font-weight: 1000;
+  text-shadow: 0 1px #e9ffc0;
+  transition: transform .12s, filter .12s;
 }
-
-/* VERY SMALL SCREENS */
-
-@media(max-width: 360px) {
-    .main {
-        gap: 13px;
-    }
-
-    .game-button {
-        width: 21vw;
-    }
-
-    .play {
-        width: 29vw;
-    }
-
-    .bottom {
-        gap: 8px;
-    }
-
-    .circle {
-        width: 16.5vw;
-    }
+.flat-button:hover { filter: brightness(1.13); }
+.flat-button:active { transform: translateY(4px); box-shadow: 0 1px 0 #26350e; }
+.level-arrow { top: 335px; width: 90px; height: 90px; }
+.level-arrow.prev { left: 180px; }
+.level-arrow.next { right: 180px; }
+.level-footer {
+  position: absolute;
+  top: 630px;
+  left: 270px;
+  right: 270px;
+  text-align: center;
+  color: white;
+  font-size: 25px;
+  text-shadow: 2px 3px #51005b;
 }
-
-@media(max-height: 520px) {
-    .logo {top: 3%;font-size: 40px;}
-    .main {top: 43%;}
-    .game-button {width: 75px;}
-    .play {width: 105px;}
-    .profile {top: 48%;}
-    .daily {top: 43%;}
-    .bottom {bottom: 3%;}
-    .ground {height: 13%;}
+.dots { margin-top: 25px; display: flex; justify-content: center; gap: 15px; }
+.dot { width: 15px; height: 15px; border: 2px solid #fff; border-radius: 50%; background: #630071; }
+.dot.active { background: #a8ff26; }
+.garage-panel { left: 280px; top: 170px; width: 970px; height: 560px; padding: 28px; }
+.preview-area {
+  height: 210px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 70px;
+  background: #2f152766;
+  border: 3px solid #331621;
+  border-radius: 13px;
+}
+#cubePreview { width: 145px; height: 145px; filter: drop-shadow(8px 9px #0006); }
+.preview-caption { width: 360px; font-size: 25px; line-height: 1.5; color: #ffeeb9; }
+.garage-label { margin: 20px 0 12px; text-align: center; font-size: 23px; font-weight: bold; }
+.palette, .faces { display: flex; gap: 17px; justify-content: center; }
+.swatch {
+  width: 49px;
+  height: 49px;
+  border: 3px solid #201729;
+  outline: 2px solid #e8b778;
+  border-radius: 8px;
+  box-shadow: inset 0 5px #ffffff55, 0 4px #0005;
+}
+.swatch.active { outline: 4px solid #fff; transform: translateY(-4px); }
+.face-choice {
+  width: 66px;
+  height: 66px;
+  background: #391c1a;
+  border: 2px solid #cf8b51;
+  border-radius: 8px;
+  padding: 8px;
+}
+.face-choice.active { border: 3px solid #c6ff3b; background: #5c6e1f; }
+.editor-panel {
+  left: 340px;
+  top: 200px;
+  width: 850px;
+  height: 430px;
+  text-align: center;
+  padding: 30px;
+}
+.editor-grid {
+  width: 150px;
+  height: 130px;
+  margin: 0 auto;
+  border: 3px solid #65d7fc;
+  border-radius: 9px;
+  background:
+    linear-gradient(90deg, #66ccff44 1px, transparent 1px),
+    linear-gradient(#66ccff44 1px, transparent 1px), #113c5c;
+  background-size: 25px 25px;
+  position: relative;
+}
+.editor-grid::after {
+  content: "+";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #b4ff32;
+  font-size: 100px;
+}
+.editor-panel p { font-size: 24px; line-height: 1.5; }
+#modalLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: #16001cc9;
+  backdrop-filter: blur(5px);
+  display: grid;
+  place-items: center;
+  animation: appear .18s ease-out;
+}
+.dialog {
+  position: relative;
+  width: 750px;
+  max-height: 740px;
+  padding: 28px 35px 32px;
+  border: 5px solid #281627;
+  outline: 3px solid #fff;
+  border-radius: 22px;
+  background: linear-gradient(#995c32, #60311e);
+  box-shadow: inset 0 0 0 5px #c48c4f, 0 15px 0 #0005;
+}
+.dialog h2 {
+  margin: 0 55px 25px;
+  text-align: center;
+  font-size: 40px;
+}
+.dialog-close { right: -23px; top: -25px; width: 65px; height: 65px; z-index: 2; }
+#modalBody { max-height: 525px; overflow-y: auto; padding: 5px 8px 10px; }
+.dialog p { font-size: 23px; line-height: 1.5; }
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 17px;
+  margin-bottom: 12px;
+  background: #351a1966;
+  border-radius: 12px;
+  font-size: 24px;
+}
+.row small { display: block; color: #f7d9b0; font-size: 17px; margin-top: 7px; }
+.toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 72px;
+  height: 38px;
+  background: #46282c;
+  border: 3px solid #251824;
+  border-radius: 25px;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+}
+.toggle::after {
+  content: "";
+  width: 26px;
+  height: 26px;
+  background: #fff0d2;
+  border-radius: 50%;
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  transition: transform .2s;
+}
+.toggle:checked { background: #75b81e; }
+.toggle:checked::after { transform: translateX(33px); }
+input[type=range] { accent-color: #aeef29; width: 250px; cursor: pointer; }
+.text-input {
+  width: 100%;
+  padding: 16px;
+  border: 3px solid #291523;
+  border-radius: 12px;
+  background: #311622;
+  color: #fff;
+  font-size: 26px;
+  user-select: text;
+}
+.dialog-actions { margin-top: 24px; display: flex; justify-content: center; gap: 20px; }
+.achievement {
+  padding: 18px;
+  margin: 12px 0;
+  border: 2px solid #b98447;
+  border-radius: 12px;
+  background: #331c20a6;
+}
+.achievement h3 { color: #ffde2a; font-size: 23px; margin: 0 0 8px; }
+.achievement p { font-size: 18px; margin: 0; color: #e8cab5; }
+.achievement.locked { opacity: .55; }
+#toast {
+  position: absolute;
+  z-index: 40;
+  left: 50%;
+  bottom: 26px;
+  transform: translate(-50%, 30px);
+  max-width: 1100px;
+  padding: 16px 28px;
+  border: 2px solid #fff;
+  border-radius: 12px;
+  background: #21132ef2;
+  color: #fff;
+  text-align: center;
+  font-size: 23px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+#rotateHint {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  text-align: center;
+  color: #eac9ef;
+  font-size: 13px;
+  pointer-events: none;
+  display: none;
+}
+@media (orientation: portrait) {
+  #rotateHint { display: block; }
+}
+@keyframes drift { to { transform: translate(-25px, 20px); } }
+@keyframes breathe { to { opacity: .4; } }
+@keyframes run { to { left: 1600px; } }
+@keyframes roll { to { transform: rotate(360deg); } }
+@keyframes sparkle {
+  0% { transform: translateY(0) scale(0); opacity: 0; }
+  30% { opacity: .7; }
+  100% { transform: translateY(-70px) scale(1); opacity: 0; }
+}
+@keyframes appear { from { opacity: 0; } to { opacity: 1; } }
+.reduced *, .reduced *::before, .reduced *::after {
+  animation: none !important;
+  transition: none !important;
 }
 </style>
 </head>
-
 <body>
 
-<div class="background">
-    <div class="blocks">
-        <div class="block"></div>
-        <div class="block"></div>
-        <div class="block"></div>
-        <div class="block"></div>
-        <div class="block"></div>
+<!-- Все графические ресурсы встроены в документ. -->
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+<defs>
+  <linearGradient id="green" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#d1ff65"/>
+    <stop offset=".44" stop-color="#a6ed30"/>
+    <stop offset=".45" stop-color="#88d817"/>
+    <stop offset="1" stop-color="#4f9f07"/>
+  </linearGradient>
+  <linearGradient id="cyan" x1="0" y1="0" x2="0" y2="1">
+    <stop stop-color="#70fff0"/>
+    <stop offset=".48" stop-color="#22e7dc"/>
+    <stop offset=".5" stop-color="#04b5b9"/>
+    <stop offset="1" stop-color="#087e91"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop stop-color="#ffff63"/>
+    <stop offset=".5" stop-color="#ffe01a"/>
+    <stop offset="1" stop-color="#efa400"/>
+  </linearGradient>
+  <linearGradient id="blue" x1="0" y1="0" x2="0" y2="1">
+    <stop stop-color="#86ffff"/>
+    <stop offset=".5" stop-color="#11bce9"/>
+    <stop offset="1" stop-color="#005794"/>
+  </linearGradient>
+  <linearGradient id="logoFill" x1="0" y1="0" x2="0" y2="1">
+    <stop stop-color="#e5ff98"/>
+    <stop offset=".3" stop-color="#b9f454"/>
+    <stop offset=".51" stop-color="#a4ed35"/>
+    <stop offset=".52" stop-color="#7fd329"/>
+    <stop offset="1" stop-color="#459d0f"/>
+  </linearGradient>
+
+  <symbol id="crossBase" viewBox="0 0 200 200">
+    <path d="M66 8H134V24H178V68H192V132H178V176H134V192H66V176H22V132H8V68H22V24H66Z"
+      fill="#101411" stroke="white" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M26 29H174V171H26Z" fill="url(#cyan)" stroke="#14251b" stroke-width="5"/>
+    <path d="M68 12H132V70H188V130H132V188H68V130H12V70H68Z"
+      fill="url(#green)" stroke="#13230e" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M75 20H124V70H115V30H75ZM20 77H67V88H27V120H20Z" fill="#e8ffb5" opacity=".6"/>
+    <path d="M133 117H181V124H133ZM117 133H125V181H75V174H117Z" fill="#2b6a06" opacity=".7"/>
+  </symbol>
+  <symbol id="roundBase" viewBox="0 0 120 120">
+    <circle cx="60" cy="60" r="56" fill="#131813" stroke="white" stroke-width="4"/>
+    <circle cx="60" cy="60" r="49" fill="url(#green)" stroke="#14200f" stroke-width="3"/>
+    <path d="M22 39Q60 0 98 39" fill="none" stroke="#edffc4" stroke-width="4" opacity=".6"/>
+    <path d="M22 84Q60 116 98 84" fill="none" stroke="#3b8109" stroke-width="5"/>
+  </symbol>
+  <symbol id="cube" viewBox="0 0 100 100">
+    <path d="M7 7H93V93H7Z" fill="currentColor" stroke="#192019" stroke-width="6"/>
+    <path d="M12 12H88V24H24V88H12Z" fill="#fff" opacity=".28"/>
+    <path d="M24 31H37V45H24ZM63 31H76V45H63ZM25 64H75V75H25Z"
+      fill="#2a3c16" stroke="#fcffb0" stroke-width="2"/>
+  </symbol>
+  <symbol id="play" viewBox="0 0 200 200">
+    <use href="#crossBase"/>
+    <path d="M78 44Q74 42 74 49V151Q74 158 80 154L147 106Q155 101 147 95Z"
+      fill="#15230b" transform="translate(3 4)" opacity=".8"/>
+    <path d="M78 43Q73 40 73 48V151Q73 157 79 153L146 105Q153 100 146 95Z"
+      fill="url(#gold)" stroke="#172008" stroke-width="3"/>
+    <path d="M80 50L138 99" stroke="#fff57a" stroke-width="3" opacity=".8"/>
+  </symbol>
+  <symbol id="garage" viewBox="0 0 200 200">
+    <use href="#crossBase"/>
+    <use href="#cube" x="44" y="44" width="112" height="112" color="#ffe024"/>
+  </symbol>
+  <symbol id="editor" viewBox="0 0 200 200">
+    <use href="#crossBase"/>
+    <path d="M51 48L64 35L87 56L78 69L143 132L153 130L166 146L149 163L134 151L136 140L72 77L60 85L39 62Z"
+      fill="url(#gold)" stroke="#253020" stroke-width="4"/>
+    <path d="M147 32Q116 25 118 57L52 122Q27 117 30 146L45 134L58 147L47 163Q78 166 78 140L142 77Q172 81 172 51L154 65L141 52Z"
+      fill="url(#gold)" stroke="#253020" stroke-width="4"/>
+    <path d="M82 123L122 83" stroke="#fff66a" stroke-width="4"/>
+  </symbol>
+  <symbol id="close" viewBox="0 0 120 120">
+    <use href="#roundBase"/>
+    <path d="M38 26L60 48L82 26L95 39L73 61L95 83L82 96L60 74L38 96L25 83L47 61L25 39Z"
+      fill="url(#gold)" stroke="#17321b" stroke-width="4"/>
+  </symbol>
+  <symbol id="back" viewBox="0 0 120 120">
+    <use href="#roundBase"/>
+    <path d="M65 26L29 60L65 94V73H92V47H65Z"
+      fill="url(#gold)" stroke="#1c3010" stroke-width="4" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="profile" viewBox="0 0 120 120">
+    <circle cx="60" cy="60" r="56" fill="#111" stroke="white" stroke-width="4"/>
+    <circle cx="60" cy="60" r="49" fill="url(#blue)" stroke="#101820" stroke-width="3"/>
+    <ellipse cx="60" cy="36" rx="17" ry="21" fill="url(#gold)" stroke="#20251a" stroke-width="3"/>
+    <path d="M33 83V72L49 62H71L87 72V90H33Z" fill="url(#gold)" stroke="#20251a" stroke-width="3"/>
+  </symbol>
+  <symbol id="trophy" viewBox="0 0 120 120">
+    <use href="#roundBase"/>
+    <path d="M37 31H83V64L69 77V89H81V99H39V89H51V77L37 64ZM37 40H23V58L40 69M83 40H97V58L80 69"
+      fill="url(#gold)" stroke="#233315" stroke-width="3" stroke-linejoin="miter"/>
+    <path d="M58 39H64V65H58Z" fill="#263c10"/>
+  </symbol>
+  <symbol id="settings" viewBox="0 0 120 120">
+    <use href="#roundBase"/>
+    <path d="M51 23H69L72 33L82 37L92 33L103 49L94 57V66L102 74L92 90L81 86L72 91L68 102H51L47 91L38 86L27 90L17 74L25 66V55L18 48L28 33L38 37L48 32Z"
+      transform="translate(0 -2) scale(1 .98)"
+      fill="url(#gold)" stroke="#294015" stroke-width="3"/>
+    <circle cx="60" cy="60" r="23" fill="url(#green)" stroke="#294015" stroke-width="3"/>
+  </symbol>
+  <symbol id="stats" viewBox="0 0 120 120">
+    <use href="#roundBase"/>
+    <path d="M31 34H44V89H31ZM53 51H66V89H53ZM75 40H88V89H75Z"
+      fill="url(#gold)" stroke="#294015" stroke-width="3"/>
+  </symbol>
+  <symbol id="music" viewBox="0 0 120 120">
+    <use href="#roundBase"/>
+    <circle cx="59" cy="58" r="35" fill="#e5b614" stroke="#344418" stroke-width="3"/>
+    <path d="M49 69V34L88 25V61M49 43L88 34" fill="none" stroke="#152a19" stroke-width="10"/>
+    <path d="M49 69V34L88 25V61M49 43L88 34" fill="none" stroke="white" stroke-width="6"/>
+    <ellipse cx="40" cy="73" rx="11" ry="8" fill="white" stroke="#172c18" stroke-width="3"/>
+    <ellipse cx="79" cy="65" rx="11" ry="8" fill="white" stroke="#172c18" stroke-width="3"/>
+  </symbol>
+  <symbol id="daily" viewBox="0 0 150 140">
+    <path d="M26 49V26Q75 7 124 26V49L133 58V104H17V58Z"
+      fill="#121b22" stroke="white" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M28 48V28Q75 12 122 28V49Z" fill="url(#blue)" stroke="#16283d" stroke-width="4"/>
+    <path d="M19 56H131V100H19Z" fill="url(#blue)" stroke="#16283d" stroke-width="4"/>
+    <path d="M32 23V99M118 23V99M19 57H131" stroke="#1e2430" stroke-width="10"/>
+    <path d="M32 23V99M118 23V99M19 57H131" stroke="#f3b625" stroke-width="5"/>
+    <rect x="60" y="48" width="31" height="28" rx="7" fill="url(#gold)" stroke="#271f11" stroke-width="3"/>
+    <path d="M75 57V67" stroke="#29231c" stroke-width="5"/>    <text x="75" y="126" text-anchor="middle" font-family="Arial Black,Arial" font-size="33"
+      font-weight="1000" fill="#ffe722" stroke="white" stroke-width="10" paint-order="stroke">DAILY</text>
+    <text x="75" y="126" text-anchor="middle" font-family="Arial Black,Arial" font-size="33"
+      font-weight="1000" fill="#ffe722" stroke="#171817" stroke-width="4" paint-order="stroke">DAILY</text>
+  </symbol>
+
+  <symbol id="more" viewBox="0 0 210 165">
+    <use href="#crossBase" x="25" y="4" width="160" height="160"/>
+    <g font-family="Impact,Arial Black,monospace" font-weight="1000"
+       font-size="43" text-anchor="middle" fill="#ffe62a" stroke="#161916"
+       stroke-width="5" paint-order="stroke">
+      <text x="105" y="67">MORE</text>
+      <text x="105" y="124">GAMES</text>
+    </g>
+  </symbol>
+</defs>
+</svg>
+
+<div id="viewport">
+<main id="stage" aria-label="Главное меню игры">
+  <div class="pattern"></div>
+  <div class="glow"></div>
+  <div class="floor"></div>
+  <div id="particles" aria-hidden="true"></div>
+
+  <section id="home" class="screen" aria-label="Главное меню">
+    <svg class="logo" viewBox="0 0 1180 165" aria-label="Geometry Dash">
+      <text x="590" y="127" text-anchor="middle"
+        textLength="1130" lengthAdjust="spacingAndGlyphs"
+        font-size="126" fill="#11190d" stroke="#101510" stroke-width="22">GEOMETRY DASH</text>
+      <text x="590" y="127" text-anchor="middle"
+        textLength="1130" lengthAdjust="spacingAndGlyphs"
+        font-size="126" fill="#11190d" stroke="#fff" stroke-width="14">GEOMETRY DASH</text>
+      <text x="590" y="127" text-anchor="middle"
+        textLength="1130" lengthAdjust="spacingAndGlyphs"
+        font-size="126" fill="url(#logoFill)" stroke="#17210d" stroke-width="8">GEOMETRY DASH</text>
+    </svg>
+
+    <button class="icon-button close-main" data-action="exit" aria-label="Выход">
+      <svg><use href="#close"/></svg>
+    </button>
+
+    <button class="icon-button garage-main" data-screen="garageScreen" aria-label="Гараж">
+      <svg><use href="#garage"/></svg>
+    </button>
+
+    <button class="icon-button play-main" data-screen="levelsScreen" aria-label="Играть">
+      <svg><use href="#play"/></svg>
+    </button>
+
+    <button class="icon-button editor-main" data-screen="editorScreen" aria-label="Редактор">
+      <svg><use href="#editor"/></svg>
+    </button>
+
+    <button class="icon-button daily-main" data-action="daily" aria-label="Ежедневная награда">
+      <svg><use href="#daily"/></svg>
+    </button>
+
+    <div id="profileName" class="profile-name game-text">QXLF</div>
+
+    <button class="icon-button profile-main" data-action="profile" aria-label="Профиль">
+      <svg><use href="#profile"/></svg>
+    </button>
+
+    <button class="icon-button social fb" data-social="Сообщество" aria-label="Сообщество">
+      <svg viewBox="0 0 70 70">
+        <rect x="3" y="3" width="64" height="64" rx="13"
+          fill="#234681" stroke="white" stroke-width="3"/>
+        <rect x="7" y="7" width="56" height="56" rx="9"
+          fill="#3263a2" stroke="#192233" stroke-width="2"/>
+        <path d="M41 58V37H49L50 27H41V22Q41 18 46 18H51V9H43Q30 9 30 23V27H23V37H30V58Z"
+          fill="white"/>
+      </svg>
+    </button>
+
+    <button class="icon-button social tw" data-social="Новости" aria-label="Новости">
+      <svg viewBox="0 0 70 70">
+        <rect x="3" y="3" width="64" height="64" rx="13"
+          fill="#03a2de" stroke="white" stroke-width="3"/>
+        <rect x="7" y="7" width="56" height="56" rx="9"
+          fill="none" stroke="#154657" stroke-width="2"/>
+        <path d="M56 22L49 24Q44 15 35 22Q31 26 33 31Q21 31 15 22Q12 31 20 36L14 35Q15 43 25 45Q20 49 12 48Q31 61 46 45Q53 37 52 28Z"
+          fill="white"/>
+      </svg>
+    </button>
+
+    <button class="icon-button social yt" data-social="Видео" aria-label="Видео">
+      <svg viewBox="0 0 70 70">
+        <rect x="3" y="3" width="64" height="64" rx="13"
+          fill="#e32c25" stroke="white" stroke-width="3"/>
+        <rect x="7" y="7" width="56" height="56" rx="9"
+          fill="none" stroke="#72131c" stroke-width="2"/>
+        <path d="M27 17L53 35L27 53Z" fill="white"/>
+      </svg>
+    </button>
+
+    <button class="robtop" data-action="about" aria-label="Об этом проекте">RobTop</button>
+
+    <button class="icon-button bottom achievements-main"
+      data-action="achievements" aria-label="Достижения">
+      <svg><use href="#trophy"/></svg>
+    </button>
+
+    <button class="icon-button bottom settings-main"
+      data-action="settings" aria-label="Настройки">
+      <svg><use href="#settings"/></svg>
+    </button>
+
+    <button class="icon-button bottom stats-main"
+      data-action="stats" aria-label="Статистика">
+      <svg><use href="#stats"/></svg>
+    </button>
+
+    <button class="icon-button bottom music-main"
+      data-action="music" aria-label="Музыка">
+      <svg><use href="#music"/></svg>
+    </button>
+
+    <button class="icon-button more-main" data-action="more" aria-label="Другие игры">
+      <svg><use href="#more"/></svg>
+    </button>
+  </section>
+
+  <section id="levelsScreen" class="screen off" inert
+    aria-hidden="true" aria-label="Выбор уровня">
+
+    <button class="icon-button back-button" data-screen="home" aria-label="Назад">
+      <svg><use href="#back"/></svg>
+    </button>
+
+    <h1 class="screen-title game-text">SELECT LEVEL</h1>
+
+    <button class="icon-button level-arrow prev"
+      data-action="prevLevel" aria-label="Предыдущий уровень">
+      <svg><use href="#back"/></svg>
+    </button>
+
+    <article class="panel level-card">
+      <div class="badge" id="levelBadge">МЕНЮ · 01</div>
+      <h2 class="game-text" id="levelName">Stereo Start</h2>
+      <p class="level-description">
+        Экран выбора уровня готов.<br>
+        Игровой процесс пока не добавлен.
+      </p>
+      <button class="flat-button" data-action="levelInfo">ПОДРОБНЕЕ</button>
+    </article>
+
+    <button class="icon-button level-arrow next"
+      data-action="nextLevel" aria-label="Следующий уровень">
+      <svg style="transform:rotate(180deg)"><use href="#back"/></svg>
+    </button>
+
+    <div class="level-footer">
+      Только интерфейс — без физики и препятствий
+      <div id="levelDots" class="dots"></div>
     </div>
-</div>
+  </section>
 
-<div class="ground"></div>
+  <section id="garageScreen" class="screen off" inert
+    aria-hidden="true" aria-label="Гараж">
 
-<div class="logo">GEOMETRY DASH</div>
-
-<!-- MAIN BUTTONS -->
-
-<div class="main">
-
-    <button class="game-button" onclick="openMenu('Иконки')">
-        <svg viewBox="0 0 100 100">
-            <rect x="8" y="8" width="84" height="84"
-                fill="#92f62c" stroke="#183c00" stroke-width="5"/>
-            <rect x="19" y="22" width="23" height="25"
-                fill="#fff000" stroke="#111" stroke-width="4"/>
-            <rect x="58" y="22" width="23" height="25"
-                fill="#fff000" stroke="#111" stroke-width="4"/>
-            <path d="M20 67 H80 V79 H20Z"
-                fill="#ffcf00" stroke="#111" stroke-width="4"/>
-        </svg>
+    <button class="icon-button back-button" data-screen="home" aria-label="Назад">
+      <svg><use href="#back"/></svg>
     </button>
 
-    <button class="game-button play" onclick="openMenu('Играть')">
-        <svg viewBox="0 0 100 100">
-            <path d="M24 10 Q17 7 17 20 V80 Q17 94 30 86 L85 55 Q96 49 85 42Z"
-                fill="#ffe500" stroke="#171717" stroke-width="6"
-                stroke-linejoin="round"/>
-        </svg>
-    </button>
+    <h1 class="screen-title game-text">ICON KIT</h1>
 
-    <button class="game-button" onclick="openMenu('Редактор')">
-        <svg viewBox="0 0 100 100">
-            <path d="M18 80 L72 20 L84 31 L30 88 L10 91Z"
-                fill="#ffe000" stroke="#222" stroke-width="5"/>
-            <path d="M65 17 L78 5 L94 21 L82 34Z"
-                fill="#ffe000" stroke="#222" stroke-width="5"/>
-        </svg>
-    </button>
+    <div class="panel garage-panel">
+      <div class="preview-area">
+        <div id="cubePreview"></div>
+        <div class="preview-caption">
+          Твой кубик<br>
+          <span style="color:#b5ff42">
+            Цвет и лицо сохраняются автоматически.
+          </span>
+        </div>
+      </div>
 
-</div>
+      <div class="garage-label">ОСНОВНОЙ ЦВЕТ</div>
+      <div class="palette" id="palette"></div>
 
-<!-- PROFILE -->
-
-<div class="profile" onclick="openMenu('Профиль')">
-    <div class="username">QXLF</div>
-    <div class="avatar">
-        <svg viewBox="0 0 100 100">
-            <circle cx="50" cy="30" r="22"
-                fill="#ffce24" stroke="#744000" stroke-width="4"/>
-            <path d="M13 88 Q12 53 50 53 Q88 53 87 88Z"
-                fill="#ffce24" stroke="#744000" stroke-width="4"/>
-        </svg>
+      <div class="garage-label">ВЫБЕРИ ЛИЦО</div>
+      <div class="faces" id="faces"></div>
     </div>
-</div>
+  </section>
 
-<!-- DAILY -->
+  <section id="editorScreen" class="screen off" inert
+    aria-hidden="true" aria-label="Редактор">
 
-<div class="daily" onclick="openMenu('Daily Chest')">
-    <span class="chest">🎁</span>
-    DAILY
-</div>
-
-<!-- BOTTOM BUTTONS -->
-
-<div class="bottom">
-
-    <button class="circle" onclick="openMenu('Достижения')">
-        <svg viewBox="0 0 100 100">
-            <path d="M25 15 H75 V50 Q75 75 50 75 Q25 75 25 50Z"
-                fill="#ffcf00" stroke="#222" stroke-width="5"/>
-            <path d="M25 25 H10 V42 Q10 55 30 55 M75 25 H90 V42 Q90 55 70 55"
-                fill="none" stroke="#222" stroke-width="7"/>
-            <path d="M42 75 V88 H58 V75 M35 91 H65"
-                stroke="#222" stroke-width="7"/>
-        </svg>
+    <button class="icon-button back-button" data-screen="home" aria-label="Назад">
+      <svg><use href="#back"/></svg>
     </button>
 
-    <button class="circle" onclick="openMenu('Настройки')">
-        <svg viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="34"
-                fill="#ffcd00" stroke="#222" stroke-width="6"/>
-            <circle cx="50" cy="50" r="16"
-                fill="#6adb12" stroke="#222" stroke-width="5"/>
-            <g stroke="#222" stroke-width="9">
-                <path d="M50 5 V18 M50 82 V95 M5 50 H18 M82 50 H95"/>
-                <path d="M18 18 L28 28 M72 72 L82 82 M18 82 L28 72 M72 28 L82 18"/>
-            </g>
-        </svg>
-    </button>
+    <h1 class="screen-title game-text">CREATE</h1>
 
-    <button class="circle" onclick="openMenu('Статистика')">
-        <svg viewBox="0 0 100 100">
-            <path d="M12 45 H32 V85 H12Z"
-                fill="#ffcf00" stroke="#222" stroke-width="5"/>
-            <path d="M40 20 H60 V85 H40Z"
-                fill="#ffcf00" stroke="#222" stroke-width="5"/>
-            <path d="M68 5 H88 V85 H68Z"
-                fill="#ffcf00" stroke="#222" stroke-width="5"/>
-        </svg>
-    </button>
-
-    <button class="circle" onclick="openMenu('Музыка')">
-        <svg viewBox="0 0 100 100">
-            <path d="M55 20 L88 10 V65"
-                stroke="#222" stroke-width="9" fill="none"/>
-            <path d="M55 20 V70" stroke="#222" stroke-width="9"/>
-            <ellipse cx="43" cy="76" rx="18" ry="12"
-                fill="#ffcc00" stroke="#222" stroke-width="5"/>
-            <ellipse cx="76" cy="65" rx="18" ry="12"
-                fill="#ffcc00" stroke="#222" stroke-width="5"/>
-        </svg>
-    </button>
-
-</div>
-
-<!-- SOCIALS -->
-
-<div class="socials">
-    <div class="social fb">f</div>
-    <div class="social tw">♥</div>
-    <div class="social yt">▶</div>
-</div>
-
-<div class="robtop">RobTop</div>
-
-<!-- POPUP -->
-
-<div class="popup" id="popup" onclick="closeOutside(event)">
-    <div class="popup-box">
-        <h2 id="popupTitle">Меню</h2>
-        <button onclick="closeMenu()">OK</button>
+    <div class="panel editor-panel">
+      <div class="editor-grid"></div>
+      <p>
+        Здесь будет редактор уровней.<br>
+        Сейчас реализована только оболочка меню.
+      </p>
+      <button class="flat-button" data-action="editorInfo">О РЕДАКТОРЕ</button>
     </div>
+  </section>
+
+  <div class="runner" id="runner" aria-hidden="true"></div>
+
+  <div id="modalLayer" hidden>
+    <section class="dialog" role="dialog"
+      aria-modal="true" aria-labelledby="modalTitle">
+
+      <button class="icon-button dialog-close"
+        data-action="closeModal" aria-label="Закрыть окно">
+        <svg><use href="#close"/></svg>
+      </button>
+
+      <h2 id="modalTitle" class="game-text"></h2>
+      <div id="modalBody"></div>
+    </section>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+</main>
+</div>
+
+<div id="rotateHint">
+  Для крупного интерфейса поверните устройство горизонтально.
 </div>
 
 <script>
-const popup = document.getElementById('popup');
-const popupTitle = document.getElementById('popupTitle');
+"use strict";
 
-function openMenu(name) {
-    popupTitle.textContent = name;
-    popup.classList.add('show');
-}
+(() => {
+  const $ = selector => document.querySelector(selector);
 
-function closeMenu() {
-    popup.classList.remove('show');
-}
+  const stage = $("#stage");
+  const modal = $("#modalLayer");
+  const modalBody = $("#modalBody");
+  const storageKey = "geometry-menu-v1";
 
-function closeOutside(event) {
-    if (event.target === popup) {
-        closeMenu();
+  const defaults = {
+    name: "QXLF",
+    color: "#ffe22b",
+    face: 0,
+    sound: true,
+    music: false,
+    volume: 0.35,
+    animations: !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    visits: 0,
+    clicks: 0,
+    customized: false,
+    daily: "",
+    coins: 0
+  };
+
+  let state = { ...defaults };
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+
+    if (saved && typeof saved === "object") {
+      for (const key of Object.keys(defaults)) {
+        if (
+          typeof saved[key] === typeof defaults[key] &&
+          (typeof saved[key] !== "number" || Number.isFinite(saved[key]))
+        ) {
+          state[key] = saved[key];
+        }
+      }
     }
-}
+  } catch (_) {
+    // Если хранилище недоступно, меню работает с настройками по умолчанию.
+  }
 
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') closeMenu();
-});
+  const colors = [
+    "#ffe22b",
+    "#a8f12b",
+    "#22eed5",
+    "#29bcff",
+    "#a578ff",
+    "#ff65cf",
+    "#ff6860",
+    "#ffffff"
+  ];
+
+  if (!colors.includes(state.color)) state.color = defaults.color;
+
+  state.face = Math.max(0, Math.min(3, Math.floor(state.face)));
+  state.volume = Math.max(0, Math.min(1, state.volume));
+  state.name = state.name.trim().slice(0, 12) || "PLAYER";
+  state.visits = Math.max(0, Math.floor(state.visits)) + 1;
+  state.clicks = Math.max(0, Math.floor(state.clicks));
+  state.coins = Math.max(0, Math.floor(state.coins));
+
+  let activeScreen = "home";
+  let previousFocus = null;
+  let toastTimer = null;
+  let levelIndex = 0;
+  let audioContext = null;
+  let musicTimer = null;
+  let noteIndex = 0;
+
+  const levelNames = [
+    "Stereo Start",
+    "Neon Avenue",
+    "Purple Skyline"
+  ];
+
+  const notes = [
+    261.63, 329.63, 392, 523.25,
+    392, 329.63, 293.66, 349.23
+  ];
+
+  function save() {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+    } catch (_) {
+      // Состояние остаётся доступным до закрытия страницы.
+    }
+  }
+
+  function resize() {
+    const viewport = $("#viewport");
+    const scale = Math.min(
+      viewport.clientWidth / 1530,
+      viewport.clientHeight / 860
+    );
+
+    stage.style.left = "50%";
+    stage.style.top = "50%";
+    stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+  }
+
+  function escapeHTML(value) {
+    const replacements = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    };
+
+    return String(value).replace(/[&<>"']/g, char => replacements[char]);
+  }
+
+  function getAudio() {
+    if (!audioContext) {
+      const AudioConstructor = window.AudioContext || window.webkitAudioContext;
+
+      if (!AudioConstructor) return null;
+
+      try {
+        audioContext = new AudioConstructor();
+      } catch (_) {
+        return null;
+      }
+    }
+
+    if (audioContext.state === "suspended") {
+      audioContext.resume().catch(() => {});
+    }
+
+    return audioContext;
+  }
+
+  function tone(frequency, duration, volume, type = "sine") {
+    if (document.hidden || state.volume === 0) return;
+
+    const context = getAudio();
+
+    if (!context || context.state !== "running") return;
+
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const now = context.currentTime;
+
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, now);
+
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(
+      Math.max(0.0001, volume * state.volume),
+      now + 0.012
+    );
+    gain.gain.exponentialRampToValueAtTime(
+      0.0001,
+      now + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+
+    oscillator.start(now);
+    oscillator.stop(now + duration + 0.03);
+
+    oscillator.onended = () => {
+      oscillator.disconnect();
+      gain.disconnect();
+    };
+  }
+
+  function clickSound() {
+    if (state.sound) tone(660, 0.075, 0.13, "triangle");
+  }
+
+  function syncMusic() {
+    clearInterval(musicTimer);
+    musicTimer = null;
+
+    if (!state.music || document.hidden) return;
+
+    const context = getAudio();
+    if (!context) return;
+
+    musicTimer = setInterval(() => {
+      tone(
+        notes[noteIndex++ % notes.length],
+        0.32,
+        0.055,
+        "triangle"
+      );
+    }, 285);
+  }
+
+  function notify(message) {
+    const toast = $("#toast");
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 3200);
+  }
+
+  function closeModal(restoreFocus = true) {
+    if (modal.hidden) return;
+
+    modal.hidden = true;
+
+    document.querySelectorAll(".screen").forEach(screen => {
+      screen.inert = screen.id !== activeScreen;
+    });
+
+    if (
+      restoreFocus &&
+      previousFocus &&
+      previousFocus.isConnected &&
+      !previousFocus.closest("[inert]")
+    ) {
+      previousFocus.focus({ preventScroll: true });
+    }
+  }
+
+  function showScreen(id) {
+    const target = document.getElementById(id);
+
+    if (!target || !target.classList.contains("screen")) return;
+
+    closeModal(false);
+    activeScreen = id;
+
+    document.querySelectorAll(".screen").forEach(screen => {
+      const inactive = screen.id !== id;
+
+      screen.classList.toggle("off", inactive);
+      screen.inert = inactive;
+      screen.setAttribute("aria-hidden", String(inactive));
+    });
+
+    if (id === "garageScreen") renderGarage();
+    if (id === "levelsScreen") renderLevel();
+
+    const focusTarget = target.querySelector("button");
+
+    if (focusTarget) {
+      focusTarget.focus({ preventScroll: true });
+    }
+  }
+
+  function openModal(title, content) {
+    if (modal.hidden) {
+      previousFocus = document.activeElement;
+    }
+
+    $("#modalTitle").textContent = title;
+    modalBody.innerHTML = content;
+    modal.hidden = false;
+
+    document.querySelectorAll(".screen").forEach(screen => {
+      screen.inert = true;
+    });
+
+    requestAnimationFrame(() => {
+      if (!modal.hidden) {
+        $(".dialog-close").focus({ preventScroll: true });
+      }
+    });
+  }
+
+  function cubeSVG(color = state.color, face = state.face) {
+    const faces = [
+      '<path d="M25 30H39V45H25ZM61 30H75V45H61ZM25 64H75V75H25Z"/>',
+
+      '<path d="M22 29L40 35V46H25ZM78 29L60 35V46H75ZM29 66H71L65 76H35Z"/>',
+
+      '<path d="M24 30H40V43H24ZM60 30H76V43H60ZM27 59H73V78H27Z"/>' +
+      '<path d="M32 60V68H68V60" fill="white" stroke="none"/>',
+
+      '<path d="M22 30H43V45H22ZM57 30H78V45H57ZM43 35H57V40H43ZM30 66H70V73H30Z"/>'
+    ];
+
+    return `
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M6 6H94V94H6Z"
+          fill="${color}" stroke="#152019" stroke-width="6"/>
+
+        <path d="M12 12H88V24H24V88H12Z"
+          fill="white" opacity=".3"/>
+
+        <path d="M88 24V88H24"
+          fill="none" stroke="#152019" stroke-width="5" opacity=".25"/>
+
+        <g fill="#24351d" stroke="#f4ffb6" stroke-width="1.5">
+          ${faces[face]}
+        </g>
+      </svg>
+    `;
+  }
+
+  function renderCube() {
+    $("#cubePreview").innerHTML = cubeSVG();
+    $("#runner").innerHTML = cubeSVG();
+  }
+
+  function renderGarage() {
+    renderCube();
+
+    $("#palette").innerHTML = colors.map((color, index) => `
+      <button
+        class="swatch ${state.color === color ? "active" : ""}"
+        style="background-color:${color}"
+        data-color="${color}"
+        aria-label="Цвет ${index + 1}"
+        aria-pressed="${state.color === color}">
+      </button>
+    `).join("");
+
+    $("#faces").innerHTML = [0, 1, 2, 3].map(face => `
+      <button
+        class="face-choice ${state.face === face ? "active" : ""}"
+        data-face="${face}"
+        aria-label="Лицо ${face + 1}"
+        aria-pressed="${state.face === face}">
+        ${cubeSVG(state.color, face)}
+      </button>
+    `).join("");
+  }
+
+  function renderLevel() {
+    $("#levelName").textContent = levelNames[levelIndex];
+    $("#levelBadge").textContent = `МЕНЮ · 0${levelIndex + 1}`;
+
+    $("#levelDots").innerHTML = levelNames.map((name, index) => `
+      <span
+        class="dot ${index === levelIndex ? "active" : ""}"
+        aria-hidden="true">
+      </span>
+    `).join("");
+  }
+
+  function applySettings() {
+    stage.classList.toggle("reduced", !state.animations);
+    $("#profileName").textContent = state.name;
+  }
+
+  function settingsContent(musicOnly = false) {
+    return `
+      ${!musicOnly ? `
+        <label class="row">
+          <span>Звуки интерфейса</span>
+          <input
+            class="toggle"
+            type="checkbox"
+            data-setting="sound"
+            ${state.sound ? "checked" : ""}
+            aria-label="Звуки интерфейса">
+        </label>
+      ` : ""}
+
+      <label class="row">
+        <span>
+          Музыка меню
+          <small>Простая синтезированная мелодия</small>
+        </span>
+        <input
+          class="toggle"
+          type="checkbox"
+          data-setting="music"
+          ${state.music ? "checked" : ""}
+          aria-label="Музыка меню">
+      </label>
+
+      <label class="row">
+        <span>
+          Громкость
+          <span id="volumeValue">${Math.round(state.volume * 100)}%</span>
+        </span>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value="${Math.round(state.volume * 100)}"
+          data-setting="volume"
+          aria-label="Громкость">
+      </label>
+
+      ${!musicOnly ? `
+        <label class="row">
+          <span>Анимации</span>
+          <input
+            class="toggle"
+            type="checkbox"
+            data-setting="animations"
+            ${state.animations ? "checked" : ""}
+            aria-label="Анимации">
+        </label>
+
+        <div class="dialog-actions">
+          <button class="flat-button" data-action="fullscreen">
+            ПОЛНЫЙ ЭКРАН
+          </button>
+        </div>
+      ` : ""}
+    `;
+  }
+
+  function localDate() {
+    const date = new Date();
+
+    return [
+      date.getFullYear(),
+      date.getMonth() + 1,
+      date.getDate()
+    ].join("-");
+  }
+
+  const actions = {
+    closeModal() {
+      closeModal();
+    },
+
+    exit() {
+      openModal("ВЫХОД", `
+        <p>
+          Это локальное меню.
+          Чтобы выйти, закройте вкладку браузера.
+        </p>
+        <div class="dialog-actions">
+          <button class="flat-button" data-action="closeModal">
+            ПРОДОЛЖИТЬ
+          </button>
+        </div>
+      `);
+    },
+
+    settings() {
+      openModal("SETTINGS", settingsContent());
+    },
+
+    music() {
+      openModal("MENU MUSIC", settingsContent(true));
+    },
+
+    profile() {
+      openModal("PLAYER", `
+        <p>Имя игрока</p>
+        <input
+          id="nameInput"
+          class="text-input"
+          maxlength="12"
+          value="${escapeHTML(state.name)}"
+          placeholder="PLAYER"
+          autocomplete="off"
+          aria-label="Имя игрока">
+
+        <p style="font-size:18px;color:#f8d3a2">
+          Профиль хранится только в этом браузере.
+          Онлайн-аккаунт не создаётся.
+        </p>
+
+        <div class="dialog-actions">
+          <button class="flat-button" data-action="saveProfile">
+            СОХРАНИТЬ
+          </button>
+        </div>
+      `);
+    },
+
+    saveProfile() {
+      const input = $("#nameInput");
+      if (!input) return;
+
+      state.name = input.value.trim().slice(0, 12) || "PLAYER";
+
+      save();
+      applySettings();
+      closeModal();
+      notify("Имя игрока сохранено");
+    },
+
+        achievements() {
+      const achievements = [
+        [
+          "Первый запуск",
+          "Открыть главное меню.",
+          true
+        ],
+        [
+          "Новый образ",
+          "Изменить цвет или лицо кубика в гараже.",
+          state.customized
+        ],
+        [
+          "На связи",
+          "Нажать 25 кнопок меню.",
+          state.clicks >= 25
+        ],
+        [
+          "Сокровище дня",
+          "Забрать ежедневную награду.",
+          state.coins > 0
+        ]
+      ];
+
+      openModal(
+        "ACHIEVEMENTS",
+        achievements.map(item => `
+          <article class="achievement ${item[2] ? "" : "locked"}">
+            <h3>${item[2] ? "✓" : "—"} ${item[0]}</h3>
+            <p>
+              ${item[1]}
+              ${item[2] ? "Получено." : "Пока закрыто."}
+            </p>
+          </article>
+        `).join("")
+      );
+    },
+
+    stats() {
+      openModal("STATISTICS", `
+        <div class="row">
+          <span>Запуски меню</span>
+          <span>${state.visits}</span>
+        </div>
+
+        <div class="row">
+          <span>Нажатия кнопок</span>
+          <span>${state.clicks}</span>
+        </div>
+
+        <div class="row">
+          <span>Декоративные монеты</span>
+          <span>${state.coins}</span>
+        </div>
+
+        <div class="row">
+          <span>Пройденные уровни</span>
+          <span>0</span>
+        </div>
+
+        <p style="font-size:18px">
+          Статистика относится только к этой оболочке меню.
+        </p>
+      `);
+    },
+
+    daily() {
+      const claimed = state.daily === localDate();
+
+      openModal("DAILY CHEST", `
+        <div style="width:145px;height:135px;margin:auto">
+          <svg><use href="#daily"/></svg>
+        </div>
+
+        <p style="text-align:center">
+          ${claimed
+            ? "Сегодняшняя награда уже получена. Возвращайся завтра!"
+            : "В сундуке — 25 декоративных монет для твоего профиля."}
+        </p>
+
+        <div class="dialog-actions">
+          <button
+            class="flat-button"
+            data-action="${claimed ? "closeModal" : "claimDaily"}">
+            ${claimed ? "ОТЛИЧНО" : "ЗАБРАТЬ"}
+          </button>
+        </div>
+      `);
+    },
+
+    claimDaily() {
+      if (state.daily === localDate()) {
+        notify("Награда уже получена");
+        return;
+      }
+
+      state.daily = localDate();
+      state.coins += 25;
+
+      save();
+      closeModal();
+      notify("+25 декоративных монет");
+    },
+
+    about() {
+      openModal("ABOUT", `
+        <p>
+          Неофициальный учебный интерфейс,
+          вдохновлённый меню Geometry Dash.
+        </p>
+        <p>
+          Проект не связан с RobTop Games
+          и не является официальной версией игры.
+        </p>
+        <p>
+          HTML, CSS, JavaScript и встроенная SVG-графика.
+          Без сетевых запросов.
+        </p>
+      `);
+    },
+
+    more() {
+      openModal("MORE GAMES", `
+        <p>Раздел других игр пока пуст.</p>
+        <p>
+          Здесь можно разместить собственные проекты.
+          В этой автономной версии внешних ссылок нет.
+        </p>
+        <div class="dialog-actions">
+          <button class="flat-button" data-action="closeModal">
+            НАЗАД
+          </button>
+        </div>
+      `);
+    },
+
+    editorInfo() {
+      openModal("LEVEL EDITOR", `
+        <p>Экран редактора подготовлен как заглушка.</p>
+        <p>
+          Создание, размещение объектов и сохранение уровней
+          намеренно не реализованы: текущая версия посвящена
+          только главному меню.
+        </p>
+      `);
+    },
+
+    levelInfo() {
+      openModal(levelNames[levelIndex], `
+        <p>Это карточка будущего уровня, а не игровой экран.</p>
+        <p>
+          Выбор карточек работает; уровни, физика,
+          препятствия и игровой процесс в проект не добавлены.
+        </p>
+      `);
+    },
+
+    prevLevel() {
+      levelIndex = (
+        levelIndex + levelNames.length - 1
+      ) % levelNames.length;
+
+      renderLevel();
+    },
+
+    nextLevel() {
+      levelIndex = (levelIndex + 1) % levelNames.length;
+      renderLevel();
+    },
+
+    async fullscreen() {
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        } else if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        } else {
+          notify("Полноэкранный режим недоступен в этом браузере");
+        }
+      } catch (_) {
+        notify("Браузер не разрешил полноэкранный режим");
+      }
+    }
+  };
+
+  document.addEventListener("click", event => {
+    const button = event.target.closest("button");
+
+    if (
+      !button ||
+      button.disabled ||
+      button.closest("[inert]")
+    ) {
+      return;
+    }
+
+    state.clicks++;
+    save();
+
+    clickSound();
+
+    if (state.music && !musicTimer) {
+      syncMusic();
+    }
+
+    if (button.dataset.screen) {
+      showScreen(button.dataset.screen);
+      return;
+    }
+
+    if (button.dataset.color) {
+      const color = button.dataset.color;
+
+      if (!colors.includes(color)) return;
+
+      state.color = color;
+      state.customized = true;
+
+      save();
+      renderGarage();
+
+      const selected = [...$("#palette").querySelectorAll("button")]
+        .find(item => item.dataset.color === color);
+
+      if (selected) {
+        selected.focus({ preventScroll: true });
+      }
+
+      return;
+    }
+
+    if (button.dataset.face !== undefined) {
+      const face = Number(button.dataset.face);
+
+      if (!Number.isInteger(face) || face < 0 || face > 3) {
+        return;
+      }
+
+      state.face = face;
+      state.customized = true;
+
+      save();
+      renderGarage();
+
+      const selected = $("#faces").querySelector(
+        `[data-face="${face}"]`
+      );
+
+      if (selected) {
+        selected.focus({ preventScroll: true });
+      }
+
+      return;
+    }
+
+    if (button.dataset.social) {
+      const section = button.dataset.social;
+
+      openModal(section.toUpperCase(), `
+        <p>Раздел «${escapeHTML(section)}» подготовлен.</p>
+        <p>
+          Внешние сервисы не подключены.
+          Эта версия работает полностью автономно.
+        </p>
+        <div class="dialog-actions">
+          <button class="flat-button" data-action="closeModal">
+            ПОНЯТНО
+          </button>
+        </div>
+      `);
+
+      return;
+    }
+
+    const actionName = button.dataset.action;
+
+    if (Object.prototype.hasOwnProperty.call(actions, actionName)) {
+      actions[actionName]();
+    }
+  });
+
+  modalBody.addEventListener("input", event => {
+    const input = event.target;
+    const key = input.dataset.setting;
+
+    if (!["sound", "music", "volume", "animations"].includes(key)) {
+      return;
+    }
+
+    if (key === "volume") {
+      state.volume = Math.max(
+        0,
+        Math.min(1, Number(input.value) / 100)
+      );
+
+      const valueLabel = $("#volumeValue");
+
+      if (valueLabel) {
+        valueLabel.textContent = `${Math.round(state.volume * 100)}%`;
+      }
+    } else {
+      state[key] = input.checked;
+    }
+
+    save();
+    applySettings();
+
+    if (key === "music") {
+      syncMusic();
+    }
+  });
+
+  modal.addEventListener("click", event => {
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+
+      if (!modal.hidden) {
+        closeModal();
+      } else if (activeScreen !== "home") {
+        showScreen("home");
+      }
+
+      return;
+    }
+
+    if (!modal.hidden && event.key === "Tab") {
+      const controls = [...modal.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), [tabindex="0"]'
+      )].filter(element => element.getClientRects().length);
+
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+
+      if (!first) {
+        event.preventDefault();
+        return;
+      }
+
+      if (
+        event.shiftKey &&
+        (
+          document.activeElement === first ||
+          !modal.contains(document.activeElement)
+        )
+      ) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        (
+          document.activeElement === last ||
+          !modal.contains(document.activeElement)
+        )
+      ) {
+        event.preventDefault();
+        first.focus();
+      }
+
+      return;
+    }
+
+    if (
+      !modal.hidden &&
+      event.key === "Enter" &&
+      event.target.id === "nameInput"
+    ) {
+      event.preventDefault();
+      actions.saveProfile();
+      return;
+    }
+
+    if (modal.hidden && activeScreen === "levelsScreen") {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        actions.prevLevel();
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        actions.nextLevel();
+      }
+    }
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      clearInterval(musicTimer);
+      musicTimer = null;
+
+      if (audioContext) {
+        audioContext.suspend().catch(() => {});
+      }
+    } else if (state.music && audioContext) {
+      audioContext.resume().then(syncMusic).catch(() => {});
+    }
+  });
+
+  window.addEventListener("resize", resize);
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", resize);
+  }
+
+    for (let index = 0; index < 16; index++) {
+    const spark = document.createElement("i");
+
+    spark.className = "spark";
+    spark.style.left = `${220 + Math.random() * 1110}px`;
+    spark.style.top = `${550 + Math.random() * 60}px`;
+    spark.style.animationDelay = `${-Math.random() * 3}s`;
+    spark.style.animationDuration = `${2 + Math.random() * 2}s`;
+
+    $("#particles").appendChild(spark);
+  }
+
+  save();
+  applySettings();
+  renderCube();
+  renderLevel();
+  resize();
+})();
 </script>
-
 </body>
 </html>
