@@ -1,1087 +1,663 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>NEON DASH — Geometry Platformer</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geometry Dash Menu</title>
+
 <style>
-:root{--bg:#080d20;--panel:#101a38;--cyan:#28e7ff;--pink:#ff4db8;--lime:#a8ff4d;--text:#f4f7ff}
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;touch-action:manipulation}
-button,input,select{font:inherit}
-button{border:1px solid #3c5a91;background:linear-gradient(180deg,#243d70,#14264d);color:white;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;box-shadow:0 4px 0 #091329;transition:.12s}
-button:active{transform:translateY(3px);box-shadow:0 1px 0 #091329}
-button:disabled{opacity:.4;cursor:not-allowed}
-#app{height:100%;width:100%;position:relative;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 0%,#172b55 0%,#080d20 65%)}
-header{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid #24375d;background:#080e21cc;z-index:3}
-.logo{font-weight:1000;letter-spacing:3px;color:var(--cyan);text-shadow:0 0 15px #28e7ff88}
-.small{font-size:12px;color:#aab9d8}
-main{flex:1;min-height:0;position:relative;overflow:auto;padding:18px}
-.screen{display:none;max-width:1000px;margin:0 auto;min-height:100%}
-.screen.active{display:block}
-.hero{text-align:center;padding:clamp(18px,6vh,70px) 12px 24px}
-.hero h1{font-size:clamp(38px,8vw,76px);margin:0;color:white;letter-spacing:5px;text-shadow:0 0 22px #24dcff88,4px 4px 0 #17416c}
-.hero p{color:#a8badb}
-.menu-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;max-width:760px;margin:24px auto}
-.menu-grid button{min-height:64px;font-size:15px}
-.primary{background:linear-gradient(180deg,#20cce8,#087eaf);border-color:#69f1ff;color:#001b2b}
-.pink{background:linear-gradient(180deg,#ed56b8,#9a287c);border-color:#ff9cda}
-.green{background:linear-gradient(180deg,#9eea4d,#4c9226);border-color:#d3ff9b;color:#142400}
-.panel{background:linear-gradient(145deg,#142447ee,#0c1731ee);border:1px solid #2d4778;border-radius:18px;padding:18px;margin:12px 0;box-shadow:0 10px 30px #0005}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.spread{justify-content:space-between}
-.muted{color:#9eb0d2}
-.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.level{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border-radius:13px;background:#0b1730;border:1px solid #263e69;margin:8px 0}
-.tag{font-size:11px;padding:5px 8px;border-radius:20px;background:#233d66;color:#bdefff}
-.stat{font-size:22px;font-weight:900;color:var(--cyan)}
-#gameWrap{position:absolute;inset:0;background:#050b1b;display:none;z-index:5}
-#gameWrap.show{display:flex;flex-direction:column}
-#gameTop{height:52px;display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#0b1530;border-bottom:1px solid #25436e;gap:8px}
-#gameCanvas{width:100%;flex:1;min-height:0;display:block;background:#071329;touch-action:none}
-#gameBottom{height:42px;padding:5px 12px;display:flex;align-items:center;justify-content:space-between;background:#0b1530;color:#b8c9e8;font-size:12px}
-.progress{height:7px;background:#1b2a4a;border-radius:9px;overflow:hidden;flex:1;margin:0 10px}
-.progress span{height:100%;display:block;width:0;background:linear-gradient(90deg,var(--cyan),var(--lime))}
-.overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#020718c9;z-index:8;padding:18px}
-.overlay.show{display:flex}
-.modal{width:min(420px,100%);text-align:center;background:#101d3b;border:1px solid #42639a;border-radius:20px;padding:22px;box-shadow:0 0 40px #0009}
-.modal h2{margin-top:0}
-.iconCard{background:#0b1730;border:1px solid #29436f;border-radius:14px;padding:12px;text-align:center}
-.preview{height:54px;display:grid;place-items:center;font-size:35px;text-shadow:0 0 14px currentColor}
-.locked{opacity:.45}
-input,select{background:#071329;color:white;border:1px solid #38547e;border-radius:9px;padding:10px;max-width:100%}
-label{font-size:13px;color:#b8c9e8;display:flex;align-items:center;gap:8px;margin:8px 0}
-input[type=range]{padding:0}
-#editorCanvas{width:100%;height:min(52vh,420px);background:#071329;border:1px solid #34517f;border-radius:12px;touch-action:none}
-.editorTools{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
-.editorTools button{padding:9px 12px;font-size:12px}
-footer{text-align:center;color:#62789f;font-size:11px;padding:7px}
-@media(max-width:650px){
- main{padding:10px}
- .menu-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
- .menu-grid button{min-height:55px;padding:10px}
- .grid3{grid-template-columns:repeat(2,minmax(0,1fr))}
- .hero{padding-top:22px}
- .hero h1{letter-spacing:2px}
- .panel{padding:13px}
- .level{padding:10px}
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Press+Start+2P&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background: #b900bd;
+    font-family: 'Russo One', sans-serif;
+}
+
+/* BACKGROUND */
+
+.background {
+    position: fixed;
+    inset: 0;
+    background:
+        linear-gradient(90deg, transparent 98%, #e500d8 98%),
+        linear-gradient(0deg, transparent 98%, #e500d8 98%),
+        linear-gradient(135deg, #a900ad, #c900c9, #a600ae);
+    background-size: 340px 300px;
+}
+
+.background::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, transparent 48%, #ec00db 49%, #ec00db 50%, transparent 51%),
+        linear-gradient(0deg, transparent 48%, #ec00db 49%, #ec00db 50%, transparent 51%);
+    background-size: 430px 330px;
+    opacity: .7;
+}
+
+/* FLOOR */
+
+.floor {
+    position: absolute;
+    bottom: 27%;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background: #ef00dd;
+    box-shadow: 0 5px 0 #87008e;
+}
+
+.ground {
+    position: absolute;
+    bottom: 0;
+    height: 28%;
+    width: 100%;
+    background: rgba(91, 0, 94, .35);
+    border-top: 7px solid #ec00d7;
+}
+
+/* LOGO */
+
+.logo {
+    position: absolute;
+    top: 7%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    font-size: clamp(30px, 7vw, 95px);
+    font-weight: 1000;
+    letter-spacing: -4px;
+    color: #9bff35;
+    -webkit-text-stroke: 3px #111;
+    paint-order: stroke fill;
+    text-shadow:
+        4px 5px 0 white,
+        7px 9px 0 #222,
+        10px 13px 0 rgba(0,0,0,.45);
+    filter: drop-shadow(0 4px 0 #222);
+}
+
+/* MAIN BUTTONS */
+
+.main-buttons {
+    position: absolute;
+    top: 46%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(35px, 6vw, 100px);
+    width: 95%;
+}
+
+.game-btn {
+    position: relative;
+    width: clamp(90px, 11vw, 155px);
+    aspect-ratio: 1;
+    background: linear-gradient(145deg, #b5ff37, #53c900);
+    border: 6px solid white;
+    outline: 5px solid #111;
+    border-radius: 17px;
+    box-shadow:
+        0 8px 0 #245900,
+        0 12px 0 #111,
+        0 17px 8px #0008;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: .12s;
+}
+
+.game-btn::before {
+    content: "";
+    position: absolute;
+    inset: -13px;
+    border: 5px solid #111;
+    border-radius: 18px;
+    z-index: -1;
+}
+
+.game-btn:hover {
+    filter: brightness(1.2);
+    transform: translateY(-5px);
+}
+
+.game-btn:active {
+    transform: translateY(5px);
+    box-shadow: 0 2px 0 #245900, 0 5px 0 #111;
+}
+
+.game-btn svg {
+    width: 75%;
+    height: 75%;
+    filter: drop-shadow(3px 4px 0 #222);
+}
+
+.play-btn {
+    width: clamp(145px, 17vw, 235px);
+    background: linear-gradient(145deg, #b5ff39, #4dc900);
+    border-radius: 17px;
+}
+
+.play-btn svg {
+    width: 70%;
+    height: 70%;
+}
+
+/* SIDE BUTTONS */
+
+.profile {
+    position: absolute;
+    left: 3.5%;
+    top: 55%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.username {
+    color: #ffe500;
+    font-size: clamp(20px, 2vw, 32px);
+    -webkit-text-stroke: 1px #4c2100;
+    text-shadow: 2px 3px #111;
+}
+
+.avatar {
+    width: clamp(85px, 10vw, 125px);
+    aspect-ratio: 1;
+    border: 5px solid white;
+    outline: 5px solid #111;
+    border-radius: 50%;
+    background: linear-gradient(#13d9fa, #0870d5);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 6px 0 #333;
+}
+
+.avatar svg {
+    width: 75%;
+}
+
+.daily {
+    position: absolute;
+    right: 3%;
+    top: 38%;
+    cursor: pointer;
+    text-align: center;
+    font-size: 25px;
+    color: #ffe900;
+    -webkit-text-stroke: 1.5px #281000;
+    text-shadow: 3px 4px #111;
+    transition: .15s;
+}
+
+.daily:hover {
+    transform: scale(1.1);
+}
+
+.chest {
+    font-size: 65px;
+    display: block;
+    filter: drop-shadow(3px 5px 0 #222);
+}
+
+/* BOTTOM BUTTONS */
+
+.bottom-buttons {
+    position: absolute;
+    bottom: 7%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 3vw, 35px);
+}
+
+.circle-btn {
+    width: clamp(75px, 9vw, 125px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #b5ff32, #55c900);
+    border: 6px solid white;
+    outline: 4px solid #111;
+    box-shadow: 0 7px 0 #222, 0 10px 5px #0008;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: .15s;
+}
+
+.circle-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    filter: brightness(1.2);
+}
+
+.circle-btn:active {
+    transform: translateY(3px);
+}
+
+.circle-btn svg {
+    width: 65%;
+    height: 65%;
+    filter: drop-shadow(2px 3px 0 #333);
+}
+
+.more-games {
+    position: absolute;
+    right: 2%;
+    bottom: 8%;
+    font-size: clamp(22px, 3.5vw, 43px);
+    color: #ffeb00;
+    text-align: center;
+    line-height: 1.1;
+    -webkit-text-stroke: 2px #201000;
+    text-shadow: 4px 5px #111;
+    cursor: pointer;
+}
+
+.socials {
+    position: absolute;
+    bottom: 13%;
+    left: 2%;
+    display: flex;
+    gap: 13px;
+}
+
+.social {
+    width: 58px;
+    height: 58px;
+    border: 4px solid white;
+    outline: 3px solid #111;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #222;
+}
+
+.facebook { background: #2678df; }
+.twitter { background: #16bce9; }
+.youtube { background: #f32b25; }
+
+.robtop {
+    position: absolute;
+    bottom: 3%;
+    left: 2%;
+    color: #ffb000;
+    font-size: clamp(25px, 3vw, 40px);
+    -webkit-text-stroke: 2px #321000;
+    text-shadow: 3px 4px #111;
+}
+
+/* CLOSE BUTTON */
+
+.close {
+    position: absolute;
+    top: 2%;
+    left: 1%;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: linear-gradient(#aaff35, #53bf00);
+    border: 5px solid white;
+    outline: 3px solid #111;
+    display: grid;
+    place-items: center;
+    color: #ffdf00;
+    font-size: 55px;
+    line-height: 1;
+    -webkit-text-stroke: 2px #111;
+    text-shadow: 2px 3px #111;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* GAME CUBE */
+
+.runner {
+    position: absolute;
+    bottom: 27.5%;
+    right: 23%;
+    font-size: 40px;
+    animation: run 4s linear infinite;
+}
+
+@keyframes run {
+    0% { right: -5%; }
+    100% { right: 105%; }
+}
+
+/* POPUP */
+
+.popup {
+    position: absolute;
+    inset: 0;
+    background: #0009;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+}
+
+.popup.active {
+    display: flex;
+}
+
+.popup-box {
+    width: min(90%, 450px);
+    min-height: 230px;
+    background: linear-gradient(#a6ff35, #4dbd00);
+    border: 7px solid white;
+    outline: 5px solid #111;
+    border-radius: 20px;
+    box-shadow: 0 12px 0 #222;
+    padding: 35px;
+    text-align: center;
+    color: white;
+    text-shadow: 2px 3px #222;
+}
+
+.popup-box h2 {
+    font-size: 30px;
+    margin-bottom: 25px;
+}
+
+.popup-box button {
+    padding: 12px 35px;
+    font-family: inherit;
+    font-size: 20px;
+    border: 4px solid white;
+    outline: 3px solid #111;
+    border-radius: 12px;
+    background: #ffbd00;
+    color: white;
+    cursor: pointer;
+}
+
+/* MOBILE */
+
+@media(max-width: 700px) {
+    .logo {
+        top: 12%;
+        font-size: clamp(25px, 7vw, 48px);
+        letter-spacing: -2px;
+        -webkit-text-stroke: 2px #111;
+    }
+
+    .main-buttons {
+        top: 45%;
+        gap: 23px;
+    }
+
+    .game-btn {
+        width: 22vw;
+        border-width: 4px;
+    }
+
+    .play-btn {
+        width: 29vw;
+    }
+
+    .profile {
+        top: 62%;
+        left: 4%;
+    }
+
+    .avatar {
+        width: 65px;
+        border-width: 3px;
+    }
+
+    .username {
+        font-size: 16px;
+    }
+
+    .daily {
+        top: 61%;
+        right: 5%;
+        font-size: 17px;
+    }
+
+    .chest {
+        font-size: 43px;
+    }
+
+    .bottom-buttons {
+        bottom: 6%;
+        gap: 10px;
+    }
+
+    .circle-btn {
+        width: 16vw;
+        border-width: 4px;
+    }
+
+    .socials {
+        bottom: 19%;
+        left: 3%;
+        gap: 7px;
+    }
+
+    .social {
+        width: 35px;
+        height: 35px;
+        font-size: 19px;
+        border-width: 2px;
+    }
+
+    .robtop {
+        bottom: 12%;
+        font-size: 19px;
+    }
+
+    .more-games {
+        bottom: 12%;
+        font-size: 19px;
+    }
+
+    .close {
+        width: 45px;
+        height: 45px;
+        font-size: 37px;
+    }
+
+    .runner {
+        font-size: 25px;
+    }
 }
 </style>
 </head>
+
 <body>
-<div id="app">
-<header>
-<div class="logo">◆ NEON DASH</div>
-<div class="small" id="headerStats">0 звёзд · 0 монет</div>
-</header>
-<main>
 
-<section id="home" class="screen active">
-<div class="hero">
-<h1>NEON DASH</h1>
-<p>Ритм • скорость • точность</p>
-<div class="row" style="justify-content:center">
-<span class="tag">8 игровых режимов</span>
-<span class="tag">Редактор уровней</span>
-<span class="tag">Автосохранение</span>
-</div>
-</div>
-<div class="menu-grid">
-<button class="primary" onclick="show('levels')">▶ ИГРАТЬ</button>
-<button onclick="show('editor')">✚ СОЗДАТЬ</button>
-<button onclick="show('garage')">◈ ГАРАЖ</button>
-<button onclick="show('online')">◎ ОНЛАЙН</button>
-<button onclick="show('achievements')">★ ДОСТИЖЕНИЯ</button>
-<button onclick="show('stats')">▤ СТАТИСТИКА</button>
-<button onclick="show('settings')">⚙ НАСТРОЙКИ</button>
-<button onclick="show('profile')">☺ ПРОФИЛЬ</button>
-</div>
-<div class="panel row spread">
-<div><b>Твой прогресс</b><div class="small">Локальный профиль на этом устройстве</div></div>
-<div class="row">
-<div><div class="stat" id="homeStars">0</div><div class="small">звёзды</div></div>
-<div><div class="stat" id="homeCoins">0</div><div class="small">монеты</div></div>
-<div><div class="stat" id="homeBest">0%</div><div class="small">лучший</div></div>
-</div>
-</div>
-</section>
+<div class="background"></div>
+<div class="ground"></div>
+<div class="floor"></div>
 
-<section id="levels" class="screen">
-<div class="row spread"><h2>Выбор уровня</h2><button onclick="show('home')">← Меню</button></div>
-<div id="levelList"></div>
-</section>
+<!-- CLOSE -->
+<div class="close" onclick="showPopup('Выход')">×</div>
 
-<section id="garage" class="screen">
-<div class="row spread"><h2>Гараж</h2><button onclick="show('home')">← Меню</button></div>
-<div class="panel">
-<div class="row spread"><b>Выбор иконки</b><span class="small">Открывай новые за прохождение</span></div>
-<div id="iconList" class="grid3"></div>
-<hr style="border-color:#263e69">
-<div class="grid2">
-<label>Основной цвет <input type="color" id="color1" value="#35e8ff" onchange="setColor(1,this.value)"></label>
-<label>Дополнительный цвет <input type="color" id="color2" value="#ff4db8" onchange="setColor(2,this.value)"></label>
-</div>
-<label><input type="checkbox" id="glow" checked onchange="prefs.glow=this.checked;save()"> Свечение персонажа</label>
-<label>След персонажа
-<select id="trail" onchange="prefs.trail=this.value;save()">
-<option value="spark">Искры</option><option value="line">Линия</option><option value="none">Нет</option>
-</select>
-</label>
-</div>
-</section>
+<!-- LOGO -->
+<div class="logo">GEOMETRY DASH</div>
 
-<section id="editor" class="screen">
-<div class="row spread"><h2>Редактор уровней</h2><button onclick="show('home')">← Меню</button></div>
-<div class="panel">
-<div class="editorTools">
-<button onclick="tool='block'">Блок</button>
-<button onclick="tool='spike'">Шип</button>
-<button onclick="tool='orb'">Кольцо</button>
-<button onclick="tool='portal'">Портал</button>
-<button onclick="tool='coin'">Монета</button>
-<button onclick="tool='erase'">Ластик</button>
-<button onclick="undoEditor()">↶ Отмена</button>
-<button onclick="clearEditor()">Очистить</button>
-</div>
-<canvas id="editorCanvas" width="900" height="360"></canvas>
-<div class="row">
-<input id="levelName" placeholder="Название уровня" value="Мой уровень">
-<button class="green" onclick="saveEditor()">Сохранить</button>
-<button class="primary" onclick="testEditor()">▶ Тестировать</button>
-</div>
-<p class="small">Нажимай или касайся сетки, чтобы размещать объекты. Сохранённые уровни появятся в пользовательских.</p>
-<div id="savedLevels"></div>
-</div>
-</section>
+<!-- MAIN BUTTONS -->
+<div class="main-buttons">
 
-<section id="settings" class="screen">
-<div class="row spread"><h2>Настройки</h2><button onclick="show('home')">← Меню</button></div>
-<div class="panel">
-<label>Музыка <input type="range" min="0" max="100" id="musicVol" value="25" oninput="prefs.music=this.value;save()"></label>
-<label>Звуки <input type="range" min="0" max="100" id="sfxVol" value="70" oninput="prefs.sfx=this.value;save()"></label>
-<label><input type="checkbox" id="fps" onchange="prefs.fps=this.checked;save()"> Показывать FPS</label>
-<label><input type="checkbox" id="particles" checked onchange="prefs.particles=this.checked;save()"> Частицы</label>
-<label><input type="checkbox" id="shake" checked onchange="prefs.shake=this.checked;save()"> Тряска экрана</label>
-<label><input type="checkbox" id="bgfx" checked onchange="prefs.bgfx=this.checked;save()"> Анимированный фон</label>
-<label>Качество
-<select id="quality" onchange="prefs.quality=this.value;save()">
-<option>Высокое</option><option>Среднее</option><option>Низкое</option>
-</select>
-</label>
-<button onclick="toggleFullscreen()">Полный экран</button>
-</div>
-</section>
+    <!-- CUBE -->
+    <button class="game-btn" onclick="showPopup('Иконки')">
+        <svg viewBox="0 0 100 100">
+            <rect x="8" y="8" width="84" height="84"
+                  fill="#8cf52b" stroke="#174000" stroke-width="5"/>
+            <rect x="18" y="22" width="23" height="25"
+                  fill="#fff000" stroke="#111" stroke-width="4"/>
+            <rect x="59" y="22" width="23" height="25"
+                  fill="#fff000" stroke="#111" stroke-width="4"/>
+            <path d="M20 65 L80 65 L80 78 L20 78Z"
+                  fill="#ffcf00" stroke="#111" stroke-width="4"/>
+        </svg>
+    </button>
 
-<section id="stats" class="screen">
-<div class="row spread"><h2>Статистика</h2><button onclick="show('home')">← Меню</button></div>
-<div class="panel grid3" id="statsGrid"></div>
-</section>
+    <!-- PLAY -->
+    <button class="game-btn play-btn" onclick="showPopup('Играть')">
+        <svg viewBox="0 0 100 100">
+            <path d="M24 10 Q18 7 18 18 L18 82 Q18 94 30 87 L84 55 Q95 49 84 42Z"
+                  fill="#ffe500" stroke="#111" stroke-width="5"
+                  stroke-linejoin="round"/>
+        </svg>
+    </button>
 
-<section id="achievements" class="screen">
-<div class="row spread"><h2>Достижения</h2><button onclick="show('home')">← Меню</button></div>
-<div id="achievementList"></div>
-</section>
+    <!-- EDITOR -->
+    <button class="game-btn" onclick="showPopup('Редактор уровней')">
+        <svg viewBox="0 0 100 100" fill="none"
+             stroke="#ffdf00" stroke-width="9"
+             stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 80 L75 20"/>
+            <path d="M15 70 L30 85 L10 90Z" fill="#ffdf00"/>
+            <path d="M64 12 L85 33 L76 42 L55 21Z"/>
+            <path d="M45 55 L75 85"/>
+            <path d="M65 65 L85 45 L95 55 L75 75Z"/>
+            <path d="M10 15 L35 40"/>
+        </svg>
+    </button>
 
-<section id="profile" class="screen">
-<div class="row spread"><h2>Профиль</h2><button onclick="show('home')">← Меню</button></div>
-<div class="panel">
-<div class="preview" id="profileIcon">◆</div>
-<h2 id="profileName">Игрок</h2>
-<p class="muted">NEON RUNNER</p>
-<label>Имя игрока <input id="playerName" maxlength="18" placeholder="Игрок"></label>
-<button onclick="saveName()">Сохранить имя</button>
-<p class="small">Прогресс хранится локально в браузере. Очистка данных браузера может удалить сохранение.</p>
 </div>
-</section>
 
-<section id="online" class="screen">
-<div class="row spread"><h2>Онлайн</h2><button onclick="show('home')">← Меню</button></div>
-<div class="panel">
-<h3>Пользовательские уровни</h3>
-<p class="muted">В этой автономной версии нет серверного мультиплеера. Можно играть в свои уровни, сохранённые на устройстве.</p>
-<button class="primary" onclick="show('editor')">Открыть редактор</button>
+<!-- PROFILE -->
+<div class="profile" onclick="showPopup('Профиль')">
+    <div class="username">QXLF</div>
+    <div class="avatar">
+        <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="30" r="22"
+                    fill="#ffcf25" stroke="#713b00" stroke-width="4"/>
+            <path d="M13 87 Q12 53 50 53 Q88 53 87 87Z"
+                  fill="#ffcf25" stroke="#713b00" stroke-width="4"/>
+        </svg>
+    </div>
 </div>
-</section>
 
-</main>
-<footer>NEON DASH • оригинальная браузерная игра</footer>
+<!-- DAILY -->
+<div class="daily" onclick="showPopup('Daily Chest')">
+    <span class="chest">🎁</span>
+    DAILY
+</div>
 
-<div id="gameWrap">
-<div id="gameTop">
-<b id="gameTitle">Уровень</b>
-<span id="attempts">Попытка 1</span>
-<button onclick="pauseGame()">Ⅱ</button>
+<!-- BOTTOM BUTTONS -->
+<div class="bottom-buttons">
+
+    <!-- TROPHY -->
+    <button class="circle-btn" onclick="showPopup('Достижения')">
+        <svg viewBox="0 0 100 100">
+            <path d="M25 15 H75 V50 Q75 75 50 75 Q25 75 25 50Z"
+                  fill="#ffcc00" stroke="#222" stroke-width="5"/>
+            <path d="M25 25 H10 V42 Q10 55 30 55 M75 25 H90 V42 Q90 55 70 55"
+                  fill="none" stroke="#222" stroke-width="7"/>
+            <path d="M42 75 V87 H58 V75 M35 90 H65"
+                  stroke="#222" stroke-width="7"/>
+        </svg>
+    </button>
+
+    <!-- SETTINGS -->
+    <button class="circle-btn" onclick="showPopup('Настройки')">
+        <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="36"
+                    fill="#ffce00" stroke="#222" stroke-width="6"/>
+            <circle cx="50" cy="50" r="20"
+                    fill="#69df18" stroke="#222" stroke-width="5"/>
+            <g stroke="#222" stroke-width="9">
+                <path d="M50 5 V17 M50 83 V95 M5 50 H17 M83 50 H95"/>
+                <path d="M18 18 L27 27 M73 73 L82 82 M18 82 L27 73 M73 27 L82 18"/>
+            </g>
+        </svg>
+    </button>
+
+    <!-- STATS -->
+    <button class="circle-btn" onclick="showPopup('Статистика')">
+        <svg viewBox="0 0 100 100">
+            <path d="M12 45 H32 V85 H12Z"
+                  fill="#ffcd00" stroke="#222" stroke-width="5"/>
+            <path d="M40 20 H60 V85 H40Z"
+                  fill="#ffcd00" stroke="#222" stroke-width="5"/>
+            <path d="M68 5 H88 V85 H68Z"
+                  fill="#ffcd00" stroke="#222" stroke-width="5"/>
+        </svg>
+    </button>
+
+    <!-- MUSIC -->
+    <button class="circle-btn" onclick="showPopup('Музыка')">
+        <svg viewBox="0 0 100 100">
+            <path d="M55 20 L88 10 V65"
+                  stroke="#222" stroke-width="9" fill="none"/>
+            <path d="M55 20 V70"
+                  stroke="#222" stroke-width="9"/>
+            <ellipse cx="43" cy="76" rx="18" ry="12"
+                     fill="#ffcc00" stroke="#222" stroke-width="5"/>
+            <ellipse cx="76" cy="65" rx="18" ry="12"
+                     fill="#ffcc00" stroke="#222" stroke-width="5"/>
+        </svg>
+    </button>
+
 </div>
-<canvas id="gameCanvas"></canvas>
-<div id="gameBottom">
-<span id="modeLabel">Кубик</span>
-<div class="progress"><span id="progressBar"></span></div>
-<b id="percent">0%</b>
+
+<!-- SOCIALS -->
+<div class="socials">
+    <div class="social facebook">f</div>
+    <div class="social twitter">♥</div>
+    <div class="social youtube">▶</div>
 </div>
-<div id="gameOverlay" class="overlay">
-<div class="modal" id="modalContent"></div>
+
+<div class="robtop">RobTop</div>
+
+<div class="more-games" onclick="showPopup('Другие игры')">
+    MORE<br>GAMES
 </div>
-</div>
+
+<!-- RUNNING CUBE -->
+<div class="runner">◆</div>
+
+<!-- POPUP -->
+<div class="popup" id="popup" onclick="closePopup(event)">
+    <div class="popup-box">
+        <h2 id="popup-title">Меню</h2>
+        <button onclick="hidePopup()">OK</button>
+    </div>
 </div>
 
 <script>
-'use strict';
-
-const $=id=>document.getElementById(id);
-
-const defaultData={
- name:'Kyosuke',stars:0,coins:0,attempts:0,deaths:0,jumps:0,
- completed:[],best:{},unlocked:[0,1,2],icon:0,
- color1:'#35e8ff',color2:'#ff4db8',glow:true,trail:'spark',
- music:25,sfx:70,fps:false,particles:true,shake:true,bgfx:true,
- quality:'Высокое',levels:[],totalPlay:0
-};
-
-let data;
-try{
- data={...defaultData,...JSON.parse(localStorage.getItem('neondash-save')||'{}')};
-}catch(e){
- data={...defaultData};
+function showPopup(title) {
+    document.getElementById('popup-title').textContent = title;
+    document.getElementById('popup').classList.add('active');
 }
 
-let prefs=data;
-
-function save(){
- localStorage.setItem('neondash-save',JSON.stringify(data));
- updateUI();
+function hidePopup() {
+    document.getElementById('popup').classList.remove('active');
 }
 
-function show(id){
- document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
- $(id).classList.add('active');
-
- if(id==='levels')renderLevels();
- if(id==='garage')renderGarage();
- if(id==='stats')renderStats();
- if(id==='achievements')renderAchievements();
- if(id==='editor')drawEditor();
-
- if(id==='profile'){
-  $('playerName').value=data.name;
-  $('profileName').textContent=data.name;
-  $('profileIcon').textContent=icons[data.icon].glyph;
- }
-
- updateUI();
+function closePopup(event) {
+    if (event.target.id === 'popup') {
+        hidePopup();
+    }
 }
-
-function updateUI(){
- $('headerStats').textContent=`${data.stars} звёзд · ${data.coins} монет`;
- $('homeStars').textContent=data.stars;
- $('homeCoins').textContent=data.coins;
- $('homeBest').textContent=Math.max(0,...Object.values(data.best),0)+'%';
-}
-
-const icons=[
- {glyph:'◆',name:'Неон',need:0},
- {glyph:'⬟',name:'Шестиугольник',need:0},
- {glyph:'✦',name:'Звезда',need:0},
- {glyph:'✧',name:'Искра',need:3},
- {glyph:'⬢',name:'Кристалл',need:5},
- {glyph:'◈',name:'Ромб',need:8},
- {glyph:'●',name:'Орб',need:12},
- {glyph:'▲',name:'Пик',need:18},
- {glyph:'✪',name:'Сияние',need:25},
- {glyph:'⬡',name:'Ядро',need:35},
- {glyph:'✹',name:'Солнце',need:50},
- {glyph:'✺',name:'Вспышка',need:75}
-];
-
-function renderGarage(){
- $('iconList').innerHTML=icons.map((ic,i)=>{
-  let ok=data.unlocked.includes(i)||data.stars>=ic.need;
-  return `<div class="iconCard ${ok?'':'locked'}">
-   <div class="preview" style="color:${data.color1}">${ic.glyph}</div>
-   <b>${ic.name}</b>
-   <p class="small">${ok?(data.icon===i?'Выбрано':'Доступно'):`Нужно ${ic.need}★`}</p>
-   <button ${ok?'':'disabled'} onclick="chooseIcon(${i})">${data.icon===i?'Выбрано':'Выбрать'}</button>
-  </div>`;
- }).join('');
-
- $('color1').value=data.color1;
- $('color2').value=data.color2;
- $('glow').checked=data.glow;
- $('trail').value=data.trail;
-}
-
-function chooseIcon(i){
- if(data.stars<icons[i].need&&!data.unlocked.includes(i))return;
- data.icon=i;
- save();
- renderGarage();
-}
-
-function setColor(n,v){
- data['color'+n]=v;
- save();
-}
-
-const levels=[
- {
-  id:'first',name:'First Light',difficulty:'Лёгкий',
-  length:1500,speed:260,mode:'cube',
-  objects:makeLevel(1500,0),music:'Neon Pulse'
- },
- {
-  id:'blue',name:'Blue Velocity',difficulty:'Обычный',
-  length:1900,speed:290,mode:'cube',
-  objects:makeLevel(1900,1),music:'Digital Sky'
- },
- {
-  id:'rush',name:'Voltage Rush',difficulty:'Сложный',
-  length:2300,speed:320,mode:'ship',
-  objects:makeLevel(2300,2),music:'Voltage'
- },
- {
-  id:'chaos',name:'Pixel Chaos',difficulty:'Очень сложный',
-  length:2700,speed:340,mode:'wave',
-  objects:makeLevel(2700,3),music:'Pixel Storm'
- }
-];
-
-function makeLevel(len,seed){
- let a=[],x=430+seed*25,n=0;
-
- while(x<len-150){
-  let r=(n*37+seed*53)%100;
-
-  if(r<53)a.push({x,y:300,w:38,h:40,type:'spike'});
-  else if(r<76)a.push({x,y:260,w:75,h:80,type:'block'});
-  else a.push({x,y:220,w:28,h:28,type:'orb'});
-
-  x+=170+((n*23+seed*17)%120);
-  n++;
- }
-
- a.push({x:len-90,y:240,w:42,h:60,type:'finish'});
- return a;
-}
-
-function renderLevels(){
- let all=[
-  ...levels,
-  ...data.levels.map((l,i)=>({
-   ...l,id:'custom'+i,difficulty:'Пользовательский',
-   length:Math.max(1000,l.objects.length*90+500),speed:270
-  }))
- ];
-
- $('levelList').innerHTML=all.map(l=>`
-  <div class="level">
-   <div>
-    <b>${l.name}</b>
-    <div class="small">${l.difficulty} · ${l.music||'Своя музыка'} · Лучший: ${data.best[l.id]||0}%</div>
-   </div>
-   <button class="primary" onclick="startLevel('${l.id}')">Играть</button>
-  </div>
- `).join('');
-}
-
-function renderStats(){
- $('statsGrid').innerHTML=[
-  ['Звёзды',data.stars],
-  ['Монеты',data.coins],
-  ['Попытки',data.attempts],
-  ['Смерти',data.deaths],
-  ['Прыжки',data.jumps],
-  ['Уровни',data.completed.length]
- ].map(x=>`
-  <div class="panel">
-   <div class="stat">${x[1]}</div>
-   <div class="small">${x[0]}</div>
-  </div>
- `).join('');
-}
-
-const achievements=[
- ['first','Первый шаг','Пройди первый уровень',()=>data.completed.length>=1],
- ['jump10','Прыгун','Соверши 10 прыжков',()=>data.jumps>=10],
- ['star10','Коллекционер','Собери 10 звёзд',()=>data.stars>=10],
- ['attempt20','Упорство','Сделай 20 попыток',()=>data.attempts>=20],
- ['editor','Создатель','Сохрани собственный уровень',()=>data.levels.length>0]
-];
-
-function renderAchievements(){
- $('achievementList').innerHTML=achievements.map(a=>`
-  <div class="level">
-   <div><b>${a[1]}</b><div class="small">${a[2]}</div></div>
-   <span class="tag">${a[3]()?'ПОЛУЧЕНО':'ЗАКРЫТО'}</span>
-  </div>
- `).join('');
-}
-
-function saveName(){
- data.name=$('playerName').value.trim()||'Игрок';
- save();
- $('profileName').textContent=data.name;
-}
-
-function toggleFullscreen(){
- if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();
- else document.exitFullscreen?.();
-}
-
-$('musicVol').value=data.music;
-$('sfxVol').value=data.sfx;
-$('fps').checked=data.fps;
-$('particles').checked=data.particles;
-$('shake').checked=data.shake;
-$('bgfx').checked=data.bgfx;
-$('quality').value=data.quality;
-
-let audioCtx=null,lastTone=0;
-
-function tone(freq=440,dur=.07,type='sine'){
- if(+data.sfx===0)return;
-
- try{
-  audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();
-
-  let o=audioCtx.createOscillator();
-  let g=audioCtx.createGain();
-
-  o.type=type;
-  o.frequency.value=freq;
-
-  g.gain.setValueAtTime((+data.sfx/100)*.07,audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur);
-
-  o.connect(g);
-  g.connect(audioCtx.destination);
-
-  o.start();
-  o.stop(audioCtx.currentTime+dur);
- }catch(e){}
-}
-
-function musicTick(){
- if(!game.running||+data.music===0)return;
-
- let t=performance.now();
-
- if(t-lastTone>450){
-  lastTone=t;
-  tone([220,277,330,440][Math.floor(t/450)%4],.13,'triangle');
- }
-}let editorObjects=[],editorUndo=[],tool='block';
-let editorCanvas=$('editorCanvas');
-let ectx=editorCanvas.getContext('2d');
-
-function drawEditor(){
- ectx.clearRect(0,0,900,360);
- ectx.fillStyle='#08152d';
- ectx.fillRect(0,0,900,360);
-
- ectx.strokeStyle='#203a63';
-
- for(let x=0;x<900;x+=45){
-  ectx.beginPath();
-  ectx.moveTo(x,0);
-  ectx.lineTo(x,360);
-  ectx.stroke();
- }
-
- for(let y=0;y<360;y+=45){
-  ectx.beginPath();
-  ectx.moveTo(0,y);
-  ectx.lineTo(900,y);
-  ectx.stroke();
- }
-
- editorObjects.forEach(o=>drawObject(ectx,o,1));
-}
-
-function editorPoint(e){
- let r=editorCanvas.getBoundingClientRect();
-
- return {
-  x:Math.floor((e.clientX-r.left)/r.width*900/45)*45,
-  y:Math.floor((e.clientY-r.top)/r.height*360/45)*45
- };
-}
-
-editorCanvas.addEventListener('pointerdown',e=>{
- let p=editorPoint(e);
-
- editorUndo.push(JSON.stringify(editorObjects));
-
- if(tool==='erase'){
-  editorObjects=editorObjects.filter(o=>!(o.x===p.x&&o.y===p.y));
- }else{
-  editorObjects.push({x:p.x,y:p.y,w:45,h:45,type:tool});
- }
-
- drawEditor();
-});
-
-function undoEditor(){
- if(editorUndo.length)editorObjects=JSON.parse(editorUndo.pop());
- drawEditor();
-}
-
-function clearEditor(){
- editorUndo.push(JSON.stringify(editorObjects));
- editorObjects=[];
- drawEditor();
-}
-
-function saveEditor(){
- if(!editorObjects.length){
-  alert('Добавь хотя бы один объект');
-  return;
- }
-
- data.levels.push({
-  name:$('levelName').value.trim()||'Без названия',
-  objects:editorObjects.map(o=>({...o}))
- });
-
- save();
- renderSaved();
- alert('Уровень сохранён!');
-}
-
-function renderSaved(){
- $('savedLevels').innerHTML=data.levels.map((l,i)=>`
-  <div class="level">
-   <b>${l.name}</b>
-   <button onclick="startLevel('custom${i}')">Играть</button>
-  </div>
- `).join('');
-}
-
-function testEditor(){
- if(!editorObjects.length){
-  alert('Добавь объекты');
-  return;
- }
-
- startLevel('test');
-}
-
-renderSaved();
-
-let gameCanvas=$('gameCanvas');
-let ctx=gameCanvas.getContext('2d');
-
-let game={
- running:false,paused:false,level:null,objects:[],
- x:80,y:0,vy:0,rot:0,mode:'cube',speed:280,
- progress:0,attempt:1,ground:false,dead:false,
- practice:false,checkpoint:0,coins:0,last:0,
- raf:0,particles:[],camera:0,gravity:1500,hold:false
-};
-
-function resizeCanvas(){
- let dpr=Math.min(devicePixelRatio||1,2);
- let r=gameCanvas.getBoundingClientRect();
-
- gameCanvas.width=Math.max(1,r.width*dpr);
- gameCanvas.height=Math.max(1,r.height*dpr);
-
- ctx.setTransform(dpr,0,0,dpr,0,0);
-}
-
-window.addEventListener('resize',resizeCanvas);
-
-function getLevel(id){
- if(id==='test'){
-  return {
-   id:'test',
-   name:'Тест редактора',
-   length:Math.max(1200,editorObjects.reduce((m,o)=>Math.max(m,o.x+200),0)),
-   speed:280,
-   objects:editorObjects.map(o=>({...o}))
-  };
- }
-
- if(id.startsWith('custom')){
-  let l=data.levels[+id.slice(6)];
-
-  return {
-   id,
-   name:l.name,
-   length:Math.max(1200,l.objects.reduce((m,o)=>Math.max(m,o.x+200),0)),
-   speed:280,
-   objects:l.objects.map(o=>({...o}))
-  };
- }
-
- return levels.find(l=>l.id===id);
-}
-
-function startLevel(id){
- let l=getLevel(id);
- if(!l)return;
-
- game.level=l;
- game.objects=l.objects.map(o=>({...o}));
- game.speed=l.speed||280;
- game.mode=l.mode||'cube';
- game.x=80;
- game.y=0;
- game.vy=0;
- game.rot=0;
- game.progress=0;
- game.attempt++;
- game.dead=false;
- game.paused=false;
- game.running=true;
- game.ground=false;
- game.practice=false;
- game.checkpoint=0;
- game.coins=0;
- game.camera=0;
-
- $('gameTitle').textContent=l.name;
- $('attempts').textContent='Попытка '+game.attempt;
- $('modeLabel').textContent=modeName(game.mode);
-
- $('gameWrap').classList.add('show');
- $('gameOverlay').classList.remove('show');
-
- resizeCanvas();
-
- game.last=performance.now();
-
- cancelAnimationFrame(game.raf);
- game.raf=requestAnimationFrame(loop);
-}
-
-function modeName(m){
- return ({
-  cube:'Кубик',
-  ship:'Корабль',
-  ball:'Шар',
-  ufo:'НЛО',
-  wave:'Волна',
-  robot:'Робот',
-  spider:'Паук',
-  swing:'Качели'
- })[m]||'Кубик';
-}
-
-function pauseGame(){
- if(!game.running)return;
-
- game.paused=true;
-
- showModal('Пауза',`
-  <button class="primary" onclick="resumeGame()">Продолжить</button>
-  <p><button onclick="restartLevel()">Перезапустить</button></p>
-  <p><button onclick="game.practice=true;resumeGame()">Тренировка</button></p>
-  <p><button onclick="exitGame()">Выйти в меню</button></p>
- `);
-}
-
-function resumeGame(){
- game.paused=false;
- $('gameOverlay').classList.remove('show');
- game.last=performance.now();
- game.raf=requestAnimationFrame(loop);
-}
-
-function restartLevel(){
- let id=game.level.id;
- startLevel(id);
-}
-
-function exitGame(){
- game.running=false;
- cancelAnimationFrame(game.raf);
- $('gameWrap').classList.remove('show');
- show('home');
-}
-
-function showModal(title,body){
- $('modalContent').innerHTML=`<h2>${title}</h2>${body}`;
- $('gameOverlay').classList.add('show');
-}
-
-function die(){
- if(game.dead||game.practice&&game.checkpoint){
-  if(game.practice&&game.checkpoint){
-   game.x=game.checkpoint;
-   game.y=0;
-   game.vy=0;
-   game.dead=false;
-   return;
-  }
- }
-
- game.dead=true;
- game.running=false;
- data.deaths++;
- save();
- tone(110,.25,'sawtooth');
-
- showModal('Попытка окончена',`
-  <p>Прогресс: ${Math.floor(game.progress)}%</p>
-  <p>Попытка: ${game.attempt}</p>
-  <button class="primary" onclick="restartLevel()">Повторить</button>
-  <button onclick="exitGame()">Выйти</button>
- `);
-}
-
-function win(){
- game.running=false;
-
- let id=game.level.id;
-
- data.completed=[...new Set([...data.completed,id])];
- data.stars+=3;
- data.coins+=5;
- data.best[id]=Math.max(data.best[id]||0,100);
-
- save();
- tone(660,.25);
-
- showModal('Уровень пройден!',`
-  <p>100% · +3 звезды · +5 монет</p>
-  <button class="primary" onclick="restartLevel()">Повторить</button>
-  <button onclick="exitGame()">В меню</button>
- `);
-}
-
-function jump(){
- if(!game.running||game.paused)return;
-
- game.hold=true;
-
- if(game.mode==='cube'||game.mode==='robot'){
-  if(game.ground){
-   game.vy=-560;
-   game.ground=false;
-   data.jumps++;
-   tone(540,.06);
-  }
- }else if(
-  game.mode==='ship'||
-  game.mode==='ufo'||
-  game.mode==='wave'||
-  game.mode==='swing'
- ){
-  game.vy=-600;
- }else if(game.mode==='ball'||game.mode==='spider'){
-  game.gravity=-game.gravity;
-  game.vy=0;
-  tone(400,.08);
- }
-}
-
-function release(){
- game.hold=false;
-}
-
-gameCanvas.addEventListener('pointerdown',e=>{
- e.preventDefault();
- if(game.running)jump();
-});
-
-gameCanvas.addEventListener('pointerup',release);
-gameCanvas.addEventListener('pointercancel',release);
-
-window.addEventListener('keydown',e=>{
- if(['Space','ArrowUp','KeyW'].includes(e.code)){
-  e.preventDefault();
-  jump();
- }
-
- if(e.code==='Escape'&&game.running)pauseGame();
-});
-
-window.addEventListener('keyup',e=>{
- if(['Space','ArrowUp','KeyW'].includes(e.code))release();
-});
-
-function drawObject(c,o,scale=1){
- let x=o.x,y=o.y,w=o.w||40,h=o.h||40;
-
- c.save();
- c.translate(x,y);
-
- if(o.type==='spike'){
-  c.fillStyle='#ff4f9a';
-  c.shadowColor='#ff4f9a';
-  c.shadowBlur=12;
-  c.beginPath();
-  c.moveTo(0,h);
-  c.lineTo(w/2,0);
-  c.lineTo(w,h);
-  c.closePath();
-  c.fill();
-
- }else if(o.type==='orb'){
-  c.strokeStyle='#ffdc55';
-  c.lineWidth=5;
-  c.shadowColor='#ffdc55';
-  c.shadowBlur=12;
-  c.beginPath();
-  c.arc(w/2,h/2,Math.min(w,h)/2-4,0,Math.PI*2);
-  c.stroke();
-
- }else if(o.type==='portal'){
-  c.strokeStyle='#a66bff';
-  c.lineWidth=8;
-  c.shadowColor='#a66bff';
-  c.shadowBlur=15;
-  c.beginPath();
-  c.ellipse(w/2,h/2,w/2,h/2,0,0,Math.PI*2);
-  c.stroke();
-
- }else if(o.type==='coin'){
-  c.fillStyle='#ffd84b';
-  c.beginPath();
-  c.arc(w/2,h/2,w/2,0,Math.PI*2);
-  c.fill();
-
- }else if(o.type==='finish'){
-  c.fillStyle='#a8ff4d';
-  c.fillRect(0,0,w,h);
-  c.fillStyle='#10251a';
-  c.fillRect(8,8,w-16,h-16);
-
- }else{
-  c.fillStyle='#1c8fb7';
-  c.shadowColor='#28e7ff';
-  c.shadowBlur=9;
-  c.fillRect(0,0,w,h);
-  c.strokeStyle='#7cf4ff';
-  c.strokeRect(0,0,w,h);
- }
-
- c.restore();
-}
-
-function loop(now){
- if(!game.running||game.paused)return;
-
- let dt=Math.min((now-game.last)/1000,.033);
- game.last=now;
-
- update(dt);
- render();
- musicTick();
-
- game.raf=requestAnimationFrame(loop);
-}
-
-function update(dt){
- let W=gameCanvas.clientWidth;
- let H=gameCanvas.clientHeight;
- let groundY=H*.78;
- let scale=H/420;
-
- game.x+=game.speed*dt;
- game.camera=game.x-120;
- game.progress=Math.min(100,game.x/game.level.length*100);
-
- $('progressBar').style.width=game.progress+'%';
- $('percent').textContent=Math.floor(game.progress)+'%';
-
- game.gravity=game.gravity||1500;
-
- if(
-  game.mode==='ship'||
-  game.mode==='ufo'||
-  game.mode==='wave'||
-  game.mode==='swing'
- ){
-  if(game.hold)game.vy-=2100*dt;
-  else game.vy+=game.mode==='wave'?1800*dt:1900*dt;
- }else{
-  game.vy+=game.gravity*dt;
- }
-
- game.y+=game.vy*dt;
-
- if(game.mode==='wave'){
-  game.y=Math.max(-groundY*.5,Math.min(groundY*.6,game.y));
- }
-
- let py=groundY-35+game.y;
-
- if(py>groundY-35){
-  game.y=0;
-  game.vy=0;
-  game.ground=true;
- }else{
-  game.ground=false;
- }
-
- if(py<15||py>H-30){
-  die();
-  return;
- }
-
- let px=game.x;
- let player={x:px+game.camera,y:py,w:30,h:30};
-
- for(let o of game.objects){
-  let ox=o.x-game.camera;
-  let oy=groundY-40-(o.y||0);
-  let ow=o.w||40;
-  let oh=o.h||40;
-
-  if(ox>player.x+100||ox+ow<player.x-30)continue;
-
-  let hit=
-   player.x+player.w>ox&&
-   player.x<ox+ow&&
-   player.y+player.h>oy&&
-   player.y<oy+oh;
-
-  if(o.type==='spike'&&hit){
-   die();
-   return;
-  }
-
-  if((o.type==='block'||o.type==='finish')&&hit){
-   if(o.type==='finish'){
-    win();
-    return;
-   }else if(player.y+player.h-oy<18&&game.vy>=0){
-    game.y=oy-groundY+40-30;
-    game.vy=0;
-    game.ground=true;
-   }else if(player.y<oy+oh-8){
-    die();
-    return;
-   }
-  }
-
-  if(o.type==='orb'&&hit&&game.hold&&game.mode==='cube'){
-   game.vy=-650;
-   tone(800,.07);
-   o.type='used';
-  }
-
-  if(o.type==='coin'&&hit){
-   o.type='used';
-   game.coins++;
-   data.coins++;
-   save();
-   tone(900,.08);
-  }
-
-  if(o.type==='portal'&&hit){
-   let modes=['cube','ship','ball','ufo','wave','robot','spider','swing'];
-   game.mode=modes[(modes.indexOf(game.mode)+1)%modes.length];
-   $('modeLabel').textContent=modeName(game.mode);
-   o.type='used';
-   tone(500,.12);
-  }
- }
-
- if(game.ground&&game.mode==='cube'){
-  game.rot=Math.round(game.rot/(Math.PI/2))*(Math.PI/2);
- }else{
-  game.rot+=game.speed*dt/30;
- }
-
- if(game.x>game.level.length){
-  win();
-  return;
- }
-}
-
-function render(){
- let W=gameCanvas.clientWidth;
- let H=gameCanvas.clientHeight;
- let groundY=H*.78;
-
- ctx.clearRect(0,0,W,H);
-
- let grad=ctx.createLinearGradient(0,0,0,H);
- grad.addColorStop(0,'#0c2850');
- grad.addColorStop(1,'#071023');
-
- ctx.fillStyle=grad;
- ctx.fillRect(0,0,W,H);
-
- if(data.bgfx){
-  ctx.strokeStyle='#15345a';
-  ctx.lineWidth=1;
-
-  for(let x=-(game.camera*.3%70);x<W;x+=70){
-   ctx.beginPath();
-   ctx.moveTo(x,0);
-   ctx.lineTo(x,H);
-   ctx.stroke();
-  }
- }
-
- ctx.fillStyle='#11284b';
- ctx.fillRect(0,groundY,W,H-groundY);
-
- ctx.strokeStyle='#28e7ff';
- ctx.shadowColor='#28e7ff';
- ctx.shadowBlur=12;
- ctx.beginPath();
- ctx.moveTo(0,groundY);
- ctx.lineTo(W,groundY);
- ctx.stroke();
- ctx.shadowBlur=0;
-
- for(let o of game.objects){
-  if(o.type==='used')continue;
-
-  let copy={
-   ...o,
-   x:o.x-game.camera,
-   y:groundY-40-(o.y||0)
-  };
-
-  if(copy.x>-100&&copy.x<W+100){
-   drawObject(ctx,copy);
-  }
- }
-
- let y=groundY-35+game.y;
-
- ctx.save();
- ctx.translate(120+15,y+15);
-
- if(game.mode==='cube'||game.mode==='robot'||game.mode==='spider'){
-  ctx.rotate(game.rot);
-  ctx.fillStyle=data.color1;
-  ctx.shadowColor=data.color1;
-  ctx.shadowBlur=data.glow?18:0;
-  ctx.fillRect(-15,-15,30,30);
-  ctx.shadowBlur=0;
-  ctx.strokeStyle=data.color2;
-  ctx.lineWidth=3;
-  ctx.strokeRect(-10,-10,20,20);
-
- }else{
-  ctx.rotate(game.mode==='wave'?(game.hold?-0.6:0.6):game.rot);
-  ctx.fillStyle=data.color1;
-  ctx.shadowColor=data.color1;
-  ctx.shadowBlur=14;
-  ctx.beginPath();
-  ctx.moveTo(-18,-11);
-  ctx.lineTo(19,0);
-  ctx.lineTo(-18,11);
-  ctx.closePath();
-  ctx.fill();
- }
-
- ctx.restore();
-
- if(data.fps){
-  ctx.fillStyle='white';
-  ctx.font='12px Arial';
-  ctx.fillText('FPS '+Math.round(1/Math.max(.001,(performance.now()-game.last)/1000)),10,18);
- }
-}
-
-updateUI();
 </script>
+
 </body>
 </html>
